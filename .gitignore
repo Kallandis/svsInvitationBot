@@ -1,6 +1,6 @@
 # Default ignored files
 /shelf/
-/workspace.xml
+workspace.xml
 tokenFile.py
 db.dat
 attendees.csv
