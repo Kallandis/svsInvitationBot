@@ -5,9 +5,12 @@ import tokenFile
 import globals
 
 logging.basicConfig(level=logging.INFO)
-globals.client = discord.Client()
+intents = discord.Intents(messages=True, members=True, guilds=True)
 
-bot = commands.Bot(command_prefix='$')
+# globals.client = discord.Client(intents=intents)
+# globals.client = commands.Bot(command_prefix='$', intents=intents)
+
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 
 @bot.command()
@@ -49,4 +52,19 @@ async def mail_db(ctx):
     pass
 
 
-globals.client.run(tokenFile.token)
+@bot.command()
+async def repeat(ctx, *, arg):
+    await ctx.send(arg)
+    print(ctx.channel.id)
+
+
+
+@bot.event
+async def on_ready():
+    print(f'{bot.user.name} connected!')
+    globals.mainChannel = bot.get_channel(964654664677212220)
+    await globals.mainChannel.send(f'{bot.user.name} connected!')
+
+
+# globals.client.run(tokenFile.token)
+bot.run(tokenFile.token)
