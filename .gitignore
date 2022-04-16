@@ -4,3 +4,4 @@ workspace.xml
 tokenFile.py
 db.dat
 attendees.csv
+userHistory.db

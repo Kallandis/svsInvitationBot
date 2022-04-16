@@ -1,2 +1,2 @@
-client = None
+bot = None
 mainChannel = None

@@ -3,14 +3,13 @@ from discord.ext import commands
 import logging
 import tokenFile
 import globals
+import sqlite3 as sql
 
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents(messages=True, members=True, guilds=True)
 
-# globals.client = discord.Client(intents=intents)
-# globals.client = commands.Bot(command_prefix='$', intents=intents)
-
 bot = commands.Bot(command_prefix='$', intents=intents)
+globals.bot = bot
 
 
 @bot.command()
@@ -55,8 +54,11 @@ async def mail_db(ctx):
 @bot.command()
 async def repeat(ctx, *, arg):
     await ctx.send(arg)
-    print(ctx.channel.id)
 
+
+@repeat.error
+async def repeat_error(ctx, error):
+    await ctx.send('Error with repeat')
 
 
 @bot.event
