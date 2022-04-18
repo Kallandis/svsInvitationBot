@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 import tokenFile
 import globals
-
+import sqlite3 as sql3
 
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents(messages=True, members=True, guilds=True)
@@ -47,7 +47,7 @@ async def mail_event_attendees(ctx):
 
 @bot.command()
 async def mail_db(ctx):
-    """Send a copy of the long-term db to command user"""
+    """Send a copy of the db dump to command user"""
     pass
 
 
@@ -61,6 +61,13 @@ async def repeat_error(ctx, error):
     await ctx.send('Error with repeat')
 
 
+@bot.command()
+async def foo(ctx, *, arg):
+    embed = discord.Embed(title="BIGTITLE", description=arg)
+    await ctx.send(embed=embed)
+
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
@@ -68,5 +75,5 @@ async def on_ready():
     await globals.mainChannel.send(f'{bot.user.name} connected!')
 
 
-# globals.client.run(tokenFile.token)
-bot.run(tokenFile.token)
+if __name__ == "__main__":
+    bot.run(tokenFile.token)
