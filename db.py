@@ -105,8 +105,13 @@ def all_of_category(conn, category: str, value):
         statusDict = {'NO': 0, 'YES': 1, 'MAYBE': 2}
         status = statusDict[value]
         users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?", status)
+
     elif category == "class":
         users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?", value)
+
+    elif category == "lotto":
+        users = conn.execute("SELECT DISCORD_ID FROM USERS WHERE LOTTERY = ?", value)
+
     else:
         return None
 
