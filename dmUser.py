@@ -4,6 +4,10 @@
 #   possible issue: this is not well suited for long-term waiting; would break if the bot ever turns off. Better to
 #   write to a file?
 
+@bot.command()
+async def dm_command(ctx):
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+
 @client.event
 async def on_message(message):
     if message.content.startswith('$thumb'):
