@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 import tokenFile
 import globals
-import sqlite3 as sql
+
 
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents(messages=True, members=True, guilds=True)
@@ -64,7 +64,7 @@ async def repeat_error(ctx, error):
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
-    globals.mainChannel = bot.get_channel(964654664677212220)
+    globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
 
 
