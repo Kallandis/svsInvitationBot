@@ -39,7 +39,8 @@ def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
 
 def update_profession(conn, discord_id, prof: str):
     """
-    param [str] new_profession: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
+    param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
+    formatting instructions to be given in private message, checked in main.py
     """
     # get class (MM, CE)
     prof = prof.upper()
@@ -60,7 +61,6 @@ def update_profession(conn, discord_id, prof: str):
     # get level
     # CE: (2 (or nothing), 3, 3X, 3XE, M)
     # MM: (0 (no T), 3T, 5T, 10, E)
-
     ceLevelDict = {
         "2":    0,
         "3":    1,
@@ -68,7 +68,6 @@ def update_profession(conn, discord_id, prof: str):
         "3XE":  3,
         "M":    4
     }
-
     mmLevelDict = {
         "0T":   0,
         "3T":   1,
@@ -76,7 +75,6 @@ def update_profession(conn, discord_id, prof: str):
         "10":   3,
         "E":    4
     }
-
     if clas == "CE":
         level = ceLevelDict.get(prof, "0")
     else:

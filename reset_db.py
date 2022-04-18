@@ -1,4 +1,8 @@
 import sqlite3 as sql3
+import os
+
+if os.path.exists("userHistory.db"):
+    os.remove("userHistory.db")
 
 conn = sql3.connect('userHistory.db')
 

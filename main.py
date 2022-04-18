@@ -3,6 +3,8 @@ from discord.ext import commands
 import logging
 import tokenFile
 import globals
+import time
+import datetime
 import sqlite3 as sql3
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +16,28 @@ globals.bot = bot
 
 @bot.command()
 async def create_event(ctx, *, arg):
-    pass
+    """
+    USAGE: $create_event MM/DD/YY
+    Creates event for the specified date at 11:00AM PST
+    """
+    # if 'ADMIN' not in ctx.author.roles:
+    #     return
+
+    print(ctx.author.roles)
+    arg = [int(x) for x in arg.split('/')]
+    month, day, year = arg
+    if year < 2000:
+        year += 2000
+    date_time = datetime.datetime(year, month, day, 11, 0)
+    print("date_time: ", date_time)
+    print("unix time: ", time.mktime(date_time.timetuple()))
+    unix_time = int(time.mktime(date_time.timetuple()))
+
+    title = "SvS Event"
+    descr = f"<t:{unix_time}>\nIt's an SvS Event"
+
+    embed = discord.Embed(title=title, description=descr)
+    await ctx.send(embed=embed)
 
 
 @create_event.error
