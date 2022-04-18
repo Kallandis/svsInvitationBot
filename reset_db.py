@@ -11,7 +11,7 @@ conn.execute("""CREATE TABLE USERS (
         class TEXT,
         unit TEXT,
         level INTEGER,
-        status INTEGER,
+        status TEXT,
         tokens INTEGER,
         lottery INTEGER
         );

@@ -4,7 +4,7 @@
 #         class TEXT,
 #         unit TEXT,
 #         level INTEGER,
-#         status INTEGER,
+#         status TEXT,
 #         tokens INTEGER,
 #         lottery INTEGER
 #         );
@@ -13,7 +13,7 @@
 
 def add_entry(conn, entry: tuple):
     """
-    param [tuple] entry: INT, STRING, STRING, INT, INT, INT, INT
+    param [tuple] entry: INT, STRING, STRING, INT, STRING, INT, INT
     Status and Tokens default to 0
     Lottery default to 1
     Profession must be provided by User
