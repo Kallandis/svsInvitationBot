@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from discord import ActionRow, Button, ButtonStyle
 import logging
+
+import db
 import tokenFile
 import globals
 import time
@@ -9,7 +11,7 @@ import datetime
 import sqlite3 as sql3
 
 logging.basicConfig(level=logging.INFO)
-intents = discord.Intents(messages=True, members=True, guilds=True)
+intents = discord.Intents(messages=True, members=True, guilds=True, reactions=True)
 
 bot = commands.Bot(command_prefix='$', intents=intents)
 globals.bot = bot
@@ -40,42 +42,49 @@ async def create_event(ctx, *, datestring):
     descr = f"<t:{unix_time}>\nIt's an SvS Event"
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
+    msg = await ctx.send(embed=embed)
+    await msg.add_reaction("✅")
+    await msg.add_reaction("❔")
+    await msg.add_reaction("❌")
 
-    # components = [ActionRow(Button(label='Yes',
-    #                                custom_id='1',
-    #                                emoji="✅",
-    #                                style=ButtonStyle.green
-    #                                ),
-    #                         Button(label='Maybe',
-    #                                custom_id='2',
-    #                                emoji="❔",
-    #                                style=ButtonStyle.blurple
-    #                                ),
-    #                         Button(label='No',
-    #                                custom_id='3',
-    #                                emoji="✖️",
-    #                                style=ButtonStyle.red
-    #                                ))
-    #               ]
 
-    # await ctx.send(embed=embed, components=components)
-    await ctx.send(embed=embed)
+@bot.event
+async def on_raw_reaction_add(payload):
+    # check if message is in the dedicated event channel
+    if payload.channel_id != globals.mainChannel.id:
+        return
 
-    # def _check(i: discord.Interaction, b):
-    #     return i.message == msg and i.member == ctx.author
+    message = await globals.mainChannel.fetch_message(payload.message_id)
+    member = payload.member
 
-    # interaction, button = await bot.wait_for('button_click')
-    # button_id = button.custom_id
-    #
-    # # This sends the Discord-API that the interaction has been received and is being "processed"
-    # await interaction.defer()
-    # # if this is not used and you also do not edit the message within 3 seconds as described below,
-    # # Discord will indicate that the interaction has failed.
-    #
-    # # If you use interaction.edit instead of interaction.message.edit, you do not have to defer the interaction,
-    # # if your response does not last longer than 3 seconds.
-    # await interaction.edit(embed=embed.add_field(name='Choose', value=f'Your Choose was `{button_id}`'),
-    #                        components=[components[0].disable_all_buttons()])
+    # exit if message has no embeds (and thus is not event message)
+    if not message.embeds:
+        return
+
+    # remove other reactions from user (This is pretty slow and can break, might not be worth including)
+    for rxn in message.reactions:
+        if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
+            await message.remove_reaction(rxn.emoji, member)
+
+    rxnDict = {
+        "✅": "YES",
+        "❔": "MAYBE",
+        "❌": "NO"
+    }
+    status = rxnDict.get(str(payload.emoji), None)
+    if status is None:
+        logging.debug(f"IMPROPER REACTION: {str(payload.emoji)}")
+        return
+
+    conn = sql3.connect("userHistory.db")
+
+    # check if user is in DB. If yes, proceed. If no, must create a new entry and prompt them to respond to DM asking
+    # for their role. If they do not respond within 1hr, or if the CSV is built, their status will be changed to "NO"
+
+    db.update_status(conn, member.id, status)
+    conn.commit()
+    conn.close()
+    await member.create_dm()
 
 
 # @bot.event
@@ -125,16 +134,6 @@ async def mail_db(ctx):
     Requires ADMIN role
     """
     pass
-
-
-@bot.command()
-async def repeat(ctx, *, arg):
-    await ctx.send(arg)
-
-
-@repeat.error
-async def repeat_error(ctx, error):
-    await ctx.send('Error with repeat')
 
 
 @bot.event

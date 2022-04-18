@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Event Embed and dynamic timestamp for create_event()">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Moving to reactions instead of buttons for reliability.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dmUser.py" beforeDir="false" afterPath="$PROJECT_DIR$/dmUser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -178,7 +177,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650268786271</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Moving to reactions instead of buttons for reliability.">
+      <created>1650275468633</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1650275468633</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -201,6 +207,18 @@
     <MESSAGE value="Updated db table to include fields &quot;class&quot;, &quot;unit&quot;, &quot;level&quot;, and &quot;lottery&quot;&#10;&#10;Finished update_profession() function.&#10;Added update_lotto()&#10;&#10;Generalized all_of_status to all_of_category" />
     <MESSAGE value="Add &quot;lottery&quot; to all_of_category" />
     <MESSAGE value="Event Embed and dynamic timestamp for create_event()" />
-    <option name="LAST_COMMIT_MESSAGE" value="Event Embed and dynamic timestamp for create_event()" />
+    <MESSAGE value="Moving to reactions instead of buttons for reliability." />
+    <option name="LAST_COMMIT_MESSAGE" value="Moving to reactions instead of buttons for reliability." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>83</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
