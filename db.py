@@ -9,6 +9,17 @@
 #         lottery INTEGER
 #         );
 #     """)
+import globals
+from discord.ext.tasks import loop
+
+
+@loop(seconds=30, reconnect=True)
+async def sql_write():
+    # with sql3.connect('userHistory.db') as conn:
+    #     for entry in globals.sqlEntries:
+    #         conn.execute(entry[0], entry[1])
+    # globals.sqlEntries = []
+    return
 
 
 def add_entry(conn, entry: tuple):
@@ -19,7 +30,8 @@ def add_entry(conn, entry: tuple):
     Profession must be provided by User
     """
     sql = "INSERT INTO USERS (discord_ID, class, unit, level, status, tokens, lottery) values(?, ?, ?, ?, ?, ?, ?)"
-    conn.execute(sql, entry)
+    # conn.execute(sql, entry)
+    globals.sqlEntries.append([sql, entry])
 
 
 def get_entry(conn, discord_id: int):
@@ -37,12 +49,17 @@ def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
     param [int] tokens: number of tokens to add
     """
 
+    sql = "UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?"
     if delete_tokens:
-        conn.execute("UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?", [0, discord_id])
+        entry = [0, discord_id]
+        # conn.execute(sql, entry)
     else:
         old_tokens = conn.execute("SELECT TOKENS FROM USERS WHERE DISCORD_ID = ?", discord_id)
         new_tokens = old_tokens + tokens
-        conn.execute("UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?", [new_tokens, discord_id])
+        entry = [new_tokens, discord_id]
+        # conn.execute("UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?", [new_tokens, discord_id])
+
+    globals.sqlEntries.append([sql, entry])
 
 
 def update_profession(conn, discord_id, prof: str):
@@ -88,16 +105,24 @@ def update_profession(conn, discord_id, prof: str):
     else:
         level = mmLevelDict.get(prof, "0")
 
-    conn.execute("UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ? WHERE DISCORD_ID = ?",
-                 (clas, unit, level, discord_id))
+    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ? WHERE DISCORD_ID = ?"
+    entry = [clas, unit, level, discord_id]
+    # conn.execute(sql, entry)
+    globals.sqlEntries.append([sql, entry])
 
 
 def update_lotto(conn, discord_id, lotto: int):
-    conn.execute("UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?", [lotto, discord_id])
+    sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
+    entry = [lotto, discord_id]
+    # conn.execute(sql, entry)
+    globals.sqlEntries.append([sql, entry])
 
 
 def update_status(conn, discord_id, status: str):
-    conn.execute("UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?", [status, discord_id])
+    sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
+    entry = [status, discord_id]
+    # conn.execute(sql, entry)
+    globals.sqlEntries.append([sql, entry])
 
 
 def all_of_category(conn, category: str, value):

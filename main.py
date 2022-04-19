@@ -1,13 +1,6 @@
 import discord
 from discord.ext import commands
 import logging
-import time
-import datetime
-import sqlite3 as sql3
-
-import db
-import dm
-import tokenFile
 import globals
 
 logging.basicConfig(level=logging.INFO)
@@ -16,10 +9,16 @@ intents = discord.Intents(messages=True, members=True, guilds=True, reactions=Tr
 bot = commands.Bot(command_prefix='$', intents=intents)
 globals.bot = bot
 
-sqlEntries = []
+import dm
+import db
+import tokenFile
+import sqlite3 as sql3
+import time
+import datetime
 
 
 @bot.command()
+@commands.has_role(globals.adminRole)
 async def create_event(ctx, *, datestring):
     """
     $create_event MM/DD/YY
@@ -27,8 +26,8 @@ async def create_event(ctx, *, datestring):
     Requires ADMIN Role
     """
     # check if invoker is ADMIN and channel is mainChannel
-    if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-        return
+    # if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
+    #     return
 
     # parse MM/DD/YY from command input
     arg = [int(x) for x in datestring.split('/')]
@@ -111,10 +110,8 @@ async def on_raw_reaction_add(payload):
     #     dm.on_react(payload)
     #     return
 
-    print(f'guild id: {payload.guild_id}')
-
-    # check if message is in the dedicated event channel
-    if payload.channel_id != globals.mainChannel.id:
+    # check if message is in the dedicated event channel, and react author is not a bot
+    if payload.channel_id != globals.mainChannel.id or payload.member.bot:
         return
 
     # get message and member object from payload
@@ -199,6 +196,7 @@ async def on_ready():
     print(f'{bot.user.name} connected!')
     globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
+    db.sql_write.start()
     # await bot.change_presence(activity = discord.SOMETHING)
 
 
