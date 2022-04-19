@@ -63,9 +63,22 @@ async def prof(ctx, arg):
     CE levels: {2, 3, 3X, 3XE, M}
     EXAMPLES: MMA3T, CEN3XE
     """
-    # if not isinstance(ctx.channel, discord.channel.DMChannel):
-    #     return
-    await ctx.send(f"you typed: {arg}")
+    member = ctx.author
+    ID = member.id
+
+    with sql3.connect('userHistory.db') as conn:
+        entry = db.get_entry(conn, ID)
+
+    if not entry:
+        resp = await dm.request_entry(member)
+    else:
+        # Handle arg-parsing in db.update_profession(). return True if successful, False otherwise
+        success = db.update_profession(ID, arg)
+        if not success:
+            await ctx.send(f"ERROR: Could not parse profession")
+            return
+
+        await ack_change(member)
 
 
 @globals.bot.command()
