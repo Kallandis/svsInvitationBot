@@ -12,9 +12,50 @@ import datetime
 import asyncio
 
 
-async def request_entry(member: discord.Member):
+async def request_entry(member: discord.Member, profstring=None):
     # prompt member to provide data entry for SQL
     # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
+
+    await member.create_dm()
+    dmChannel = member.dm_channel()
+
+    # if profstring provided through $prof
+    if profstring is not None:
+        # parse profstring with db.parse_profession()
+        profInfo = db.parse_profession()
+        if profInfo is None:
+            success = False
+        else:
+            # db.add_entry()
+            success = True
+            await ack_change(member)
+
+    # default case (no argument given)
+    else:
+        # TODO: how to ask for profession string format?
+        msg = "You do not have an existing entry in the database. Please enter Profession string in proper format. " \
+              "You have 5 minutes to reply."
+        await dmChannel.send(msg)
+
+        def check(m):
+            return m.channel == dmChannel and m.author == member
+
+        try:
+            reply = await globals.bot.wait_for('message', timeout=300, check=check)
+        except asyncio.TimeoutError:
+            reply = None
+
+        if reply is None:
+            # user failed to reply in time.
+            success = False
+        else:
+            profInfo = db.parse_profession()
+            if profInfo is None:
+                success = False
+            else:
+                # db.add_entry()
+                success = True
+                await ack_change(member)
 
     # return something indicating if user responded to prompt, or if it was set to NO automatically
     return success
@@ -39,7 +80,10 @@ async def ack_change(member: discord.Member):
     status = entry[4]
     lottery = entry[6]
 
-    msg = f'You have been marked as **{status}** for {globals.event_info}\n' \
+    msg = ''
+    # TODO: get event_info from eventInfo.db
+    # if event_info is not '': msg += str(event_info)
+    msg = f'You are marked as **{status}** for {globals.event_info}\n' \
           f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.'
 
     msg += f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.'
@@ -69,14 +113,15 @@ async def prof(ctx, arg):
         entry = db.get_entry(conn, ID)
 
     if not entry:
-        resp = await dm.request_entry(member)
+        success = await request_entry(member, arg)
     else:
-        # Handle arg-parsing in db.update_profession(). return True if successful, False otherwise
+        # TODO: Handle arg-parsing in db.update_profession(). return True if successful, False otherwise
         success = db.update_profession(ID, arg)
-        if not success:
-            await ctx.send(f"ERROR: Could not parse profession")
-            return
 
+    if not success:
+        await ctx.send(f"ERROR: Could not parse profession")
+        return
+    else:
         await ack_change(member)
 
 
@@ -92,7 +137,7 @@ async def toggle_lotto(ctx):
         entry = db.get_entry(conn, ID)
 
     if not entry:
-        resp = await dm.request_entry(member)
+        success = await request_entry(member)
     else:
         lottery = 1 - entry[6]
         db.update_lotto(ID, lottery)

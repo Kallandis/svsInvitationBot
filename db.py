@@ -114,6 +114,7 @@ def update_profession(discord_id, prof: str):
     entry = [clas, unit, level, discord_id]
     # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
+    return True
 
 
 def update_lotto(discord_id, lotto: int):

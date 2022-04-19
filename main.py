@@ -152,8 +152,8 @@ async def on_raw_reaction_add(payload):
             entry = db.get_entry(conn, member.id)
 
         if not entry:
-            resp = await dm.request_entry(member)
-            if resp is None:
+            success = await dm.request_entry(member)
+            if not success:
                 status = "NO"
 
         db.update_status(member.id, status)
