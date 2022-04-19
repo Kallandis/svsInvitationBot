@@ -22,6 +22,14 @@ def add_entry(conn, entry: tuple):
     conn.execute(sql, entry)
 
 
+def get_entry(conn, discord_id: int):
+    """
+    Returns entry assoc with unique discord ID. If no entry exists, returns empty list
+    """
+    user = conn.execute("SELECT FROM USERS WHERE DISCORD_ID = ?", discord_id)
+    return list(user)
+
+
 def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
     """
     param [int] discord_id: unique identifier of User invoking command
@@ -89,20 +97,15 @@ def update_lotto(conn, discord_id, lotto: int):
 
 
 def update_status(conn, discord_id, status: str):
-    statusDict = {'NO': 0, 'YES': 1, 'MAYBE': 2}
-    status = statusDict[status]
     conn.execute("UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?", [status, discord_id])
 
 
 def all_of_category(conn, category: str, value):
     """
-    return all users that satisfy a certain criterion
-    returns a sqlite3 cursor object (iterator) which parses as a list of tuples
+    return a list of all user tuples that satisfy a condition
     """
     if category == 'status':
-        statusDict = {'NO': 0, 'YES': 1, 'MAYBE': 2}
-        status = statusDict[value]
-        users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?", status)
+        users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?", value)
 
     elif category == "class":
         users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?", value)
@@ -113,7 +116,7 @@ def all_of_category(conn, category: str, value):
     else:
         return None
 
-    return users    # sqlite3 cursor object (iterator)
+    return list(users)    # list of user tuples
 
 
 def dump_db(conn):
