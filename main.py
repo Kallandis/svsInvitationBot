@@ -167,10 +167,11 @@ async def on_raw_reaction_add(payload):
 @bot.event
 async def on_raw_reaction_remove(payload):
     """
-    If user removes reaction, DM them that they have been marked as "NO"?
+    If user removes reaction, must update their status to NO
     """
     pass
 
+# commented out so that I can see error MSG for $help in private channel not working
 
 # @bot.event
 # async def on_command_error(ctx, error):
