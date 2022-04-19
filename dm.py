@@ -7,7 +7,6 @@ import discord
 from discord.ext import commands
 import sqlite3 as sql3
 import db
-import dm
 import globals
 import datetime
 import asyncio

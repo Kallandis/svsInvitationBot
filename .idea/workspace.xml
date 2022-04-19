@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="few comments">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="added reset_event() to a few main.py fxns">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -234,7 +237,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650357190586</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="added reset_event() to a few main.py fxns">
+      <created>1650357393806</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1650357393806</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -265,14 +275,15 @@
     <MESSAGE value="Continue migration to SQL buffer&#10;Update ack_status -&gt; ack_change. Now waits until next sql-write to send the updated entry. &#10;Added toggle_lotto() DM command" />
     <MESSAGE value="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession()." />
     <MESSAGE value="few comments" />
-    <option name="LAST_COMMIT_MESSAGE" value="few comments" />
+    <MESSAGE value="added reset_event() to a few main.py fxns" />
+    <option name="LAST_COMMIT_MESSAGE" value="added reset_event() to a few main.py fxns" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/dm.py</url>
-          <line>75</line>
+          <line>74</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

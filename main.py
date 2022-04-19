@@ -66,8 +66,6 @@ async def create_event(ctx, *, datestring):
 async def edit_event(ctx, *, arg):
     """
     """
-    with sql3.connect('userHistory.db') as conn:
-        db.reset_event(conn)
     pass
 
 
@@ -77,9 +75,9 @@ async def edit_event(ctx, *, arg):
 async def delete_event(ctx):
     """
     """
+    globals.event_info = None
     with sql3.connect('userHistory.db') as conn:
-        db.reset_event(conn)
-    pass
+        db.reset_status(conn)
 
 
 @bot.command()

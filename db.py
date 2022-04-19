@@ -11,14 +11,15 @@
 #     """)
 import globals
 from discord.ext.tasks import loop
+import sqlite3 as sql3
 
 
 @loop(seconds=15, reconnect=True)
 async def sql_write():
-    # with sql3.connect('userHistory.db') as conn:
-    #     for entry in globals.sqlEntries:
-    #         conn.execute(entry[0], entry[1])
-    # globals.sqlEntries = []
+    with sql3.connect('userHistory.db') as conn:
+        for entry in globals.sqlEntries:
+            conn.execute(entry[0], entry[1])
+    globals.sqlEntries = []
     return
 
 
@@ -126,7 +127,7 @@ def update_status(discord_id, status: str):
 
 
 # this one can just run immediately rather than go into write-loop
-def reset_event(conn):
+def reset_status(conn):
     sql = "UPDATE USERS SET STATUS = NO"
 
     # write-loop should only be active while event is open for signup
