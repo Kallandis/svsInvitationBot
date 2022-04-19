@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="whole lotta stuff lol">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
@@ -210,7 +210,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650342686284</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands">
+      <created>1650348140844</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1650348140844</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -237,6 +244,7 @@
     <MESSAGE value="Progress with reactions" />
     <MESSAGE value="change &quot;status&quot; column of DB to TEXT (&quot;YES&quot;, &quot;MAYBE&quot;, &quot;NO&quot;)" />
     <MESSAGE value="whole lotta stuff lol" />
-    <option name="LAST_COMMIT_MESSAGE" value="whole lotta stuff lol" />
+    <MESSAGE value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
+    <option name="LAST_COMMIT_MESSAGE" value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
   </component>
 </project>

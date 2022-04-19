@@ -17,11 +17,17 @@ import time
 import datetime
 
 
-@bot.command()
+def in_mainChannel():
+    def predicate(ctx):
+        return ctx.message.channel == globals.mainChannel
+    return commands.check(predicate)
+
+
+@bot.command(usage="MM/DD/YY")
 @commands.has_role(globals.adminRole)
+@in_mainChannel()
 async def create_event(ctx, *, datestring):
     """
-    $create_event MM/DD/YY
     Creates event for the specified date at 11:00AM PST
     Requires ADMIN Role
     """
@@ -42,6 +48,7 @@ async def create_event(ctx, *, datestring):
     # build title and dynamic timestamp for embed
     title = "SvS Event"
     descr = f"<t:{unix_time}>\nIt's an SvS Event"
+    globals.event_info = title + ' @ ' + descr.split('\n')[0]
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     msg = await ctx.send(embed=embed)
@@ -49,44 +56,48 @@ async def create_event(ctx, *, datestring):
     await msg.add_reaction("❔")
     await msg.add_reaction("❌")
 
+    # start the sql_write loop that executes sql writes every 30 seconds
+    db.sql_write.start()
 
-@bot.command()
+
+@bot.command(usage="pass")
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
 async def edit_event(ctx, *, arg):
     """
-    USAGE: pass
     """
-    if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-        return
+
     pass
 
 
 @bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
 async def delete_event(ctx):
     """
-    USAGE: pass
     """
-    if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-        return
+
     pass
 
 
 @bot.command()
-async def mail_event_attendees(ctx):
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def mail_csv(ctx):
     """
-    USAGE: pass
-    Call fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
-    Send sorted .csv of attendees to command user
-    Will be copy-pasted into Excel for highlighting and visual decoration?
+    Close signups and send sorted .csv of attendees to command user
+    Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
+    Requires ADMIN role
     """
-    if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-        return
+
     pass
 
 
 @bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
 async def mail_db(ctx):
     """
-    $mail_db
     Sends dump of SQL database to user
     Requires ADMIN role
     """
@@ -128,12 +139,6 @@ async def on_raw_reaction_add(payload):
             await message.remove_reaction(rxn.emoji, member)
 
     async def status_logic():
-        # build eventString to be passed to DM ACK / Request
-        embed = message.embeds[0]
-        embedTitle = embed.title
-        embedTime = embed.description.split('\n')[0]
-        eventString = embedTitle + ' @ ' + embedTime
-
         rxnDict = {
             "✅": "YES",
             "❔": "MAYBE",
@@ -153,9 +158,8 @@ async def on_raw_reaction_add(payload):
             if resp is None:
                 status = "NO"
 
-        with sql3.connect('userHistory.db') as conn:
-            db.update_status(conn, member.id, status)
-            await dm.ack_status(conn, member, eventString)
+        db.update_status(member.id, status)
+        await dm.ack_change(member)
 
     await status_logic()
 
@@ -168,27 +172,27 @@ async def on_raw_reaction_remove(payload):
     pass
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    # generic error handling
-    errmsg = "ERROR: "
-    if isinstance(error, commands.MissingRequiredArgument):
-        errmsg += "Missing argument. "
-    elif isinstance(error, commands.PrivateMessageOnly):
-        errmsg += "Command must be used in DM."
-    elif isinstance(error, commands.NoPrivateMessage):
-        errmsg += "Command only works in DM."
-    elif isinstance(error, commands.BotMissingRole):
-        errmsg += "Bot lacks required role for this command."
-    elif isinstance(error, commands.BotMissingPermissions):
-        errmsg += "Bot lacks required permissions for this command."
-    elif isinstance(error, commands.MissingRole):
-        errmsg += "User lacks required role for this command."
-    elif isinstance(error, commands.MissingPermissions):
-        errmsg += "User lacks required permissions for this command."
-
-    errmsg += "$help [command] for specific info. $help for generic info"
-    await ctx.send(errmsg)
+# @bot.event
+# async def on_command_error(ctx, error):
+#     # generic error handling
+#     errmsg = "ERROR: "
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         errmsg += "Missing argument.\n"
+#     elif isinstance(error, commands.PrivateMessageOnly):
+#         errmsg += "Command must be used in DM.\n"
+#     elif isinstance(error, commands.NoPrivateMessage):
+#         errmsg += "Command only works in DM.\n"
+#     elif isinstance(error, commands.BotMissingRole):
+#         errmsg += "Bot lacks required role for this command.\n"
+#     elif isinstance(error, commands.BotMissingPermissions):
+#         errmsg += "Bot lacks required permissions for this command.\n"
+#     elif isinstance(error, commands.MissingRole):
+#         errmsg += "User lacks required role for this command.\n"
+#     elif isinstance(error, commands.MissingPermissions):
+#         errmsg += "User lacks required permissions for this command.\n"
+#
+#     errmsg += "$help [command] for specific info. $help for generic info"
+#     await ctx.send(errmsg)
 
 
 @bot.event
@@ -196,7 +200,6 @@ async def on_ready():
     print(f'{bot.user.name} connected!')
     globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
-    db.sql_write.start()
     # await bot.change_presence(activity = discord.SOMETHING)
 
 

@@ -13,7 +13,7 @@ import globals
 from discord.ext.tasks import loop
 
 
-@loop(seconds=30, reconnect=True)
+@loop(seconds=15, reconnect=True)
 async def sql_write():
     # with sql3.connect('userHistory.db') as conn:
     #     for entry in globals.sqlEntries:
@@ -22,7 +22,7 @@ async def sql_write():
     return
 
 
-def add_entry(conn, entry: tuple):
+def add_entry(entry: tuple):
     """
     param [tuple] entry: INT, STRING, STRING, INT, STRING, INT, INT
     Status and Tokens default to 0
@@ -62,7 +62,7 @@ def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
     globals.sqlEntries.append([sql, entry])
 
 
-def update_profession(conn, discord_id, prof: str):
+def update_profession(discord_id, prof: str):
     """
     param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
     formatting instructions to be given in private message, checked in main.py
@@ -111,32 +111,45 @@ def update_profession(conn, discord_id, prof: str):
     globals.sqlEntries.append([sql, entry])
 
 
-def update_lotto(conn, discord_id, lotto: int):
+def update_lotto(discord_id, lotto: int):
     sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
     entry = [lotto, discord_id]
     # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
 
 
-def update_status(conn, discord_id, status: str):
+def update_status(discord_id, status: str):
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
     entry = [status, discord_id]
     # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
 
 
+# this one can just run immediately rather than go into write-loop
+def reset_event(conn):
+    sql = "UPDATE USERS SET STATUS = NO"
+
+    # write-loop should only be active while event is open for signup
+    sql_write.cancel()
+    with conn:
+        conn.execute(sql)
+
+
 def all_of_category(conn, category: str, value):
     """
     return a list of all user tuples that satisfy a condition
     """
+    # all (ID, prof, tokens) of status
     if category == 'status':
         users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?", value)
 
+    # all (ID, prof, tokens) of class
     elif category == "class":
         users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?", value)
 
+    # all ID attending event who have opted in to lotto
     elif category == "lotto":
-        users = conn.execute("SELECT DISCORD_ID FROM USERS WHERE LOTTERY = ?", value)
+        users = conn.execute("SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = ?", value)
 
     else:
         return None
