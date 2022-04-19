@@ -2,8 +2,8 @@
 /shelf/
 workspace.xml
 tokenFile.py
-db.dat
 attendees.csv
 userHistory.db
+eventInfo.db
 TODO.txt
 NOTES.txt

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="added reset_event() to a few main.py fxns">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +44,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/main.py" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/main.py" />
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.reset_db">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="invitationBot" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -90,8 +89,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.reset_db" />
+        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -244,7 +243,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650357393806</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event">
+      <created>1650357989898</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1650357989898</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -276,7 +282,8 @@
     <MESSAGE value="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession()." />
     <MESSAGE value="few comments" />
     <MESSAGE value="added reset_event() to a few main.py fxns" />
-    <option name="LAST_COMMIT_MESSAGE" value="added reset_event() to a few main.py fxns" />
+    <MESSAGE value="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event" />
+    <option name="LAST_COMMIT_MESSAGE" value="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
