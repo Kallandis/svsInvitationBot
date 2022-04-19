@@ -66,7 +66,8 @@ async def create_event(ctx, *, datestring):
 async def edit_event(ctx, *, arg):
     """
     """
-
+    with sql3.connect('userHistory.db') as conn:
+        db.reset_event(conn)
     pass
 
 
@@ -76,7 +77,8 @@ async def edit_event(ctx, *, arg):
 async def delete_event(ctx):
     """
     """
-
+    with sql3.connect('userHistory.db') as conn:
+        db.reset_event(conn)
     pass
 
 
@@ -101,8 +103,6 @@ async def mail_db(ctx):
     Sends dump of SQL database to user
     Requires ADMIN role
     """
-    if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-        return
     pass
 
 
