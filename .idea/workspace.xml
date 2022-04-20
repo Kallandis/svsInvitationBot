@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably">
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove comment">
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -346,7 +346,35 @@
       <option name="project" value="LOCAL" />
       <updated>1650447320244</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="updated get_event() in update_status() (forgot to do it last time)">
+      <created>1650447414459</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447414459</updated>
+    </task>
+    <task id="LOCAL-00037" summary="lil change">
+      <created>1650447445080</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447445080</updated>
+    </task>
+    <task id="LOCAL-00038" summary="kill off old global var">
+      <created>1650447470064</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447470064</updated>
+    </task>
+    <task id="LOCAL-00039" summary="remove comment">
+      <created>1650447514493</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447514493</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -361,10 +389,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updated db table to include fields &quot;class&quot;, &quot;unit&quot;, &quot;level&quot;, and &quot;lottery&quot;&#10;&#10;Finished update_profession() function.&#10;Added update_lotto()&#10;&#10;Generalized all_of_status to all_of_category" />
-    <MESSAGE value="Add &quot;lottery&quot; to all_of_category" />
-    <MESSAGE value="Event Embed and dynamic timestamp for create_event()" />
-    <MESSAGE value="Moving to reactions instead of buttons for reliability." />
     <MESSAGE value="Progress with reactions" />
     <MESSAGE value="change &quot;status&quot; column of DB to TEXT (&quot;YES&quot;, &quot;MAYBE&quot;, &quot;NO&quot;)" />
     <MESSAGE value="whole lotta stuff lol" />
@@ -386,6 +410,10 @@
     <MESSAGE value="update_status() verifies that event exists in eventInfo.db" />
     <MESSAGE value="added message_id field to eventInfo.db&#10;&#10;Updated db.update_event(), db.get_event(), and invocations of them in main.py and dm.py to account for message_id field" />
     <MESSAGE value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
-    <option name="LAST_COMMIT_MESSAGE" value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
+    <MESSAGE value="updated get_event() in update_status() (forgot to do it last time)" />
+    <MESSAGE value="lil change" />
+    <MESSAGE value="kill off old global var" />
+    <MESSAGE value="remove comment" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove comment" />
   </component>
 </project>

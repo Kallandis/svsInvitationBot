@@ -60,9 +60,6 @@ async def create_event(ctx, *, datestring):
     # store event data in eventInfo.db
     db.update_event(title, eventTime, message_id)
 
-    # start the sql_write loop that executes sql writes every 30 seconds
-    db.sql_write.start()
-
 
 @bot.command(usage="pass")
 @commands.has_role(globals.adminRole)
@@ -201,6 +198,7 @@ async def on_ready():
     print(f'{bot.user.name} connected!')
     globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
+    db.sql_write.start()    # start the sql_write loop that executes sql writes every 30 seconds
     # await bot.change_presence(activity = discord.SOMETHING)
 
 
