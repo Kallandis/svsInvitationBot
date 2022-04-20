@@ -56,6 +56,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
         try:
             reply = await globals.bot.wait_for('message', timeout=300, check=check)
         except asyncio.TimeoutError:
+            # TODO: should probably do something if TIMEOUT happens
             reply = None
 
         if reply is None:
@@ -85,8 +86,7 @@ async def ack_change(member: discord.Member):
     async with member.dm_channel.typing():
         await asyncio.sleep(timeUntilNextWrite + 3)
 
-    with sql3.connect('userHistory.db') as conn:
-        entry = db.get_entry(conn, member.id)
+    entry = db.get_entry(member.id)
 
     clas = entry[1]
     unit = entry[2]
@@ -108,7 +108,7 @@ async def ack_change(member: discord.Member):
     await member.dm_channel().send(msg)
 
 
-async def confirm_maybe(conn, member: discord.member):
+async def confirm_maybe(member: discord.member):
     pass
 
 
@@ -125,13 +125,11 @@ async def prof(ctx, arg):
     member = ctx.author
     ID = member.id
 
-    with sql3.connect('userHistory.db') as conn:
-        entry = db.get_entry(conn, ID)
+    entry = db.get_entry(ID)
 
     if not entry:
         success = await request_entry(member, arg)
     else:
-        # TODO: Handle arg-parsing in db.update_profession(). return True if successful, False otherwise
         success = db.update_profession(ID, arg)
 
     if not success:
@@ -149,29 +147,11 @@ async def toggle_lotto(ctx):
     """
     member = ctx.author
     ID = member.id
-    with sql3.connect('userHistory.db') as conn:
-        entry = db.get_entry(conn, ID)
+    entry = db.get_entry(ID)
 
     if not entry:
-        success = await request_entry(member)
+        await request_entry(member)
     else:
         lottery = 1 - entry[6]
         db.update_lotto(ID, lottery)
         await ack_change(member)
-
-
-# @client.event
-# async def on_message(message):
-#     if message.content.startswith('$thumb'):
-#         channel = message.channel
-#         await channel.send('Send me that 👍 reaction, mate')
-#
-#         def check(reaction, user):
-#             return user == message.author and str(reaction.emoji) == '👍'
-#
-#         try:
-#             reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-#         except asyncio.TimeoutError:
-#             await channel.send('👎')
-#         else:
-#             await channel.send('👍')

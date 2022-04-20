@@ -79,8 +79,7 @@ async def delete_event(ctx):
     """
     """
     db.update_event('placeholder', 'placeholder')
-    with sql3.connect('userHistory.db') as conn:
-        db.reset_status(conn)
+    db.reset_status()
 
 
 @bot.command()
@@ -151,8 +150,7 @@ async def on_raw_reaction_add(payload):
             logging.debug(f"IMPROPER REACTION: {str(payload.emoji)}")
             return
 
-        with sql3.connect('userHistory.db') as conn:
-            entry = db.get_entry(conn, member.id)
+        entry = db.get_entry(member.id)
 
         if not entry:
             success = await dm.request_entry(member, status=status)

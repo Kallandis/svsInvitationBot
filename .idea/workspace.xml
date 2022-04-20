@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function">
       <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -290,7 +292,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650444381354</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function">
+      <created>1650445236770</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1650445236770</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -329,17 +338,7 @@
     <MESSAGE value="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]" />
     <MESSAGE value="finish dm.request_entry()" />
     <MESSAGE value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
-    <option name="LAST_COMMIT_MESSAGE" value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dm.py</url>
-          <line>134</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
   </component>
 </project>
