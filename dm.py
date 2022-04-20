@@ -77,7 +77,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
     return success
 
 
-async def ack_change(member: discord.Member):
+async def ack_change(member: discord.Member, show_change=None):
 
     # async sleep until next write
     nextWrite = db.sql_write.next_iteration

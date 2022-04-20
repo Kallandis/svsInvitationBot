@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Added unused parameter &quot;only_show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;">
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -396,7 +395,28 @@
       <option name="project" value="LOCAL" />
       <updated>1650450876118</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="remove event reaction if user fails dm.request_query()">
+      <created>1650453760461</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1650453760461</updated>
+    </task>
+    <task id="LOCAL-00044" summary="remove event reaction if user fails dm.request_entry()">
+      <created>1650453798378</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1650453798378</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Added unused parameter &quot;only_show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;">
+      <created>1650454863891</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1650454863891</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -411,9 +431,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
-    <MESSAGE value="Continue migration to SQL buffer&#10;Update ack_status -&gt; ack_change. Now waits until next sql-write to send the updated entry. &#10;Added toggle_lotto() DM command" />
-    <MESSAGE value="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession()." />
     <MESSAGE value="added reset_event() to a few main.py fxns" />
     <MESSAGE value="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event" />
     <MESSAGE value="Begin migrating event_info global variable to eventInfo.db" />
@@ -436,6 +453,9 @@
     <MESSAGE value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
     <MESSAGE value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
     <MESSAGE value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
-    <option name="LAST_COMMIT_MESSAGE" value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
+    <MESSAGE value="remove event reaction if user fails dm.request_query()" />
+    <MESSAGE value="remove event reaction if user fails dm.request_entry()" />
+    <MESSAGE value="Added unused parameter &quot;only_show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added unused parameter &quot;only_show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
   </component>
 </project>

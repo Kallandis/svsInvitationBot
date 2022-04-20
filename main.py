@@ -110,27 +110,24 @@ async def mail_db(ctx):
 @bot.event
 async def on_raw_reaction_add(payload):
     """
-    Handles user reaction input to DM or Event posts in dedicated Event channel
-    DM reactions used to change registered profession, opt out of lottery
-    Event reactions used to change status for upcoming event
+    Handles user Reactions to Event posts in dedicated Event channel
+    DM commands are used to change registered profession, opt out of lottery
+    Event Reactions are used to change status for upcoming event
     """
 
-    # # check if message is in the dedicated event channel, and react author is not a bot
-    # if payload.channel_id != globals.mainChannel.id or payload.member.bot:
-    #     return
+    # check if message is in the dedicated event channel. Wider scope than checking message_ID, but it's less
+    # expensive than accessing the entryInfo.db database for every reaction in the server.
+    if payload.channel_id != globals.mainChannel.id:
+        return
 
     # get message and member object from payload
     message = await globals.mainChannel.fetch_message(payload.message_id)
     member = payload.member
 
     eventTitle, eventTime, eventMessageID = db.get_event()
-    # only looks at the active event embed. Make sure react author is not a bot
+    # checks if message is the active event. Make sure react author is not a bot
     if message.id != eventMessageID or member.bot:
         return
-
-    # # exit if message has no embeds (and thus is not the event message)
-    # if not message.embeds:
-    #     return
 
     # remove other reactions from user (This is pretty slow and can break, might not be worth including)
     for rxn in message.reactions:
@@ -176,7 +173,22 @@ async def on_raw_reaction_remove(payload):
     """
     If user removes reaction, must update their status to NO
     """
-    pass
+
+    message = await globals.mainChannel.fetch_message(payload.message_id)
+    member = payload.member
+
+    eventTitle, eventTime, eventMessageID = db.get_event()
+
+    # only looks at the active event embed. Make sure react author is not a bot
+    if message.id != eventMessageID or member.bot:
+        return
+
+    if str(payload.emoji) in ["✅", "❔"] and db.get_entry(member.id):
+        db.update_status(member.id, "NO")
+        await dm.ack_change(member)
+
+
+
 
 # commented out so that I can see error MSG for $help in private channel not working
 
