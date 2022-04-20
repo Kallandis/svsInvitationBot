@@ -27,9 +27,9 @@ async def sql_write():
     globals.sqlEntries = []
 
 
-def add_entry(entry: tuple):
+def add_entry(entry: list):
     """
-    param [tuple] entry: INT, STRING, STRING, INT, STRING, INT, INT
+    param [list] entry: INT, STRING, STRING, INT, STRING, INT, INT
     Status and Tokens default to 0
     Lottery default to 1
     Profession must be provided by User
@@ -94,7 +94,6 @@ def parse_profession(prof: str):
         prof = prof.replace('F', '')
     elif 'M' in prof:
         unit = 'M'
-        prof = prof.replace('M', '')
     else:
         logging.error('Failed to parse unit from input')
         return False

@@ -12,29 +12,42 @@ import datetime
 import asyncio
 
 
-async def request_entry(member: discord.Member, profstring=None):
+async def request_entry(member: discord.Member, prof_string=None, status="NO"):
+    """
+    Prompt member to provide data entry for SQL database.
+    To be called when member attempts to do update a value, but they are not yet in the database
+    Returns False if entry fails, True if succeeds
+    """
     # prompt member to provide data entry for SQL
     # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
 
     await member.create_dm()
     dmChannel = member.dm_channel()
 
-    # if profstring provided through $prof
-    if profstring is not None:
-        # parse profstring with db.parse_profession()
-        profInfo = db.parse_profession()
-        if profInfo is None:
+    # if prof_string provided through $prof
+    if prof_string is not None:
+        # parse prof_string with db.parse_profession()
+        prof_array = db.parse_profession(prof_string)
+        if not prof_array:
             success = False
         else:
-            # db.add_entry()
+            entry = [member.id, *prof_array, status, 0, 1]
+            db.add_entry(entry)
             success = True
             await ack_change(member)
 
-    # default case (no argument given)
+    # default case (no profession string given)
+    # happens when user reacts to event or uses $lotto
     else:
-        # TODO: how to ask for profession string format?
-        msg = "You do not have an existing entry in the database. Please enter Profession string in proper format. " \
-              "You have 5 minutes to reply."
+        profPrompt = "CLASS: {MM, CE}\n" \
+                     "UNIT: {A, F, N} (skip if CEM)\n" \
+                     "MM levels: {0T, 3T, 5T, 10, E}\n" \
+                     "CE levels: {2, 3, 3X, 3XE, M}\n" \
+                     "EXAMPLES: MMA3T, CEN3XE\n"
+
+        msg = "You do not have an existing entry in the database. Please enter Profession with following format: "
+        msg += profPrompt
+        msg += "You have 5 minutes to reply."
         await dmChannel.send(msg)
 
         def check(m):
@@ -49,11 +62,12 @@ async def request_entry(member: discord.Member, profstring=None):
             # user failed to reply in time.
             success = False
         else:
-            profInfo = db.parse_profession()
-            if profInfo is None:
+            prof_array = db.parse_profession(reply)
+            if not prof_array:
                 success = False
             else:
-                # db.add_entry()
+                entry = [member.id, *prof_array, status, 0, 1]
+                db.add_entry(entry)
                 success = True
                 await ack_change(member)
 
@@ -101,7 +115,7 @@ async def confirm_maybe(conn, member: discord.member):
 async def prof(ctx, arg):
     """
     CLASS: {MM, CE}
-    UNIT: {A, F, N}
+    UNIT: {A, F, N} (skip if CEM)
     MM levels: {0T, 3T, 5T, 10, E}
     CE levels: {2, 3, 3X, 3XE, M}
     EXAMPLES: MMA3T, CEN3XE
