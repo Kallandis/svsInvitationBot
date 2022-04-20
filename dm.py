@@ -81,8 +81,9 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
 async def ack_change(member: discord.Member, show_change=None):
 
     # async sleep until next write
-    nextWrite = db.sql_write.next_iteration
-    timeUntilNextWrite = (nextWrite - datetime.datetime.now()).total_seconds()
+    nextWrite = db.sql_write.next_iteration.replace(tzinfo=None)
+    now = datetime.datetime.utcnow()
+    timeUntilNextWrite = (nextWrite - now).total_seconds()
 
     if member.dm_channel is None:
         await member.create_dm()
@@ -107,7 +108,8 @@ async def ack_change(member: discord.Member, show_change=None):
 
     profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
 
-    lotto = f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.\n'
+    lotto_in_out = '**in** to' if lottery else '**out** of'
+    lotto = f'You have opted ' + lotto_in_out + ' the lottery.\n'
     helpString = f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
 
     # default case: show everything
@@ -167,7 +169,7 @@ async def prof(ctx, arg):
 
 @globals.bot.command()
 @commands.dm_only()
-async def toggle_lotto(ctx):
+async def lottery(ctx):
     """
     Toggles lottery opt in/out status
     """

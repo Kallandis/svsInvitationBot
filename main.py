@@ -65,6 +65,31 @@ async def create_event(ctx, *, datestring):
     db.update_event(title, eventTime, message_id)
 
 
+def update_event_field(message: discord.Message, name: str, status: str, remove=False):
+    embed = message.embeds[0]
+    fields = embed.fields
+    fieldDict = {
+        "YES": 0,
+        "MAYBE": 1,
+        "NO": 2
+    }
+
+    fieldIndex = fieldDict[status]
+    fieldName = fields[fieldIndex].name
+    fieldValues = fields[fieldIndex].value.split('\n')
+    print(f'fieldname: {fieldName}')
+    print(f'fieldValues: {fieldValues}')
+
+    if remove:
+        fieldValues.remove(name)
+    else:
+        fieldValues.append(name)
+
+    print(f'fieldValues: {fieldValues}')
+    fieldValue = '\n'.join(fieldValues)
+    embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
+
+
 @bot.command(usage="pass")
 @commands.has_role(globals.adminRole)
 @in_mainChannel()
@@ -142,6 +167,7 @@ async def on_raw_reaction_add(payload):
     for rxn in message.reactions:
         if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
             await message.remove_reaction(rxn.emoji, member)
+            # TODO: add a update_event_field(remove=True) here
 
     # prevent members from reacting to the event message. This could also be accomplished by locking "Add Reaction"
         # permission behind a higher-tier role in the server.
@@ -172,9 +198,13 @@ async def on_raw_reaction_add(payload):
                 await member.dm_channel.send(msg)
                 return
 
-        db.update_status(member.id, status)
-        if status != 'NO':
-            await dm.ack_change(member, 'status')
+        else:
+            db.update_status(member.id, status)
+            update_event_field(message, member.display_name, status)
+
+            # only ack change if they registered as YES or MAYBE
+            if status != 'NO':
+                await dm.ack_change(member, 'status')
 
     await status_logic()
 
@@ -184,17 +214,17 @@ async def on_raw_reaction_remove(payload):
     """
     If user removes reaction, must update their status to NO
     """
-
     message = await globals.mainChannel.fetch_message(payload.message_id)
-    member = payload.member
 
     eventTitle, eventTime, eventMessageID = db.get_event()
 
-    # only looks at the active event embed. Make sure react author is not a bot
-    if message.id != eventMessageID or member.bot:
+    # only looks at the active event embed
+    if message.id != eventMessageID:
         return
 
-    if str(payload.emoji) in ["✅", "❔"] and db.get_entry(member.id):
+    if str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
+        print('removed check or q')
+        member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
         await dm.ack_change(member, 'status')
 
@@ -225,9 +255,18 @@ async def on_command_error(ctx, error):
     await ctx.send(errmsg)
 
 
+# temporary function for testing purposes
+@bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def print_db(ctx):
+    pass
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
+    globals.guild = bot.get_guild(964624340295499857)           # svsBotTestServer
     globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
     db.sql_write.start()    # start the sql_write loop that executes sql writes every 30 seconds
