@@ -12,11 +12,11 @@ globals.bot = bot
 import dm
 import db
 import tokenFile
-import sqlite3 as sql3
 import time
 import datetime
 
 
+# decorator to check if command was used in globals.mainChannel
 def in_mainChannel():
     def predicate(ctx):
         return ctx.message.channel == globals.mainChannel

@@ -5,7 +5,6 @@
 #   write to a file?
 import discord
 from discord.ext import commands
-import sqlite3 as sql3
 import db
 import globals
 import datetime
