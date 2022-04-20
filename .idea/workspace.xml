@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="removed deprecated sqlite3 imports from dm.py, main.py">
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="update_status() verifies that event exists in eventInfo.db">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -311,7 +314,28 @@
       <option name="project" value="LOCAL" />
       <updated>1650445850418</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="few comments">
+      <created>1650446196443</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1650446196443</updated>
+    </task>
+    <task id="LOCAL-00032" summary="few comments">
+      <created>1650446227170</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1650446227170</updated>
+    </task>
+    <task id="LOCAL-00033" summary="update_status() verifies that event exists in eventInfo.db">
+      <created>1650446488104</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1650446488104</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -326,7 +350,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added TODO.txt to .gitignore" />
     <MESSAGE value="Added NOTES.txt to .gitignore" />
     <MESSAGE value="Preliminary database IO functions" />
     <MESSAGE value="Updated db table to include fields &quot;class&quot;, &quot;unit&quot;, &quot;level&quot;, and &quot;lottery&quot;&#10;&#10;Finished update_profession() function.&#10;Added update_lotto()&#10;&#10;Generalized all_of_status to all_of_category" />
@@ -339,7 +362,6 @@
     <MESSAGE value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
     <MESSAGE value="Continue migration to SQL buffer&#10;Update ack_status -&gt; ack_change. Now waits until next sql-write to send the updated entry. &#10;Added toggle_lotto() DM command" />
     <MESSAGE value="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession()." />
-    <MESSAGE value="few comments" />
     <MESSAGE value="added reset_event() to a few main.py fxns" />
     <MESSAGE value="renamed reset_event() to clear_status()&#10;&#10;Reset event_info to None in delete_event" />
     <MESSAGE value="Begin migrating event_info global variable to eventInfo.db" />
@@ -351,6 +373,8 @@
     <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
     <MESSAGE value="remove conn object from every function in main.py, dm.py" />
     <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed deprecated sqlite3 imports from dm.py, main.py" />
+    <MESSAGE value="few comments" />
+    <MESSAGE value="update_status() verifies that event exists in eventInfo.db" />
+    <option name="LAST_COMMIT_MESSAGE" value="update_status() verifies that event exists in eventInfo.db" />
   </component>
 </project>

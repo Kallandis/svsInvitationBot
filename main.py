@@ -50,14 +50,15 @@ async def create_event(ctx, *, datestring):
     descr = f"<t:{unix_time}>\nIt's an SvS Event"
     eventTime = descr.split('\n')[0]
 
-    # store event data in eventInfo.db
-    db.update_event(title, eventTime)
-
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
     await msg.add_reaction("❔")
     await msg.add_reaction("❌")
+
+    message_id = msg.id
+    # store event data in eventInfo.db
+    db.update_event(title, eventTime, message_id)
 
     # start the sql_write loop that executes sql writes every 30 seconds
     db.sql_write.start()
@@ -78,7 +79,7 @@ async def edit_event(ctx, *, arg):
 async def delete_event(ctx):
     """
     """
-    db.update_event('placeholder', 'placeholder')
+    db.update_event('placeholder', 'placeholder', 0)
     db.reset_status()
 
 

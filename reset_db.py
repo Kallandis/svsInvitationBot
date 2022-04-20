@@ -24,7 +24,8 @@ if os.path.exists("eventInfo.db"):
 with sql3.connect('eventInfo.db') as conn:
     conn.execute("""CREATE TABLE EVENT (
             title TEXT,
-            time TEXT
+            time TEXT,
+            message_ID INT
             );
         """)
-    conn.execute("INSERT INTO EVENT (title, time) values (placeholder, placeholder)")
+    conn.execute("INSERT INTO EVENT (title, time, message_ID) values ('placeholder', 'placeholder', 0)")

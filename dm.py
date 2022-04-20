@@ -96,7 +96,7 @@ async def ack_change(member: discord.Member):
     lottery = entry[6]
 
     msg = ''
-    eventTitle, eventTime = db.get_event()
+    eventTitle, eventTime, message_id = db.get_event()
     if eventTitle != 'placeholder':
         eventInfo = eventTitle + ' @ ' + eventTime
         msg += f'You are marked as **{status}** for {eventInfo}\n'

@@ -54,9 +54,9 @@ def get_entry(discord_id: int):
         return user[0]
 
 
-def update_event(title: str, time: str):
-    sql = "UPDATE EVENT SET TITLE = ?, TIME = ?"
-    values = [title, time]
+def update_event(title: str, time: str, message_id: int):
+    sql = "UPDATE EVENT SET TITLE = ?, TIME = ?, MESSAGE_ID = ?"
+    values = [title, time, message_id]
     with sql3.connect('eventInfo.db') as conn:
         conn.execute(sql, values)
 
@@ -64,8 +64,8 @@ def update_event(title: str, time: str):
 def get_event():
     sql = "SELECT * FROM EVENT"
     with sql3.connect('eventInfo.db') as conn:
-        eventTitle, eventTime = list(conn.execute(sql))[0]
-    return eventTitle, eventTime
+        eventTitle, eventTime, message_id = list(conn.execute(sql))[0]
+    return eventTitle, eventTime, message_id
 
 
 def update_tokens(discord_id, delete_tokens=False, tokens=0):
