@@ -192,31 +192,30 @@ async def on_raw_reaction_remove(payload):
         await dm.ack_change(member, 'status')
 
 
+@bot.event
+async def on_command_error(ctx, error):
+    # generic error handling
+    errmsg = "ERROR: "
+    if isinstance(error, commands.MissingRequiredArgument):
+        errmsg += "Missing argument.\n"
+    elif isinstance(error, commands.PrivateMessageOnly):
+        errmsg += "Command must be used in DM.\n"
+    elif isinstance(error, commands.NoPrivateMessage):
+        errmsg += "Command only works in DM.\n"
+    elif isinstance(error, commands.BotMissingRole):
+        errmsg += "Bot lacks required role for this command.\n"
+    elif isinstance(error, commands.BotMissingPermissions):
+        errmsg += "Bot lacks required permissions for this command.\n"
+    elif isinstance(error, commands.MissingRole):
+        errmsg += "User lacks required role for this command.\n"
+    elif isinstance(error, commands.MissingPermissions):
+        errmsg += "User lacks required permissions for this command.\n"
+    else:
+        logging.error(str(error))
+        errmsg += 'Unknown error.\n'
 
-
-# commented out so that I can see error MSG for $help in private channel not working
-
-# @bot.event
-# async def on_command_error(ctx, error):
-#     # generic error handling
-#     errmsg = "ERROR: "
-#     if isinstance(error, commands.MissingRequiredArgument):
-#         errmsg += "Missing argument.\n"
-#     elif isinstance(error, commands.PrivateMessageOnly):
-#         errmsg += "Command must be used in DM.\n"
-#     elif isinstance(error, commands.NoPrivateMessage):
-#         errmsg += "Command only works in DM.\n"
-#     elif isinstance(error, commands.BotMissingRole):
-#         errmsg += "Bot lacks required role for this command.\n"
-#     elif isinstance(error, commands.BotMissingPermissions):
-#         errmsg += "Bot lacks required permissions for this command.\n"
-#     elif isinstance(error, commands.MissingRole):
-#         errmsg += "User lacks required role for this command.\n"
-#     elif isinstance(error, commands.MissingPermissions):
-#         errmsg += "User lacks required permissions for this command.\n"
-#
-#     errmsg += "$help [command] for specific info. $help for generic info"
-#     await ctx.send(errmsg)
+    errmsg += "$help [command] for specific info. $help for generic info"
+    await ctx.send(errmsg)
 
 
 @bot.event

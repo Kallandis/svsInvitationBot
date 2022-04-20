@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="minor changes">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="lil comment">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -437,7 +438,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650456138855</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="lil comment">
+      <created>1650456305829</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1650456305829</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -452,7 +460,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Pseudocode for request_entry(). Mostly waiting on db.parse_profession() to finish it. &#10;&#10;Added a few TODOs for various things that need to be completed." />
     <MESSAGE value="remove cursor object in sql_write()" />
     <MESSAGE value="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]" />
     <MESSAGE value="finish dm.request_entry()" />
@@ -477,6 +484,7 @@
     <MESSAGE value="Added unused parameter &quot;show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
     <MESSAGE value="Updated all usages of db.ack_change() to make use of new show_change parameter" />
     <MESSAGE value="minor changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
+    <MESSAGE value="lil comment" />
+    <option name="LAST_COMMIT_MESSAGE" value="lil comment" />
   </component>
 </project>
