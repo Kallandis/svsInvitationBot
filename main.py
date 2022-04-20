@@ -66,6 +66,7 @@ async def create_event(ctx, *, datestring):
 @in_mainChannel()
 async def edit_event(ctx, *, arg):
     """
+    Edit the existing event without changing the status of current attendees
     """
     pass
 
@@ -92,7 +93,6 @@ async def mail_csv(ctx):
     Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
     Requires ADMIN role
     """
-
     pass
 
 
