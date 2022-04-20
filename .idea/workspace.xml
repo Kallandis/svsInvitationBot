@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="lil comment">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console.">
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,13 +101,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00001" summary="a">
-      <created>1650061860002</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1650061860002</updated>
     </task>
     <task id="LOCAL-00002" summary="bot connects to server and stores &quot;botchannel&quot; object in globals.mainChannel">
       <created>1650064677126</created>
@@ -445,7 +438,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650456305829</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console.">
+      <created>1650479917795</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1650479917796</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -460,7 +460,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="remove cursor object in sql_write()" />
     <MESSAGE value="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]" />
     <MESSAGE value="finish dm.request_entry()" />
     <MESSAGE value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
@@ -485,6 +484,7 @@
     <MESSAGE value="Updated all usages of db.ack_change() to make use of new show_change parameter" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="lil comment" />
-    <option name="LAST_COMMIT_MESSAGE" value="lil comment" />
+    <MESSAGE value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
+    <option name="LAST_COMMIT_MESSAGE" value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
   </component>
 </project>

@@ -21,7 +21,8 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
     # prompt member to provide data entry for SQL
     # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
 
-    await member.create_dm()
+    if member.dm_channel is None:
+        await member.create_dm()
     dmChannel = member.dm_channel
 
     # if prof_string provided through $prof
@@ -83,7 +84,9 @@ async def ack_change(member: discord.Member, show_change=None):
     nextWrite = db.sql_write.next_iteration
     timeUntilNextWrite = (nextWrite - datetime.datetime.now()).total_seconds()
 
-    await member.create_dm()
+    if member.dm_channel is None:
+        await member.create_dm()
+
     async with member.dm_channel.typing():
         await asyncio.sleep(timeUntilNextWrite + 3)
 
@@ -96,6 +99,7 @@ async def ack_change(member: discord.Member, show_change=None):
     lottery = entry[6]
 
     msg = ''
+    eventStatus = ''
     eventTitle, eventTime, message_id = db.get_event()
     if message_id:
         eventInfo = eventTitle + ' @ ' + eventTime
