@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function">
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="removed deprecated sqlite3 imports from dm.py, main.py">
       <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -299,7 +297,21 @@
       <option name="project" value="LOCAL" />
       <updated>1650445236770</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="remove conn object from every function in main.py, dm.py">
+      <created>1650445673606</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1650445673606</updated>
+    </task>
+    <task id="LOCAL-00030" summary="removed deprecated sqlite3 imports from dm.py, main.py">
+      <created>1650445850418</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1650445850418</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -314,8 +326,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="a" />
-    <MESSAGE value="bot connects to server and stores &quot;botchannel&quot; object in globals.mainChannel" />
     <MESSAGE value="Added TODO.txt to .gitignore" />
     <MESSAGE value="Added NOTES.txt to .gitignore" />
     <MESSAGE value="Preliminary database IO functions" />
@@ -339,6 +349,8 @@
     <MESSAGE value="finish dm.request_entry()" />
     <MESSAGE value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
     <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
+    <MESSAGE value="remove conn object from every function in main.py, dm.py" />
+    <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed deprecated sqlite3 imports from dm.py, main.py" />
   </component>
 </project>

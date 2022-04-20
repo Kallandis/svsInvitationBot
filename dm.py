@@ -15,7 +15,8 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
     """
     Prompt member to provide data entry for SQL database.
     To be called when member attempts to do update a value, but they are not yet in the database
-    Returns False if entry fails, True if succeeds
+    Returns False if entry fails, True if succeeds. This allows the function that invokes request_entry() to print out
+        an error message if input was unsuccessful.
     """
     # prompt member to provide data entry for SQL
     # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
@@ -46,6 +47,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
 
         msg = "You do not have an existing entry in the database. Please enter Profession with following format: "
         msg += profPrompt
+        # TODO: do a timestring: "You have until <TIME> to reply"
         msg += "You have 5 minutes to reply."
         await dmChannel.send(msg)
 
@@ -55,7 +57,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
         try:
             reply = await globals.bot.wait_for('message', timeout=300, check=check)
         except asyncio.TimeoutError:
-            # TODO: should probably do something if TIMEOUT happens
+            # TODO: should probably do something if TIMEOUT happens. Edit message to indicate that time is up?
             reply = None
 
         if reply is None:
