@@ -31,7 +31,7 @@ def get_entry(discord_id: int):
     """
     Returns entry (list) associated with unique discord ID. If no entry exists, returns False
     """
-    sql = "SELECT FROM USERS WHERE DISCORD_ID = ?"
+    sql = "SELECT * FROM USERS WHERE DISCORD_ID = ?"
     values = [discord_id]
     with sql3.connect('userHistory.db') as conn:
         user = list(conn.execute(sql, values))

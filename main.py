@@ -51,6 +51,10 @@ async def create_event(ctx, *, datestring):
     eventTime = descr.split('\n')[0]
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
+    embed.add_field(name="YES", value="\u200b")
+    embed.add_field(name="MAYBE", value="\u200b")
+    embed.add_field(name="NO", value="\u200b")
+
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
     await msg.add_reaction("❔")

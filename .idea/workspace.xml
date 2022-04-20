@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console.">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="create_dm() only happens if member.dm_channel is None">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -101,13 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00002" summary="bot connects to server and stores &quot;botchannel&quot; object in globals.mainChannel">
-      <created>1650064677126</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1650064677126</updated>
     </task>
     <task id="LOCAL-00003" summary="bot connects to server and stores &quot;botchannel&quot; object in globals.mainChannel">
       <created>1650095490467</created>
@@ -445,7 +440,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650479917796</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="create_dm() only happens if member.dm_channel is None">
+      <created>1650480411517</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1650480411517</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -460,7 +462,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]" />
     <MESSAGE value="finish dm.request_entry()" />
     <MESSAGE value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
     <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
@@ -485,6 +486,7 @@
     <MESSAGE value="minor changes" />
     <MESSAGE value="lil comment" />
     <MESSAGE value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
-    <option name="LAST_COMMIT_MESSAGE" value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
+    <MESSAGE value="create_dm() only happens if member.dm_channel is None" />
+    <option name="LAST_COMMIT_MESSAGE" value="create_dm() only happens if member.dm_channel is None" />
   </component>
 </project>

@@ -65,7 +65,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
             # user failed to reply in time.
             success = False
         else:
-            prof_array = db.parse_profession(reply)
+            prof_array = db.parse_profession(reply.content)
             if not prof_array:
                 success = False
             else:
