@@ -173,8 +173,8 @@ def update_status(discord_id, status: str):
     """
     Called by on_raw_reaction_add() to update status when a member reacts to the event embed
     """
-    eventTitle, eventTime = get_event()
-    if eventTitle == 'placeholder':
+    eventTitle, eventTime, message_id = get_event()
+    if not message_id:
         return
 
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"

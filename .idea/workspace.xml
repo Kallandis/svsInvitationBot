@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="update_status() verifies that event exists in eventInfo.db">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably">
       <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -335,7 +332,21 @@
       <option name="project" value="LOCAL" />
       <updated>1650446488104</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="added message_id field to eventInfo.db&#10;&#10;Updated db.update_event(), db.get_event(), and invocations of them in main.py and dm.py to account for message_id field">
+      <created>1650447132813</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447132813</updated>
+    </task>
+    <task id="LOCAL-00035" summary="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably">
+      <created>1650447320244</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447320244</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -350,8 +361,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added NOTES.txt to .gitignore" />
-    <MESSAGE value="Preliminary database IO functions" />
     <MESSAGE value="Updated db table to include fields &quot;class&quot;, &quot;unit&quot;, &quot;level&quot;, and &quot;lottery&quot;&#10;&#10;Finished update_profession() function.&#10;Added update_lotto()&#10;&#10;Generalized all_of_status to all_of_category" />
     <MESSAGE value="Add &quot;lottery&quot; to all_of_category" />
     <MESSAGE value="Event Embed and dynamic timestamp for create_event()" />
@@ -375,6 +384,8 @@
     <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
     <MESSAGE value="few comments" />
     <MESSAGE value="update_status() verifies that event exists in eventInfo.db" />
-    <option name="LAST_COMMIT_MESSAGE" value="update_status() verifies that event exists in eventInfo.db" />
+    <MESSAGE value="added message_id field to eventInfo.db&#10;&#10;Updated db.update_event(), db.get_event(), and invocations of them in main.py and dm.py to account for message_id field" />
+    <MESSAGE value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
+    <option name="LAST_COMMIT_MESSAGE" value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
   </component>
 </project>
