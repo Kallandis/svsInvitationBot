@@ -180,7 +180,7 @@ def update_status(discord_id, status: str):
 def reset_status():
     sql = "UPDATE USERS SET STATUS = NO"
 
-    # TODO write-loop should be active when bot is, but only allow update_status() if event active
+    # TODO: write-loop should be active when bot is, but only allow update_status() if event active
     sql_write.cancel()
     with sql3.connect('userHistory.db') as conn:
         conn.execute(sql)
