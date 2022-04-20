@@ -134,7 +134,14 @@ async def prof(ctx, arg):
         success = db.update_profession(ID, arg)
 
     if not success:
-        await ctx.send(f"ERROR: Could not parse profession")
+        msg = "ERROR: Could not parse profession\n"
+        profPrompt = "CLASS: {MM, CE}\n" \
+                     "UNIT: {A, F, N} (skip if CEM)\n" \
+                     "MM levels: {0T, 3T, 5T, 10, E}\n" \
+                     "CE levels: {2, 3, 3X, 3XE, M}\n" \
+                     "EXAMPLES: MMA3T, CEN3XE\n"
+        msg += profPrompt
+        await ctx.send(msg)
         return
     else:
         await ack_change(member)
