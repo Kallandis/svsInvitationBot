@@ -22,7 +22,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
     # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
 
     await member.create_dm()
-    dmChannel = member.dm_channel()
+    dmChannel = member.dm_channel
 
     # if prof_string provided through $prof
     if prof_string is not None:
@@ -106,7 +106,7 @@ async def ack_change(member: discord.Member):
     msg += f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.\n'
     msg += f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
 
-    await member.dm_channel().send(msg)
+    await member.dm_channel.send(msg)
 
 
 async def confirm_maybe(member: discord.member):

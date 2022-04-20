@@ -101,6 +101,9 @@ async def mail_db(ctx):
     Sends dump of SQL database to user
     Requires ADMIN role
     """
+    await ctx.author.create_dm()
+    db.dump_db()
+    await ctx.author.dm_channel.send(file=discord.File('svs_userHistory_dump.sql'))
     pass
 
 

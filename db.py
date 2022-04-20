@@ -207,7 +207,7 @@ def all_of_category(category: str, value):
 
 
 def dump_db():
-    with open('dump.sql', 'w') as file:
+    with open('svs_userHistory_dump.sql', 'w') as file:
         with sql3.connect('userHistory.db') as conn:
             for line in conn.iterdump():
                 file.write(line + '\n')
