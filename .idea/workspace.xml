@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,13 +101,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00004" summary="bot connects to server and stores &quot;botchannel&quot; object in globals.mainChannel">
-      <created>1650176665326</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1650176665326</updated>
     </task>
     <task id="LOCAL-00005" summary="Added TODO.txt to .gitignore">
       <created>1650176688986</created>
@@ -447,7 +438,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650485573778</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call">
+      <created>1650496592144</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1650496592144</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -462,7 +460,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="db.update_event(), db.get_event()&#10;&#10;Replaced all instances of globals.event_info with calls to get_event()" />
     <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
     <MESSAGE value="remove conn object from every function in main.py, dm.py" />
     <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
@@ -487,6 +484,7 @@
     <MESSAGE value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
     <MESSAGE value="create_dm() only happens if member.dm_channel is None" />
     <MESSAGE value="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()" />
-    <option name="LAST_COMMIT_MESSAGE" value="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()" />
+    <MESSAGE value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
   </component>
 </project>

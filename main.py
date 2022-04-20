@@ -163,28 +163,31 @@ async def on_raw_reaction_add(payload):
     if message.id != eventMessageID or member.bot:
         return
 
-    # remove other reactions from user (This is pretty slow and can break, might not be worth including)
-    for rxn in message.reactions:
-        if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
-            await message.remove_reaction(rxn.emoji, member)
-            # TODO: add a update_event_field(remove=True) here
+    rxnDict = {
+        "✅": "YES",
+        "❔": "MAYBE",
+        "❌": "NO"
+    }
+    # status = None if rxn is not in approved list. Else
+    status = rxnDict.get(str(payload.emoji), None)
 
-    # prevent members from reacting to the event message. This could also be accomplished by locking "Add Reaction"
-        # permission behind a higher-tier role in the server.
-    if str(payload.emoji) not in ["✅", "❔", "❌"]:
+    # prevent members from adding reacts to the event message. This could also be accomplished by locking "Add Reaction"
+    # permission behind a higher-tier role in the server.
+    if status is None:
         await message.remove_reaction(payload.emoji, member)
+        logging.debug(f"IMPROPER REACTION: {str(payload.emoji)}")
+        return
+
+    # if rxn in approved list, remove any other existing reactions to the Event from this Member
+    else:
+        for rxn in message.reactions:
+            if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
+                await message.remove_reaction(rxn.emoji, member)
+                # TODO: test if this works
+                update_event_field(message, member.display_name, status, remove=True)
 
     async def status_logic():
-        rxnDict = {
-            "✅": "YES",
-            "❔": "MAYBE",
-            "❌": "NO"
-        }
-        status = rxnDict.get(str(payload.emoji), None)
-
-        if status is None:
-            logging.debug(f"IMPROPER REACTION: {str(payload.emoji)}")
-            return
+        # status = rxnDict.get(str(payload.emoji), None)
 
         entry = db.get_entry(member.id)
 
@@ -224,6 +227,7 @@ async def on_raw_reaction_remove(payload):
 
     if str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
         print('removed check or q')
+        # TODO: add update_event_field() call
         member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
         await dm.ack_change(member, 'status')
