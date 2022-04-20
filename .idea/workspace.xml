@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -388,7 +389,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650450462637</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel">
+      <created>1650450876118</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1650450876118</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -403,7 +411,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="whole lotta stuff lol" />
     <MESSAGE value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
     <MESSAGE value="Continue migration to SQL buffer&#10;Update ack_status -&gt; ack_change. Now waits until next sql-write to send the updated entry. &#10;Added toggle_lotto() DM command" />
     <MESSAGE value="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession()." />
@@ -428,6 +435,7 @@
     <MESSAGE value="remove comment" />
     <MESSAGE value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
     <MESSAGE value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
-    <option name="LAST_COMMIT_MESSAGE" value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
+    <MESSAGE value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
+    <option name="LAST_COMMIT_MESSAGE" value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
   </component>
 </project>

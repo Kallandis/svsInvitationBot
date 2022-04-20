@@ -159,6 +159,10 @@ async def on_raw_reaction_add(payload):
         if not entry:
             success = await dm.request_entry(member, status=status)
             if not success:
+                await message.remove_reaction(payload.emoji, member)
+                await member.create_dm()
+                msg = 'Failed to create database entry. You may react to the event to sign up again.'
+                await member.dm_channel.send(msg)
                 return
 
         db.update_status(member.id, status)

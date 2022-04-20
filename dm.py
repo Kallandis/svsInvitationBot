@@ -57,7 +57,7 @@ async def request_entry(member: discord.Member, prof_string=None, status="NO"):
         try:
             reply = await globals.bot.wait_for('message', timeout=300, check=check)
         except asyncio.TimeoutError:
-            # TODO: should probably do something if TIMEOUT happens. Edit message to indicate that time is up?
+            # TODO: should edit message to indicate that time is up and they can no longer reply
             reply = None
 
         if reply is None:
