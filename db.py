@@ -1,14 +1,3 @@
-#   table USERS
-# cursor.execute("""CREATE TABLE USERS (
-#         discord_ID INTEGER NOT NULL PRIMARY KEY,
-#         class TEXT,
-#         unit TEXT,
-#         level INTEGER,
-#         status TEXT,
-#         tokens INTEGER,
-#         lottery INTEGER
-#         );
-#     """)
 import globals
 from discord.ext.tasks import loop
 import sqlite3 as sql3
@@ -35,7 +24,6 @@ def add_entry(values: list):
     Profession must be provided by User
     """
     sql = "INSERT INTO USERS (discord_ID, class, unit, level, status, tokens, lottery) values(?, ?, ?, ?, ?, ?, ?)"
-    # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, values])
 
 
