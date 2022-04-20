@@ -17,10 +17,9 @@ import sqlite3 as sql3
 @loop(seconds=15, reconnect=True)
 async def sql_write():
     with sql3.connect('userHistory.db') as conn:
-        cur = conn.cursor()
         for entry in globals.sqlEntries:
             try:
-                cur.execute(entry[0], entry[1])
+                conn.execute(entry[0], entry[1])
             except:
                 pass
 
