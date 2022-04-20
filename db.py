@@ -12,6 +12,7 @@
 import globals
 from discord.ext.tasks import loop
 import sqlite3 as sql3
+import logging
 
 
 @loop(seconds=15, reconnect=True)
@@ -66,15 +67,20 @@ def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
     globals.sqlEntries.append([sql, entry])
 
 
-def update_profession(discord_id, prof: str):
+def parse_profession(prof: str):
     """
-    param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
-    formatting instructions to be given in private message, checked in main.py
+    Takes user-input profession-string
+    Parses and returns (CLASS, UNIT, LEVEL) according to rules
+    If fail to parse, return False
     """
     # get class (MM, CE)
     prof = prof.upper()
     clas = prof[0:2]
     prof = prof[2:]
+    # make sure clas is MM or CE
+    if clas not in ["MM", "CE"]:
+        logging.error('Failed to parse Class from input')
+        return False
 
     # get unit (A, N, F)
     if 'A' in prof:
@@ -83,34 +89,53 @@ def update_profession(discord_id, prof: str):
     elif 'N' in prof:
         unit = 'N'
         prof = prof.replace('N', '')
-    else:
+    elif 'F' in prof:
         unit = 'F'
         prof = prof.replace('F', '')
+    elif 'M' in prof:
+        unit = 'M'
+        prof = prof.replace('M', '')
+    else:
+        logging.error('Failed to parse unit from input')
+        return False
 
     # get level
     # CE: (2 (or nothing), 3, 3X, 3XE, M)
     # MM: (0 (no T), 3T, 5T, 10, E)
     ceLevelDict = {
-        "2":    0,
-        "3":    1,
-        "3X":   2,
-        "3XE":  3,
-        "M":    4
+        "2": 0,
+        "3": 1,
+        "3X": 2,
+        "3XE": 3,
+        "M": 4
     }
     mmLevelDict = {
-        "0T":   0,
-        "3T":   1,
-        "5T":   2,
-        "10":   3,
-        "E":    4
+        "0T": 0,
+        "3T": 1,
+        "5T": 2,
+        "10": 3,
+        "E": 4
     }
     if clas == "CE":
-        level = ceLevelDict.get(prof, "0")
+        level = ceLevelDict.get(prof, None)
     else:
-        level = mmLevelDict.get(prof, "0")
+        level = mmLevelDict.get(prof, None)
+
+    if level is None:
+        logging.error('Failed to parse level from input')
+        return False
+
+    return [clas, unit, level]
+
+
+def update_profession(discord_id, prof_array: list):
+    """
+    param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
+    formatting instructions to be given in private message
+    """
 
     sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ? WHERE DISCORD_ID = ?"
-    entry = [clas, unit, level, discord_id]
+    entry = prof_array.append(discord_id)
     # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
     return True
