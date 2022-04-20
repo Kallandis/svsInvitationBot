@@ -27,3 +27,4 @@ with sql3.connect('eventInfo.db') as conn:
             time TEXT
             );
         """)
+    conn.execute("INSERT INTO EVENT (title, time) values (placeholder, placeholder)")

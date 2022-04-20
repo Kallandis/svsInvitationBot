@@ -95,12 +95,14 @@ async def ack_change(member: discord.Member):
     lottery = entry[6]
 
     msg = ''
-    # TODO: get event_info from eventInfo.db
-    # if event_info is not '': msg += str(event_info)
-    msg = f'You are marked as **{status}** for {globals.event_info}\n' \
-          f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.'
+    eventTitle, eventTime = db.get_event()
+    if eventTitle != 'placeholder':
+        eventInfo = eventTitle + ' @ ' + eventTime
+        msg += f'You are marked as **{status}** for {eventInfo}\n'
 
-    msg += f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.'
+    msg += f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
+
+    msg += f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.\n'
     msg += f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
 
     await member.dm_channel().send(msg)

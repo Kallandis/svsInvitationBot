@@ -47,6 +47,20 @@ def get_entry(conn, discord_id: int):
     return list(user)
 
 
+def update_event(title: str, time: str):
+    sql = "UPDATE EVENT SET TITLE = ?, TIME = ?"
+    entry = [title, time]
+    with sql3.connect('eventInfo.db') as conn:
+        conn.execute(sql, entry)
+
+
+def get_event():
+    sql = "SELECT * FROM EVENT"
+    with sql3.connect('eventInfo.db') as conn:
+        eventTitle, eventTime = list(conn.execute(sql))[0]
+    return eventTitle, eventTime
+
+
 def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
     """
     param [int] discord_id: unique identifier of User invoking command

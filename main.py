@@ -48,7 +48,10 @@ async def create_event(ctx, *, datestring):
     # build title and dynamic timestamp for embed
     title = "SvS Event"
     descr = f"<t:{unix_time}>\nIt's an SvS Event"
-    globals.event_info = title + ' @ ' + descr.split('\n')[0]
+    eventTime = descr.split('\n')[0]
+
+    # store event data in eventInfo.db
+    db.update_event(title, eventTime)
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     msg = await ctx.send(embed=embed)
@@ -75,7 +78,7 @@ async def edit_event(ctx, *, arg):
 async def delete_event(ctx):
     """
     """
-    globals.event_info = None
+    db.update_event('placeholder', 'placeholder')
     with sql3.connect('userHistory.db') as conn:
         db.reset_status(conn)
 
