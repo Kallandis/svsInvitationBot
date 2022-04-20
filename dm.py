@@ -97,7 +97,7 @@ async def ack_change(member: discord.Member):
 
     msg = ''
     eventTitle, eventTime, message_id = db.get_event()
-    if eventTitle != 'placeholder':
+    if message_id:
         eventInfo = eventTitle + ' @ ' + eventTime
         msg += f'You are marked as **{status}** for {eventInfo}\n'
 
