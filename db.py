@@ -27,7 +27,7 @@ async def sql_write():
     globals.sqlEntries = []
 
 
-def add_entry(entry: list):
+def add_entry(values: list):
     """
     param [list] entry: INT, STRING, STRING, INT, STRING, INT, INT
     Status and Tokens default to 0
@@ -36,22 +36,29 @@ def add_entry(entry: list):
     """
     sql = "INSERT INTO USERS (discord_ID, class, unit, level, status, tokens, lottery) values(?, ?, ?, ?, ?, ?, ?)"
     # conn.execute(sql, entry)
-    globals.sqlEntries.append([sql, entry])
+    globals.sqlEntries.append([sql, values])
 
 
-def get_entry(conn, discord_id: int):
+def get_entry(discord_id: int):
     """
-    Returns entry assoc with unique discord ID. If no entry exists, returns empty list
+    Returns entry (list) associated with unique discord ID. If no entry exists, returns False
     """
-    user = conn.execute("SELECT FROM USERS WHERE DISCORD_ID = ?", discord_id)
-    return list(user)
+    sql = "SELECT FROM USERS WHERE DISCORD_ID = ?"
+    values = [discord_id]
+    with sql3.connect('userHistory.db') as conn:
+        user = list(conn.execute(sql, values))
+
+    if not user:
+        return False
+    else:
+        return user[0]
 
 
 def update_event(title: str, time: str):
     sql = "UPDATE EVENT SET TITLE = ?, TIME = ?"
-    entry = [title, time]
+    values = [title, time]
     with sql3.connect('eventInfo.db') as conn:
-        conn.execute(sql, entry)
+        conn.execute(sql, values)
 
 
 def get_event():
@@ -61,24 +68,25 @@ def get_event():
     return eventTitle, eventTime
 
 
-def update_tokens(conn, discord_id, delete_tokens=False, tokens=0):
+def update_tokens(discord_id, delete_tokens=False, tokens=0):
     """
     param [int] discord_id: unique identifier of User invoking command
     param [bool] delete_tokens: if True, reset tokens to 0
     param [int] tokens: number of tokens to add
     """
 
-    sql = "UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?"
+    update_sql = "UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?"
     if delete_tokens:
-        entry = [0, discord_id]
+        values = [0, discord_id]
         # conn.execute(sql, entry)
     else:
-        old_tokens = conn.execute("SELECT TOKENS FROM USERS WHERE DISCORD_ID = ?", discord_id)
+        with sql3.connect('userHistory.db') as conn:
+            sql = "SELECT TOKENS FROM USERS WHERE DISCORD_ID = ?"
+            old_tokens = list(conn.execute(sql, [discord_id]))[0]
         new_tokens = old_tokens + tokens
-        entry = [new_tokens, discord_id]
-        # conn.execute("UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?", [new_tokens, discord_id])
+        values = [new_tokens, discord_id]
 
-    globals.sqlEntries.append([sql, entry])
+    globals.sqlEntries.append([update_sql, values])
 
 
 def parse_profession(prof: str):
@@ -178,29 +186,36 @@ def reset_status(conn):
         conn.execute(sql)
 
 
-def all_of_category(conn, category: str, value):
+def all_of_category(category: str, value):
     """
     return a list of all user tuples that satisfy a condition
     """
+
+    conn = sql3.connect('userHistory.db')
     # all (ID, prof, tokens) of status
     if category == 'status':
-        users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?", value)
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?"
+        users = conn.execute(sql, [value])
 
     # all (ID, prof, tokens) of class
     elif category == "class":
-        users = conn.execute("SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?", value)
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?"
+        users = conn.execute(sql, [value])
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
-        users = conn.execute("SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = ?", value)
+        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = ?"
+        users = conn.execute(sql, value)
 
     else:
         return None
 
+    conn.close()
     return list(users)    # list of user tuples
 
 
-def dump_db(conn):
+def dump_db():
     with open('dump.sql', 'w') as file:
-        for line in conn.iterdump():
-            file.write(line + '\n')
+        with sql3.connect('userHistory.db') as conn:
+            for line in conn.iterdump():
+                file.write(line + '\n')
