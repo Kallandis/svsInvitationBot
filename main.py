@@ -163,7 +163,8 @@ async def on_raw_reaction_add(payload):
                 return
 
         db.update_status(member.id, status)
-        await dm.ack_change(member)
+        if status != 'NO':
+            await dm.ack_change(member, 'status')
 
     await status_logic()
 
@@ -185,7 +186,7 @@ async def on_raw_reaction_remove(payload):
 
     if str(payload.emoji) in ["✅", "❔"] and db.get_entry(member.id):
         db.update_status(member.id, "NO")
-        await dm.ack_change(member)
+        await dm.ack_change(member, 'status')
 
 
 

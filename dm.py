@@ -99,13 +99,27 @@ async def ack_change(member: discord.Member, show_change=None):
     eventTitle, eventTime, message_id = db.get_event()
     if message_id:
         eventInfo = eventTitle + ' @ ' + eventTime
-        msg += f'You are marked as **{status}** for {eventInfo}\n'
+        eventStatus = f'You are marked as **{status}** for {eventInfo}\n'
 
-    msg += f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
+    profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
 
-    msg += f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.\n'
-    msg += f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
+    lotto = f'You have opted ' + '**in** to' if lottery else '**out** of' + ' the lottery.\n'
+    helpString = f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
 
+    # default case: show everything
+    if show_change is None:
+        if message_id:
+            msg += eventStatus
+        msg += profession + lotto
+    elif show_change == 'status':
+        if message_id:
+            msg += eventStatus
+    elif show_change == 'profession':
+        msg += profession
+    elif show_change == 'lotto':
+        msg += lotto
+
+    msg += helpString
     await member.dm_channel.send(msg)
 
 
@@ -144,7 +158,7 @@ async def prof(ctx, arg):
         await ctx.send(msg)
         return
     else:
-        await ack_change(member)
+        await ack_change(member, show_change='profession')
 
 
 @globals.bot.command()
@@ -162,4 +176,4 @@ async def toggle_lotto(ctx):
     else:
         lottery = 1 - entry[6]
         db.update_lotto(ID, lottery)
-        await ack_change(member)
+        await ack_change(member, show_change='lotto')
