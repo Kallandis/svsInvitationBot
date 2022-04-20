@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove comment">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -374,7 +375,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650447514493</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()">
+      <created>1650447698645</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1650447698645</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -389,7 +397,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Progress with reactions" />
     <MESSAGE value="change &quot;status&quot; column of DB to TEXT (&quot;YES&quot;, &quot;MAYBE&quot;, &quot;NO&quot;)" />
     <MESSAGE value="whole lotta stuff lol" />
     <MESSAGE value="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands" />
@@ -414,6 +421,7 @@
     <MESSAGE value="lil change" />
     <MESSAGE value="kill off old global var" />
     <MESSAGE value="remove comment" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove comment" />
+    <MESSAGE value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
+    <option name="LAST_COMMIT_MESSAGE" value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
   </component>
 </project>

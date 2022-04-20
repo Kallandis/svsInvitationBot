@@ -112,29 +112,32 @@ async def on_raw_reaction_add(payload):
     Event reactions used to change status for upcoming event
     """
 
-    # DEPRECATED: handling DM I/O through commands now
-    # check if message is in a dmChannel; if so, pass to dm.on_react()
-    # if payload.guild_id is None:
-    #     print('dmchannel yep')
-    #     dm.on_react(payload)
+    # # check if message is in the dedicated event channel, and react author is not a bot
+    # if payload.channel_id != globals.mainChannel.id or payload.member.bot:
     #     return
-
-    # check if message is in the dedicated event channel, and react author is not a bot
-    if payload.channel_id != globals.mainChannel.id or payload.member.bot:
-        return
 
     # get message and member object from payload
     message = await globals.mainChannel.fetch_message(payload.message_id)
     member = payload.member
 
-    # exit if message has no embeds (and thus is not the event message)
-    if not message.embeds:
+    eventTitle, eventTime, eventMessageID = db.get_event()
+    # only looks at the active event embed. Make sure react author is not a bot
+    if message.id != eventMessageID or member.bot:
         return
+
+    # # exit if message has no embeds (and thus is not the event message)
+    # if not message.embeds:
+    #     return
 
     # remove other reactions from user (This is pretty slow and can break, might not be worth including)
     for rxn in message.reactions:
         if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
             await message.remove_reaction(rxn.emoji, member)
+
+    # prevent members from reacting to the event message. This could also be accomplished by locking "Add Reaction"
+        # permission behind a higher-tier role in the server.
+    if str(payload.emoji) not in ["✅", "❔", "❌"]:
+        await message.remove_reaction(payload.emoji, member)
 
     async def status_logic():
         rxnDict = {
