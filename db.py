@@ -170,9 +170,15 @@ def update_lotto(discord_id, lotto: int):
 
 
 def update_status(discord_id, status: str):
+    """
+    Called by on_raw_reaction_add() to update status when a member reacts to the event embed
+    """
+    eventTitle, eventTime = get_event()
+    if eventTitle == 'placeholder':
+        return
+
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
     entry = [status, discord_id]
-    # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
 
 
