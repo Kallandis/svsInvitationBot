@@ -75,6 +75,9 @@ async def edit_event(ctx, *, arg):
 @in_mainChannel()
 async def delete_event(ctx):
     """
+    Sets eventInfo.db to default value
+    Sets everyone's status to "NO"
+    Empties the sql_write() "buffer"
     """
     db.update_event('placeholder', 'placeholder', 0)
     db.reset_status()
