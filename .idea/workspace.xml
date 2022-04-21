@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -102,13 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Added TODO.txt to .gitignore">
-      <created>1650176734825</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1650176734825</updated>
     </task>
     <task id="LOCAL-00007" summary="Added NOTES.txt to .gitignore">
       <created>1650176744176</created>
@@ -446,7 +440,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650499179700</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!">
+      <created>1650500652182</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1650500652182</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -461,7 +462,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="remove conn object from every function in main.py, dm.py" />
     <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
     <MESSAGE value="few comments" />
     <MESSAGE value="update_status() verifies that event exists in eventInfo.db" />
@@ -486,6 +486,7 @@
     <MESSAGE value="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()" />
     <MESSAGE value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
     <MESSAGE value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
-    <option name="LAST_COMMIT_MESSAGE" value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
+    <MESSAGE value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
+    <option name="LAST_COMMIT_MESSAGE" value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
   </component>
 </project>

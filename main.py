@@ -65,7 +65,7 @@ async def create_event(ctx, *, datestring):
     db.update_event(title, eventTime, message_id)
 
 
-def update_event_field(message: discord.Message, name: str, status: str, remove=False):
+async def update_event_field(message: discord.Message, name: str, status: str, remove=False):
     embed = message.embeds[0]
     fields = embed.fields
     fieldDict = {
@@ -77,68 +77,19 @@ def update_event_field(message: discord.Message, name: str, status: str, remove=
     fieldIndex = fieldDict[status]
     fieldName = fields[fieldIndex].name
     fieldValues = fields[fieldIndex].value.split('\n')
-    print(f'fieldname: {fieldName}')
-    print(f'fieldValues: {fieldValues}')
 
-    if remove:
+    if remove and name in fieldValues:
+        print('rem', end=': ')
         fieldValues.remove(name)
     else:
+        print('app', end=': ')
         fieldValues.append(name)
 
-    print(f'fieldValues: {fieldValues}')
+    print(f'fieldname: {fieldName}, fieldValues: {fieldValues}')
     fieldValue = '\n'.join(fieldValues)
     embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
 
-
-@bot.command(usage="pass")
-@commands.has_role(globals.adminRole)
-@in_mainChannel()
-async def edit_event(ctx, *, arg):
-    """
-    Edit the existing event without changing the status of current attendees
-    """
-    pass
-
-
-@bot.command()
-@commands.has_role(globals.adminRole)
-@in_mainChannel()
-async def delete_event(ctx):
-    """
-    Sets eventInfo.db to default value
-    Sets everyone's status to "NO"
-    Empties the sql_write() "buffer"
-    """
-    db.update_event('placeholder', 'placeholder', 0)
-    db.reset_status()
-
-
-@bot.command()
-@commands.has_role(globals.adminRole)
-@in_mainChannel()
-async def mail_csv(ctx):
-    """
-    Close signups and send sorted .csv of attendees to command user
-    Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
-    Requires ADMIN role
-    """
-    pass
-
-
-@bot.command()
-@commands.has_role(globals.adminRole)
-@in_mainChannel()
-async def mail_db(ctx):
-    """
-    Sends dump of SQL database to user
-    Requires ADMIN role
-    """
-    if ctx.author.dm_channel is None:
-        await ctx.author.create_dm()
-
-    db.dump_db()
-    await ctx.author.dm_channel.send(file=discord.File('svs_userHistory_dump.sql'))
-    pass
+    await message.edit(embed=embed)
 
 
 @bot.event
@@ -184,13 +135,15 @@ async def on_raw_reaction_add(payload):
             if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
                 await message.remove_reaction(rxn.emoji, member)
                 # TODO: test if this works
-                update_event_field(message, member.display_name, status, remove=True)
+                # update_event_field(message, member.display_name, status, remove=True)
 
     async def status_logic():
         # status = rxnDict.get(str(payload.emoji), None)
 
         entry = db.get_entry(member.id)
-
+        # have to fetch message again, to account for message.remove_reaction() concurrency issues with triggering
+        # update_event_field() from on_raw_reaction_remove()
+        message = await globals.mainChannel.fetch_message(payload.message_id)
         if not entry:
             success = await dm.request_entry(member, status=status)
             if not success:
@@ -203,7 +156,7 @@ async def on_raw_reaction_add(payload):
 
         else:
             db.update_status(member.id, status)
-            update_event_field(message, member.display_name, status)
+            await update_event_field(message, member.display_name, status)
 
             # only ack change if they registered as YES or MAYBE
             if status != 'NO':
@@ -217,21 +170,77 @@ async def on_raw_reaction_remove(payload):
     """
     If user removes reaction, must update their status to NO
     """
-    message = await globals.mainChannel.fetch_message(payload.message_id)
+
+    # message = await globals.mainChannel.fetch_message(payload.message_id)
 
     eventTitle, eventTime, eventMessageID = db.get_event()
 
     # only looks at the active event embed
-    if message.id != eventMessageID:
+    if payload.message_id != eventMessageID:
         return
 
+    # TODO: figure out the error here. If was ?, then react w/ "chk", it triggers on_raw_rxn_remove(). But it doesn't remove the name from the field properly.
     # If member removed ✅ or ❔, set their status to "NO"
     # Don't need to check for bot b/c bot does not have a database entry
     elif str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
+        status = "YES" if str(payload.emoji) == "✅" else "MAYBE"
         member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
-        update_event_field(message, member.display_name, status="NO")
+        message = await globals.mainChannel.fetch_message(payload.message_id)
+        await update_event_field(message, member.display_name, status, remove=True)
         await dm.ack_change(member, 'status')
+
+
+@bot.command(usage="pass")
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def edit_event(ctx, *, arg):
+    """
+    Edit the existing event
+    Does not change the status of current attendees
+    """
+    pass
+
+
+@bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def delete_event(ctx):
+    """
+    Sets eventInfo.db to default value
+    Sets everyone's status to "NO"
+    Empties the sql_write() "buffer"
+    """
+    db.update_event('placeholder', 'placeholder', 0)
+    db.reset_status()
+
+
+@bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def mail_csv(ctx):
+    """
+    Close signups and send sorted .csv of attendees to user
+    Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
+    Requires ADMIN role
+    """
+    pass
+
+
+@bot.command()
+@commands.has_role(globals.adminRole)
+@in_mainChannel()
+async def mail_db(ctx):
+    """
+    Sends dump of SQL database to user
+    Requires ADMIN role
+    """
+    if ctx.author.dm_channel is None:
+        await ctx.author.create_dm()
+
+    db.dump_db()
+    await ctx.author.dm_channel.send(file=discord.File('svs_userHistory_dump.sql'))
+    pass
 
 
 @bot.event
@@ -266,6 +275,15 @@ async def on_command_error(ctx, error):
 @in_mainChannel()
 async def print_db(ctx):
     pass
+
+
+@bot.command()
+async def foo(ctx, arg):
+    eventTitle, eventTime, eventMessageID = db.get_event()
+    message = await globals.mainChannel.fetch_message(eventMessageID)
+    member = ctx.author
+    status = arg.upper()
+    await update_event_field(message, member.display_name, status, remove=True)
 
 
 @bot.event

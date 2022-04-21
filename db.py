@@ -4,7 +4,7 @@ import sqlite3 as sql3
 import logging
 
 
-@loop(seconds=15, reconnect=True)
+@loop(seconds=5, reconnect=True)
 async def sql_write():
     with sql3.connect('userHistory.db') as conn:
         for entry in globals.sqlEntries:

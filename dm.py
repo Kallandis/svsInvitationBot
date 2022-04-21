@@ -89,7 +89,7 @@ async def ack_change(member: discord.Member, show_change=None):
         await member.create_dm()
 
     async with member.dm_channel.typing():
-        await asyncio.sleep(timeUntilNextWrite + 3)
+        await asyncio.sleep(timeUntilNextWrite + 1)
 
     entry = db.get_entry(member.id)
 
