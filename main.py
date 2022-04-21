@@ -170,7 +170,15 @@ async def on_raw_reaction_add(payload):
 async def on_raw_reaction_remove(payload):
     """
     If user removes reaction, must update their status to NO
+    Also triggered in on_raw_reaction_add(), by await message.remove_reaction(otherEmoji, member)
+    If triggered in that way, global variable triggeredFromBotRemove is used to avoid double ACK
     """
+
+    # check if message is in the dedicated event channel. Superset of checking message.id, but it's less
+    # expensive than accessing the entryInfo.db database for every reaction in the server.
+    if payload.channel_id != globals.mainChannel:
+        return
+
     eventTitle, eventTime, eventMessageID = db.get_event()
 
     # only looks at the active event embed

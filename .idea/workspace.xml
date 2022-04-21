@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Everything working properly with reactions to Event.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Everything is actually working perfectly with reactions to Event.">
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,13 +100,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00009" summary="Updated db table to include fields &quot;class&quot;, &quot;unit&quot;, &quot;level&quot;, and &quot;lottery&quot;&#10;&#10;Finished update_profession() function.&#10;Added update_lotto()&#10;&#10;Generalized all_of_status to all_of_category">
-      <created>1650266397954</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1650266397954</updated>
     </task>
     <task id="LOCAL-00010" summary="Add &quot;lottery&quot; to all_of_category">
       <created>1650266499622</created>
@@ -445,7 +437,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650524125163</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="Everything is actually working perfectly with reactions to Event.">
+      <created>1650527123688</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1650527123688</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -460,7 +459,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update_status() verifies that event exists in eventInfo.db" />
     <MESSAGE value="added message_id field to eventInfo.db&#10;&#10;Updated db.update_event(), db.get_event(), and invocations of them in main.py and dm.py to account for message_id field" />
     <MESSAGE value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
     <MESSAGE value="updated get_event() in update_status() (forgot to do it last time)" />
@@ -485,6 +483,7 @@
     <MESSAGE value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
     <MESSAGE value="update_event_field() now properly updates the embed.&#10;&#10;Had to refetch message in status_logic(), as the reaction overwrite protection caused issues due to concurrency.&#10;&#10;If continues to be an issue, can probably just do the remove reaction loop AFTER status_logic()?" />
     <MESSAGE value="Everything working properly with reactions to Event." />
-    <option name="LAST_COMMIT_MESSAGE" value="Everything working properly with reactions to Event." />
+    <MESSAGE value="Everything is actually working perfectly with reactions to Event." />
+    <option name="LAST_COMMIT_MESSAGE" value="Everything is actually working perfectly with reactions to Event." />
   </component>
 </project>
