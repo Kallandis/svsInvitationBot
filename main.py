@@ -279,14 +279,6 @@ async def mail_db(ctx):
 #     await ctx.send(errmsg)
 
 
-# temporary function for testing purposes
-@bot.command()
-@commands.has_role(globals.adminRole)
-@in_mainChannel()
-async def print_db(ctx):
-    pass
-
-
 @bot.command()
 async def foo(ctx, arg):
     eventTitle, eventTime, eventMessageID = db.get_event()

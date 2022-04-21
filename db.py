@@ -4,6 +4,16 @@ import sqlite3 as sql3
 import logging
 
 
+# temporary function for testing purposes
+@globals.bot.command()
+async def print_db(ctx):
+    with sql3.connect('userHistory.db') as conn:
+        entries = conn.execute("SELECT * FROM USERS")
+
+    for entry in entries:
+        print(entry)
+
+
 @loop(seconds=5, reconnect=True)
 async def sql_write():
     with sql3.connect('userHistory.db') as conn:
@@ -11,7 +21,7 @@ async def sql_write():
             try:
                 conn.execute(entry[0], entry[1])
             except:
-                pass
+                print(f'Failed to write entry: {entry}')
 
     globals.sqlEntries = []
 
@@ -141,12 +151,12 @@ def update_profession(discord_id, prof_array: list):
     """
     param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
     formatting instructions to be given in private message
+    Should only be called if prof_array is not None
     """
 
     sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ? WHERE DISCORD_ID = ?"
-    entry = prof_array.append(discord_id)
-    # conn.execute(sql, entry)
-    globals.sqlEntries.append([sql, entry])
+    values = [*prof_array, discord_id]
+    globals.sqlEntries.append([sql, values])
     return True
 
 

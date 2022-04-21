@@ -152,7 +152,11 @@ async def prof(ctx, arg):
     if not entry:
         success = await request_entry(member, arg)
     else:
-        success = db.update_profession(ID, arg)
+        prof_array = db.parse_profession(arg)
+        if prof_array:
+            success = db.update_profession(ID, prof_array)
+        else:
+            success = False
 
     if not success:
         msg = "ERROR: Could not parse profession\n"
