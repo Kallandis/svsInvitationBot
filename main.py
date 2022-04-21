@@ -76,16 +76,20 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
 
     fieldIndex = fieldDict[status]
     fieldName = fields[fieldIndex].name
-    fieldValues = fields[fieldIndex].value.split('\n')
+    fieldValue = fields[fieldIndex].value
+    fieldValues = fieldValue.split('\n')
 
+    # if remove flag is True and name in fieldValues
     if remove and name in fieldValues:
-        print('rem', end=': ')
+        # print('rem', end=': ')
         fieldValues.remove(name)
-    else:
-        print('app', end=': ')
+
+    # if adding name would not exceed 2048 characters
+    elif len(fieldValue) + len(name) + 2 < 2048:
+        # print('app', end=': ')
         fieldValues.append(name)
 
-    print(f'fieldname: {fieldName}, fieldValues: {fieldValues}')
+    # print(f'fieldname: {fieldName}, fieldValues: {fieldValues}')
     fieldValue = '\n'.join(fieldValues)
     embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
 
@@ -100,7 +104,7 @@ async def on_raw_reaction_add(payload):
     Event Reactions are used to change status for upcoming event
     """
 
-    # check if message is in the dedicated event channel. Wider scope than checking message_ID, but it's less
+    # check if message is in the dedicated event channel. Superset of checking message.id, but it's less
     # expensive than accessing the entryInfo.db database for every reaction in the server.
     if payload.channel_id != globals.mainChannel.id:
         return
@@ -133,9 +137,9 @@ async def on_raw_reaction_add(payload):
     else:
         for rxn in message.reactions:
             if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
+                globals.triggeredFromBotRemove = True
                 await message.remove_reaction(rxn.emoji, member)
-                # TODO: test if this works
-                # update_event_field(message, member.display_name, status, remove=True)
+                # message.remove_reaction() will trigger on_raw_reaction_remove(), which calls update_event_field()
 
     async def status_logic():
         # status = rxnDict.get(str(payload.emoji), None)
@@ -170,25 +174,26 @@ async def on_raw_reaction_remove(payload):
     """
     If user removes reaction, must update their status to NO
     """
-
-    # message = await globals.mainChannel.fetch_message(payload.message_id)
-
     eventTitle, eventTime, eventMessageID = db.get_event()
 
     # only looks at the active event embed
     if payload.message_id != eventMessageID:
         return
 
-    # TODO: figure out the error here. If was ?, then react w/ "chk", it triggers on_raw_rxn_remove(). But it doesn't remove the name from the field properly.
     # If member removed ✅ or ❔, set their status to "NO"
-    # Don't need to check for bot b/c bot does not have a database entry
+    # Don't need to check if bot, b/c bot does not have a database entry
     elif str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
         status = "YES" if str(payload.emoji) == "✅" else "MAYBE"
         member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
         message = await globals.mainChannel.fetch_message(payload.message_id)
         await update_event_field(message, member.display_name, status, remove=True)
-        await dm.ack_change(member, 'status')
+
+        if globals.triggeredFromBotRemove:
+            globals.triggeredFromBotRemove = False
+
+        else:
+            await dm.ack_change(member, 'status')
 
 
 @bot.command(usage="pass")
