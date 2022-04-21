@@ -176,7 +176,7 @@ async def on_raw_reaction_remove(payload):
 
     # check if message is in the dedicated event channel. Superset of checking message.id, but it's less
     # expensive than accessing the entryInfo.db database for every reaction in the server.
-    if payload.channel_id != globals.mainChannel:
+    if payload.channel_id != globals.mainChannel.id:
         return
 
     eventTitle, eventTime, eventMessageID = db.get_event()
