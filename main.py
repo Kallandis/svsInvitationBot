@@ -14,6 +14,7 @@ import db
 import tokenFile
 import time
 import datetime
+import asyncio
 
 
 # decorator to check if command was used in globals.mainChannel
@@ -53,12 +54,10 @@ async def create_event(ctx, *, datestring):
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     embed.add_field(name="YES", value="\u200b")
     embed.add_field(name="MAYBE", value="\u200b")
-    embed.add_field(name="NO", value="\u200b")
 
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
     await msg.add_reaction("❔")
-    await msg.add_reaction("❌")
 
     message_id = msg.id
     # store event data in eventInfo.db
@@ -68,13 +67,8 @@ async def create_event(ctx, *, datestring):
 async def update_event_field(message: discord.Message, name: str, status: str, remove=False):
     embed = message.embeds[0]
     fields = embed.fields
-    fieldDict = {
-        "YES": 0,
-        "MAYBE": 1,
-        "NO": 2
-    }
 
-    fieldIndex = fieldDict[status]
+    fieldIndex = 0 if status == "YES" else 1
     fieldName = fields[fieldIndex].name
     fieldValue = fields[fieldIndex].value
     fieldValues = fieldValue.split('\n')
@@ -118,13 +112,18 @@ async def on_raw_reaction_add(payload):
     if message.id != eventMessageID or member.bot:
         return
 
-    rxnDict = {
-        "✅": "YES",
-        "❔": "MAYBE",
-        "❌": "NO"
-    }
-    # status = None if rxn is not in approved list. Else
-    status = rxnDict.get(str(payload.emoji), None)
+    if str(payload.emoji) == "✅":
+        status = "YES"
+        otherEmoji = "❔"
+    elif str(payload.emoji) == "❔":
+        status = "MAYBE"
+        otherEmoji = "✅"
+    else:
+        otherEmoji = None
+        status = None
+
+    # status = None if rxn is not in approved list. Else "YES" or "MAYBE"
+    # status = rxnDict.get(str(payload.emoji), None)
 
     # prevent members from adding reacts to the event message. This could also be accomplished by locking "Add Reaction"
     # permission behind a higher-tier role in the server.
@@ -133,17 +132,15 @@ async def on_raw_reaction_add(payload):
         logging.debug(f"IMPROPER REACTION: {str(payload.emoji)}")
         return
 
-    # if rxn in approved list, remove any other existing reactions to the Event from this Member
     else:
-        for rxn in message.reactions:
-            if member in await rxn.users().flatten() and not member.bot and str(rxn) != str(payload.emoji):
-                globals.triggeredFromBotRemove = True
-                await message.remove_reaction(rxn.emoji, member)
-                # message.remove_reaction() will trigger on_raw_reaction_remove(), which calls update_event_field()
+        # triggers on_raw_reaction_remove(), which in turn calls update_event_field() and updates the database
+        # global var tells orr_remove() not to ACK to avoid double ACK. Resets to False in orr_remove()
+        globals.triggeredFromBotRemove = True
+        await message.remove_reaction(otherEmoji, member)
+        # sleep 1 second to avoid concurrency issues with status_logic() calling update_event_field()
+        await asyncio.sleep(1)
 
     async def status_logic():
-        # status = rxnDict.get(str(payload.emoji), None)
-
         entry = db.get_entry(member.id)
         # have to fetch message again, to account for message.remove_reaction() concurrency issues with triggering
         # update_event_field() from on_raw_reaction_remove()
@@ -248,30 +245,30 @@ async def mail_db(ctx):
     pass
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    # generic error handling
-    errmsg = "ERROR: "
-    if isinstance(error, commands.MissingRequiredArgument):
-        errmsg += "Missing argument.\n"
-    elif isinstance(error, commands.PrivateMessageOnly):
-        errmsg += "Command must be used in DM.\n"
-    elif isinstance(error, commands.NoPrivateMessage):
-        errmsg += "Command only works in DM.\n"
-    elif isinstance(error, commands.BotMissingRole):
-        errmsg += "Bot lacks required role for this command.\n"
-    elif isinstance(error, commands.BotMissingPermissions):
-        errmsg += "Bot lacks required permissions for this command.\n"
-    elif isinstance(error, commands.MissingRole):
-        errmsg += "User lacks required role for this command.\n"
-    elif isinstance(error, commands.MissingPermissions):
-        errmsg += "User lacks required permissions for this command.\n"
-    else:
-        logging.error(str(error))
-        errmsg += 'Unknown error.\n'
-
-    errmsg += "$help [command] for specific info. $help for generic info"
-    await ctx.send(errmsg)
+# @bot.event
+# async def on_command_error(ctx, error):
+#     # generic error handling
+#     errmsg = "ERROR: "
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         errmsg += "Missing argument.\n"
+#     elif isinstance(error, commands.PrivateMessageOnly):
+#         errmsg += "Command must be used in DM.\n"
+#     elif isinstance(error, commands.NoPrivateMessage):
+#         errmsg += "Command only works in DM.\n"
+#     elif isinstance(error, commands.BotMissingRole):
+#         errmsg += "Bot lacks required role for this command.\n"
+#     elif isinstance(error, commands.BotMissingPermissions):
+#         errmsg += "Bot lacks required permissions for this command.\n"
+#     elif isinstance(error, commands.MissingRole):
+#         errmsg += "User lacks required role for this command.\n"
+#     elif isinstance(error, commands.MissingPermissions):
+#         errmsg += "User lacks required permissions for this command.\n"
+#     else:
+#         logging.error(str(error))
+#         errmsg += 'Unknown error.\n'
+#
+#     errmsg += "$help [command] for specific info. $help for generic info"
+#     await ctx.send(errmsg)
 
 
 # temporary function for testing purposes
@@ -287,8 +284,7 @@ async def foo(ctx, arg):
     eventTitle, eventTime, eventMessageID = db.get_event()
     message = await globals.mainChannel.fetch_message(eventMessageID)
     member = ctx.author
-    status = arg.upper()
-    await update_event_field(message, member.display_name, status, remove=True)
+    await message.remove_reaction("✅", member)
 
 
 @bot.event
