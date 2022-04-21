@@ -137,6 +137,7 @@ async def confirm_maybe(member: discord.member):
 @commands.dm_only()
 async def prof(ctx, arg):
     """
+    $prof to update profession, $prof ? to check profession
     CLASS: {MM, CE}
     UNIT: {A, F, N} (skip if CEM)
     MM levels: {0T, 3T, 5T, 10, E}

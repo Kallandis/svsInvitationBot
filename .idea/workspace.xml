@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,13 +102,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Added TODO.txt to .gitignore">
-      <created>1650176688986</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1650176688986</updated>
     </task>
     <task id="LOCAL-00006" summary="Added TODO.txt to .gitignore">
       <created>1650176734825</created>
@@ -445,7 +439,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650496592144</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event">
+      <created>1650499179700</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1650499179700</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -460,7 +461,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="remove conn from argument of every function in db.py&#10;&#10;If database must be accessed, create the conn object inside of the db.py function" />
     <MESSAGE value="remove conn object from every function in main.py, dm.py" />
     <MESSAGE value="removed deprecated sqlite3 imports from dm.py, main.py" />
     <MESSAGE value="few comments" />
@@ -485,6 +485,7 @@
     <MESSAGE value="create_dm() only happens if member.dm_channel is None" />
     <MESSAGE value="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()" />
     <MESSAGE value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
+    <MESSAGE value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
+    <option name="LAST_COMMIT_MESSAGE" value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
   </component>
 </project>

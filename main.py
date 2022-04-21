@@ -225,11 +225,12 @@ async def on_raw_reaction_remove(payload):
     if message.id != eventMessageID:
         return
 
-    if str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
-        print('removed check or q')
-        # TODO: add update_event_field() call
+    # If member removed ✅ or ❔, set their status to "NO"
+    # Don't need to check for bot b/c bot does not have a database entry
+    elif str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
         member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
+        update_event_field(message, member.display_name, status="NO")
         await dm.ack_change(member, 'status')
 
 
