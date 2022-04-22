@@ -1,0 +1,41 @@
+https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
+https://discordpy-message-components.readthedocs.io/en/latest/
+
+https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#Interaction.respond
+    Instead of DM? keep it all in the channel but with hidden messages
+
+- ISSUE: a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
+        temporary soln: just don't add more names after 2048 chars (unlikely that this will happen anyways)
+
+- IMPLEMENT: edit_event()   # I have no idea what functionality this should have
+
+- ISSUE: $help does not work in private channel
+    ->  await destination.send(page)
+    AttributeError: 'Object' object has no attribute 'send'
+    where destination should be the ctx of $help
+
+    $prof works fine, and the bot can DM me. so it's just $help that errors
+
+- IDEA: https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
+
+- IDEA: can reduce API calls by using messageID = mainChannel.get_partial_message(payload.message_id) at the start of
+    on_raw_reaction_add() and on_raw_reaction_remove(). If it passes checks, fetch the entire Message object
+    later in the function.
+
+- IDEA: take a loop at aiomysql module. Maybe it is better than sqlite3 for async programs?
+
+---------PRIORITY--------------
+- IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
+    implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
+
+- CHANGE: make db.request_entry() send an embed, and format it more nicely (aligned columns?)
+         Do the same for dm.ack_change()
+         $prof, $lotto prompts can be in the embed footer
+
+- CHANGE: use Select Menu to get profession instead of user-input (would be much easier for the users)
+    https://pypi.org/project/discord-ui/
+    $prof pulls up the Select Menu. Includes option to CANCEL
+    $prof ? tells you your current registered profession
+    request_entry() also pulls up Select Menu, same as prof (maybe put the menu in parse_profession())
+
+- IMPLEMENT: mail_csv()

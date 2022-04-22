@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="docstring">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Fixed error in dm.prof()">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,13 +100,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00012" summary="Moving to reactions instead of buttons for reliability.">
-      <created>1650275468633</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1650275468633</updated>
     </task>
     <task id="LOCAL-00013" summary="Progress with reactions">
       <created>1650278047850</created>
@@ -447,7 +437,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650527783815</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="Fixed error in dm.prof()">
+      <created>1650529548320</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1650529548320</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -462,7 +459,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably" />
     <MESSAGE value="updated get_event() in update_status() (forgot to do it last time)" />
     <MESSAGE value="lil change" />
     <MESSAGE value="kill off old global var" />
@@ -487,6 +483,7 @@
     <MESSAGE value="Everything working properly with reactions to Event." />
     <MESSAGE value="Everything is actually working perfectly with reactions to Event." />
     <MESSAGE value="docstring" />
-    <option name="LAST_COMMIT_MESSAGE" value="docstring" />
+    <MESSAGE value="Fixed error in dm.prof()" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed error in dm.prof()" />
   </component>
 </project>
