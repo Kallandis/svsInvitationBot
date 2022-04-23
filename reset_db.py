@@ -11,8 +11,8 @@ with sql3.connect('userHistory.db') as conn:
             class TEXT,
             unit TEXT,
             level INTEGER,
+            items TEXT,
             status TEXT,
-            tokens INTEGER,
             lottery INTEGER
             );
         """)

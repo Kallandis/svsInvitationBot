@@ -28,12 +28,12 @@ async def sql_write():
 
 def add_entry(values: list):
     """
-    param [list] entry: INT, STRING, STRING, INT, STRING, INT, INT
+    param [list] entry: INT, STRING, STRING, INT, STRING, STRING, INT
     Status and Tokens default to 0
     Lottery default to 1
     Profession must be provided by User
     """
-    sql = "INSERT INTO USERS (discord_ID, class, unit, level, status, tokens, lottery) values(?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO USERS (discord_ID, class, unit, level, items, status, lottery) values(?, ?, ?, ?, ?, ?, ?)"
     globals.sqlEntries.append([sql, values])
 
 
@@ -66,87 +66,6 @@ def get_event():
     return eventTitle, eventTime, message_id
 
 
-def update_tokens(discord_id, delete_tokens=False, tokens=0):
-    """
-    param [int] discord_id: unique identifier of User invoking command
-    param [bool] delete_tokens: if True, reset tokens to 0
-    param [int] tokens: number of tokens to add
-    """
-
-    update_sql = "UPDATE USERS SET TOKENS = ? WHERE DISCORD_ID = ?"
-    if delete_tokens:
-        values = [0, discord_id]
-        # conn.execute(sql, entry)
-    else:
-        with sql3.connect('userHistory.db') as conn:
-            sql = "SELECT TOKENS FROM USERS WHERE DISCORD_ID = ?"
-            old_tokens = list(conn.execute(sql, [discord_id]))[0]
-        new_tokens = old_tokens + tokens
-        values = [new_tokens, discord_id]
-
-    globals.sqlEntries.append([update_sql, values])
-
-
-def parse_profession(prof: str):
-    """
-    Takes user-input profession-string
-    Parses and returns (CLASS, UNIT, LEVEL) according to rules
-    If fail to parse, return False
-    """
-    # get class (MM, CE)
-    prof = prof.upper()
-    clas = prof[0:2]
-    prof = prof[2:]
-    # make sure clas is MM or CE
-    if clas not in ["MM", "CE"]:
-        logging.error('Failed to parse Class from input')
-        return False
-
-    # get unit (A, N, F)
-    if 'A' in prof:
-        unit = 'A'
-        prof = prof.replace('A', '')
-    elif 'N' in prof:
-        unit = 'N'
-        prof = prof.replace('N', '')
-    elif 'F' in prof:
-        unit = 'F'
-        prof = prof.replace('F', '')
-    elif 'M' in prof:
-        unit = 'M'
-    else:
-        logging.error('Failed to parse unit from input')
-        return False
-
-    # get level
-    # CE: (2 (or nothing), 3, 3X, 3XE, M)
-    # MM: (0 (no T), 3T, 5T, 10, E)
-    ceLevelDict = {
-        "2": 0,
-        "3": 1,
-        "3X": 2,
-        "3XE": 3,
-        "M": 4
-    }
-    mmLevelDict = {
-        "0T": 0,
-        "3T": 1,
-        "5T": 2,
-        "10": 3,
-        "E": 4
-    }
-    if clas == "CE":
-        level = ceLevelDict.get(prof, None)
-    else:
-        level = mmLevelDict.get(prof, None)
-
-    if level is None:
-        logging.error('Failed to parse level from input')
-        return False
-
-    return [clas, unit, level]
-
-
 def update_profession(discord_id, prof_array: list):
     """
     param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
@@ -154,7 +73,7 @@ def update_profession(discord_id, prof_array: list):
     Should only be called if prof_array is not None
     """
 
-    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ? WHERE DISCORD_ID = ?"
+    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ?, ITEMS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
     globals.sqlEntries.append([sql, values])
     return True
@@ -197,12 +116,12 @@ def all_of_category(category: str, value):
     conn = sql3.connect('userHistory.db')
     # all (ID, prof, tokens) of status
     if category == 'status':
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?"
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, ITEMS FROM USERS WHERE STATUS = ?"
         users = list(conn.execute(sql, [value]))
 
-    # all (ID, prof, tokens) of class
+    # all (ID, prof) of class
     elif category == "class":
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?"
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, ITEMS FROM USERS WHERE CLASS = ?"
         users = list(conn.execute(sql, [value]))
 
     # all ID attending event who have opted in to lotto

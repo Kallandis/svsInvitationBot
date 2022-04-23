@@ -103,7 +103,9 @@ class ProfessionMenu(discord.ui.Select):
             # Remove the selectmenu, tell user what they selected, write the info to DB
 
             formattedProfString = f'**CLASS:** {self.clas}, **UNIT(s)**: {self.units}, **LEVEL**: {self.level}'
-            if 'None' not in self.values:
+            if 'None' in self.values:
+                items = ''
+            else:
                 items = ', '.join(self.values)
                 formattedProfString += f', **ITEM(s):** {items}'
 
@@ -115,7 +117,7 @@ class ProfessionMenu(discord.ui.Select):
             mmLevelDict = {"0T": 0, "3T": 1, "5T": 2, "10": 3, "E": 4}
             levelNum = ceLevelDict[self.level] if self.clas == 'CE' else mmLevelDict[self.level]
 
-            prof_array = [self.clas, ''.join(unitChars), levelNum]
+            prof_array = [self.clas, ''.join(unitChars), levelNum, items]
 
             # if first-time user does not have an entry in DB (called through dm.request_entry())
             if self.first_entry:

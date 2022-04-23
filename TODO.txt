@@ -54,3 +54,4 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
+- CHANGE: remove "tokens" field from DB. Add "items" field after "level". Items is a ', '-separated string that defaults to ''
