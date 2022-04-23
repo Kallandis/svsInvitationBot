@@ -15,7 +15,7 @@ import tokenFile
 import time
 import datetime
 import asyncio
-from dropdownView import DropdownView
+from professionMenuView import ProfessionMenuView
 
 
 # custom decorator to check if command was used in globals.mainChannel
@@ -282,9 +282,8 @@ async def mail_db(ctx):
 
 @bot.command()
 async def foo(ctx):
-
     msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
-    view = DropdownView(msg, 'class')
+    view = ProfessionMenuView(msg, 'class')
     await msg.edit(view=view)
 
 @bot.event

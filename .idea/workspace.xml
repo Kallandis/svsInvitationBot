@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="new class DropdownView() returns a discord.view object containing a Selectmenu of SelectOption objects. Include the discord.view object as parameter &quot;view&quot; in a discord.Message to send it. &#10;&#10;Began moving dm.prof() over to new structure.">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="dropdown menu times out after 5 minutes of not being interacted with">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dropdownView.py" beforeDir="false" afterPath="$PROJECT_DIR$/dropdownView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dropdownView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -130,13 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00015" summary="whole lotta stuff lol">
-      <created>1650342686284</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1650342686284</updated>
     </task>
     <task id="LOCAL-00016" summary="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands">
       <created>1650348140844</created>
@@ -474,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650681836901</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="dropdown menu times out after 5 minutes of not being interacted with">
+      <created>1650691369910</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1650691369910</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="kill off old global var" />
     <MESSAGE value="remove comment" />
     <MESSAGE value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
     <MESSAGE value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
@@ -514,6 +513,7 @@
     <MESSAGE value="Fixed error in dm.prof()" />
     <MESSAGE value="Added TODO.txt to repository" />
     <MESSAGE value="new class DropdownView() returns a discord.view object containing a Selectmenu of SelectOption objects. Include the discord.view object as parameter &quot;view&quot; in a discord.Message to send it. &#10;&#10;Began moving dm.prof() over to new structure." />
-    <option name="LAST_COMMIT_MESSAGE" value="new class DropdownView() returns a discord.view object containing a Selectmenu of SelectOption objects. Include the discord.view object as parameter &quot;view&quot; in a discord.Message to send it. &#10;&#10;Began moving dm.prof() over to new structure." />
+    <MESSAGE value="dropdown menu times out after 5 minutes of not being interacted with" />
+    <option name="LAST_COMMIT_MESSAGE" value="dropdown menu times out after 5 minutes of not being interacted with" />
   </component>
 </project>

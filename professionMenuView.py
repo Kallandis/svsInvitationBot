@@ -1,7 +1,10 @@
 import discord
 
+import db
+import globals
 
-class Dropdown(discord.ui.Select):
+
+class ProfessionMenu(discord.ui.Select):
     def __init__(self, parent_message, category, clas=None, units=None):
         self.parent_message = parent_message
         self.category = category
@@ -77,39 +80,40 @@ class Dropdown(discord.ui.Select):
             nextCategory = None
 
         if nextCategory is not None:
-            # dynamically update content with the total selections so far
+            # edit the interaction message with a new ProfessionMenuView view for the next category
             await interaction.response.edit_message(
                 content=f'You chose: {choice}',
-                view=DropdownView(self.parent_message, nextCategory, clas=self.clas, units=self.units)
+                view=ProfessionMenuView(self.parent_message, nextCategory, clas=self.clas, units=self.units)
             )
-        else:
-            # Remove the selectmenu
-            # Tell the user what they selected
-            # Write the selection info to DB
-            # Ideally, there should be an asyncio.wait_for on this selectMenu, so that the selectMenu does not stay
-            # in the channel forever. Display this timer to the user
+        else:   # the current category is "level"
+            # Remove the selectmenu, tell user what they selected, write the info to DB
 
-            level = self.values[0]  # if nextCategory is None, then self.values returns the "level" choice
+            level = self.values[0]
             msg = f'You have been registered as ' \
                   f'CLASS: **{self.clas}**, UNIT(s): **{self.units}**, LEVEL: **{level}**'
+            # send user's selection, remove the view
             await interaction.response.edit_message(content=msg, view=None)
 
-            # move db.parse_profession() parsing to here? Not sure how to pass this info to db.parse_profession()
-            # if can move this stuff to db.parse_profession(), would be better to parse it there
+            # parse selection info into appropriate form for DB-submission
             unitCharDict = {'Army': 'A', 'Air Force': 'F', 'Navy': 'N'}
-            print(self.units)
             unitChars = [unitCharDict[unit] for unit in self.units.split(', ')]
-            # prof_array = [self.clas, ''.join(unitChars), ]
-            # TODO: write to DB
+
+            ceLevelDict = {"2": 0, "3": 1, "3X": 2, "3XE": 3}
+            mmLevelDict = {"0T": 0, "3T": 1, "5T": 2, "10": 3, "E": 4}
+            level = ceLevelDict[level] if self.clas == 'CE' else mmLevelDict[level]
+
+            # send database info to db.update_profession()
+            prof_array = [self.clas, ''.join(unitChars), level]
+            db.update_profession(interaction.user.id, prof_array)
 
 
-class DropdownView(discord.ui.View):
+class ProfessionMenuView(discord.ui.View):
     def __init__(self, parent_message, category, clas=None, units=None):
         super().__init__(timeout=300)
         self.parent_message = parent_message
 
         # Adds the dropdown to our view object.
-        self.add_item(Dropdown(parent_message, category, clas=clas, units=units))
+        self.add_item(ProfessionMenu(parent_message, category, clas=clas, units=units))
 
     async def on_timeout(self):
         print('timeout!')

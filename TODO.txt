@@ -56,6 +56,9 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
         - Pass parameters into DropdownView __init__() to control which options are shown.
         - delete or edit the message in the Dropdown.callback()?
 
-        TODO: give a timeout period for selectmenu
-              pass the selection in Dropdown.callback() to db.parse_profession(), parse the selection output there
-              is this possible? if not, can write to db from dropdownview.py, but would prefer not to
+        TODO:   call db.update_profession() from ProfessionMenuView. Delete db.parse_profession(). Refactor all profession
+                edits to be done through ProfessionMenuView objects via the form below
+
+                msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
+                view = ProfessionMenuView(msg, 'class')
+                await msg.edit(view=view)
