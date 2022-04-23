@@ -121,7 +121,7 @@ class ProfessionMenu(discord.ui.Select):
 
             # if first-time user does not have an entry in DB (called through dm.request_entry())
             if self.first_entry:
-                values = [interaction.user.id, *prof_array, "NO", 0, 1]
+                values = [interaction.user.id, *prof_array, "NO", 1]
                 db.add_entry(values)
                 msg = 'You are now registered in the database with profession:\n'
 

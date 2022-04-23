@@ -53,9 +53,9 @@ async def create_event(ctx, *, datestring):
     eventTime = descr.split('\n')[0]
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
-    embed.add_field(name="YES", value="\u200b")
-    embed.add_field(name="MAYBE", value="\u200b")
-    embed.add_field(name="NO", value="\u200b")
+    embed.add_field(name=f"{'YES':<5}", value="\u200b")
+    embed.add_field(name=f"{'MAYBE':<5}", value="\u200b")
+    embed.add_field(name=f"{'NO':<5}", value="\u200b")
 
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
@@ -162,10 +162,7 @@ async def on_raw_reaction_add(payload):
         else:
             db.update_status(member.id, status)
             await update_event_field(message, member.display_name, status)
-
-            # only ack change if they registered as YES or MAYBE
-            if status != 'NO':
-                await dm.ack_change(member, 'status')
+            await dm.ack_change(member, 'status')
 
     await status_logic()
 

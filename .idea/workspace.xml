@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Added 4th menu to ProfessionMenu &quot;items&quot;, select up to 2 items from list. Needs a new DB field.&#10;&#10;Fixed ProfessionMenuView timeout after successful selection issue">
-      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,13 +131,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00022" summary="Begin migrating event_info global variable to eventInfo.db">
-      <created>1650358727598</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1650358727598</updated>
     </task>
     <task id="LOCAL-00023" summary="Pseudocode for request_entry(). Mostly waiting on db.parse_profession() to finish it. &#10;&#10;Added a few TODOs for various things that need to be completed.">
       <created>1650362191671</created>
@@ -475,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650747314175</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format">
+      <created>1650748227428</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1650748227428</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -490,7 +490,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added unused parameter &quot;only_show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
     <MESSAGE value="Added unused parameter &quot;show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
     <MESSAGE value="Updated all usages of db.ack_change() to make use of new show_change parameter" />
     <MESSAGE value="minor changes" />
@@ -515,6 +514,7 @@
     <MESSAGE value="added X back to reaction handling. &#10;&#10;Had to extend asyncio.sleep() from 1 to 2 seconds to avoid fuckery. Can still be broken by an aggressive reacter. Need to implement a queue here." />
     <MESSAGE value="Fixed ProfessionMenuView timeout after successful selection issue" />
     <MESSAGE value="Added 4th menu to ProfessionMenu &quot;items&quot;, select up to 2 items from list. Needs a new DB field.&#10;&#10;Fixed ProfessionMenuView timeout after successful selection issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added 4th menu to ProfessionMenu &quot;items&quot;, select up to 2 items from list. Needs a new DB field.&#10;&#10;Fixed ProfessionMenuView timeout after successful selection issue" />
+    <MESSAGE value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
   </component>
 </project>

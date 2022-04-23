@@ -52,7 +52,8 @@ async def ack_change(member: discord.Member, show_change=None):
     clas = entry[1]
     unit = entry[2]
     level = str(entry[3])
-    status = entry[4]
+    items = entry[4]
+    status = entry[5]
     lottery = entry[6]
 
     msg = ''
@@ -63,11 +64,11 @@ async def ack_change(member: discord.Member, show_change=None):
         eventStatus = f'You are marked as **{status}** for {eventInfo}\n'
 
     # get this from db.format_profession()?
-    profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
+    profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**, ITEMS: **{items}**.\n'
 
     lotto_in_out = '**in** to' if lottery else '**out** of'
     lotto = f'You have opted ' + lotto_in_out + ' the lottery.\n'
-    helpString = f'$prof [PROFESSION] to change profession. $lottery to toggle lottery participation'
+    helpString = f'$prof to change profession. $prof ? to show profession. $lottery to toggle lottery participation'
 
     # default case: show everything
     if show_change is None:
@@ -116,8 +117,9 @@ async def prof(ctx, *, arg=None):
         clas = entry[1]
         unit = entry[2]
         level = str(entry[3])
+        items = entry[4]
         # TODO: introduce db.format_profession() to print this out nicely in an embed
-        msg = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
+        msg = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**, ITEMS: **{items}**.\n'
         await ctx.send(msg)
 
 
