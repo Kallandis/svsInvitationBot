@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="moved request_entry(), prof() to new professionMenuView.py system&#10;&#10;if user reacts to event without being in database, remove their reaction and tell them to react again after filling out ProfessionMenu.&#10;&#10;professionMenuView.py now handles first-time entry via &quot;first_entry&quot; flag">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="updated on_raw_reaction_add() to new system&#10;&#10;changed request_entry() &quot;status&quot; flag to &quot;event_reaction&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,13 +132,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00018" summary="Finish prof() command.&#10;&#10;TODO: Handle argument-parsing of profession string in db.update_profession().">
-      <created>1650357056252</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1650357056252</updated>
     </task>
     <task id="LOCAL-00019" summary="few comments">
       <created>1650357190586</created>
@@ -474,7 +469,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650701347198</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="updated on_raw_reaction_add() to new system&#10;&#10;changed request_entry() &quot;status&quot; flag to &quot;event_reaction&quot;">
+      <created>1650702146855</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1650702146855</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +491,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
     <MESSAGE value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
     <MESSAGE value="remove event reaction if user fails dm.request_query()" />
     <MESSAGE value="remove event reaction if user fails dm.request_entry()" />
@@ -514,6 +515,7 @@
     <MESSAGE value="dropdown menu times out after 5 minutes of not being interacted with" />
     <MESSAGE value="rename dropdownView.py to professionMenuView.py&#10;&#10;added db.update_profession() call at end of professionMenu callback" />
     <MESSAGE value="moved request_entry(), prof() to new professionMenuView.py system&#10;&#10;if user reacts to event without being in database, remove their reaction and tell them to react again after filling out ProfessionMenu.&#10;&#10;professionMenuView.py now handles first-time entry via &quot;first_entry&quot; flag" />
-    <option name="LAST_COMMIT_MESSAGE" value="moved request_entry(), prof() to new professionMenuView.py system&#10;&#10;if user reacts to event without being in database, remove their reaction and tell them to react again after filling out ProfessionMenu.&#10;&#10;professionMenuView.py now handles first-time entry via &quot;first_entry&quot; flag" />
+    <MESSAGE value="updated on_raw_reaction_add() to new system&#10;&#10;changed request_entry() &quot;status&quot; flag to &quot;event_reaction&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated on_raw_reaction_add() to new system&#10;&#10;changed request_entry() &quot;status&quot; flag to &quot;event_reaction&quot;" />
   </component>
 </project>

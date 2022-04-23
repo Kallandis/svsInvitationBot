@@ -10,6 +10,7 @@ class ProfessionMenu(discord.ui.Select):
         self.units = units
         self.first_entry = first_entry
         max_vals = 1
+        print(first_entry)
 
         # Set the options that will be presented inside the dropdown
         if category == "class":
@@ -82,7 +83,8 @@ class ProfessionMenu(discord.ui.Select):
             # edit the interaction message with a new ProfessionMenuView view for the next category
             await interaction.response.edit_message(
                 content=f'You chose: {choice}',
-                view=ProfessionMenuView(self.parent_message, nextCategory, clas=self.clas, units=self.units)
+                view=ProfessionMenuView(self.parent_message, nextCategory,
+                                        clas=self.clas, units=self.units, first_entry=self.first_entry)
             )
         else:   # the current category is "level"
             # Remove the selectmenu, tell user what they selected, write the info to DB
@@ -128,4 +130,3 @@ class ProfessionMenuView(discord.ui.View):
     async def on_timeout(self):
         print('timeout!')
         await self.parent_message.edit(content='Profession menu timed out.', view=None)
-

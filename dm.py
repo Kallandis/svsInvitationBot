@@ -107,7 +107,7 @@ async def prof(ctx, *, arg=None):
 
     entry = db.get_entry(ID)
     if not entry:   # check if user has been registered in DB. if not, register them
-        await request_entry(member, arg)
+        await request_entry(member)
     elif intent == "edit":
         msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
         view = ProfessionMenuView(msg, 'class')

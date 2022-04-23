@@ -274,6 +274,7 @@ async def mail_db(ctx):
 
 
 @bot.command()
+@in_mainChannel()
 async def foo(ctx):
     msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
     view = ProfessionMenuView(msg, 'class')
