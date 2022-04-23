@@ -2,7 +2,8 @@ import discord
 
 
 class Dropdown(discord.ui.Select):
-    def __init__(self, category, clas=None, units=None):
+    def __init__(self, parent_message, category, clas=None, units=None):
+        self.parent_message = parent_message
         self.category = category
         self.clas = clas
         self.units = units
@@ -77,8 +78,10 @@ class Dropdown(discord.ui.Select):
 
         if nextCategory is not None:
             # dynamically update content with the total selections so far
-            await interaction.response.edit_message(content=f'You chose: {choice}',
-                                                    view=DropdownView(nextCategory, clas=self.clas, units=self.units))
+            await interaction.response.edit_message(
+                content=f'You chose: {choice}',
+                view=DropdownView(self.parent_message, nextCategory, clas=self.clas, units=self.units)
+            )
         else:
             # Remove the selectmenu
             # Tell the user what they selected
@@ -94,14 +97,22 @@ class Dropdown(discord.ui.Select):
             # move db.parse_profession() parsing to here? Not sure how to pass this info to db.parse_profession()
             # if can move this stuff to db.parse_profession(), would be better to parse it there
             unitCharDict = {'Army': 'A', 'Air Force': 'F', 'Navy': 'N'}
-            unitChars = [unitCharDict[unit] for unit in self.units]
-            prof_array = [self.clas, ''.join(unitChars), ]
+            print(self.units)
+            unitChars = [unitCharDict[unit] for unit in self.units.split(', ')]
+            # prof_array = [self.clas, ''.join(unitChars), ]
             # TODO: write to DB
 
 
 class DropdownView(discord.ui.View):
-    def __init__(self, category, clas=None, units=None):
-        super().__init__()
+    def __init__(self, parent_message, category, clas=None, units=None):
+        super().__init__(timeout=300)
+        self.parent_message = parent_message
 
         # Adds the dropdown to our view object.
-        self.add_item(Dropdown(category, clas=clas, units=units))
+        self.add_item(Dropdown(parent_message, category, clas=clas, units=units))
+
+    async def on_timeout(self):
+        print('timeout!')
+        # view = super().clear_items()
+        await self.parent_message.edit(content='Profession menu timed out.', view=None)
+

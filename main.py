@@ -282,9 +282,10 @@ async def mail_db(ctx):
 
 @bot.command()
 async def foo(ctx):
-    view = DropdownView('class')
-    await ctx.send(view=view)
 
+    msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
+    view = DropdownView(msg, 'class')
+    await msg.edit(view=view)
 
 @bot.event
 async def on_ready():

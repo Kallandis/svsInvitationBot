@@ -22,6 +22,11 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     on_raw_reaction_add() and on_raw_reaction_remove(). If it passes checks, fetch the entire Message object
     later in the function.
 
+- IDEA: pin the event (is this necessary?)
+
+- CHANGE: global variable for eventMessage_ID. if it is None, then populate it from the DB.
+    -> reduces database reads. Should only have to read DB once per restart / new event
+
 
 ---------PRIORITY--------------
 
