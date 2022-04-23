@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="dropdown menu times out after 5 minutes of not being interacted with">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="rename dropdownView.py to professionMenuView.py&#10;&#10;added db.update_profession() call at end of professionMenu callback">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dropdownView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +48,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/main.py" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/main.py" />
   </component>
   <component name="RunManager" selected="Python.main">
@@ -117,8 +118,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.testmain" />
         <item itemvalue="Python.reset_db" />
+        <item itemvalue="Python.testmain" />
       </list>
     </recent_temporary>
   </component>
@@ -130,13 +131,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00016" summary="Swapped to buffer technique for sql writes, with global sqlEntries var&#10;Added adminRole to globals&#10;&#10;Started sqlWrite() loop&#10;&#10;INPROG: implementing check decorators for commands">
-      <created>1650348140844</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1650348140844</updated>
     </task>
     <task id="LOCAL-00017" summary="Continue migration to SQL buffer&#10;Update ack_status -&gt; ack_change. Now waits until next sql-write to send the updated entry. &#10;Added toggle_lotto() DM command">
       <created>1650356559468</created>
@@ -474,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650691369910</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="rename dropdownView.py to professionMenuView.py&#10;&#10;added db.update_profession() call at end of professionMenu callback">
+      <created>1650693992933</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1650693992933</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +490,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="remove comment" />
     <MESSAGE value="sql_write() loop is now always active. But you can only update status while event is active. &#10;&#10;This logic should be handled inside on_raw_reaction_add()" />
     <MESSAGE value="on_raw_reaction_add() now checks if the message reacted to is the event message (stored in eventInfo.db)&#10;&#10;on_raw_reaction_add() now removes reactions to event message other than check/?/x" />
     <MESSAGE value="finished main.mail_db()&#10;&#10;corrected a few stray member.dm_channel() to member.dm_channel" />
@@ -514,6 +514,7 @@
     <MESSAGE value="Added TODO.txt to repository" />
     <MESSAGE value="new class DropdownView() returns a discord.view object containing a Selectmenu of SelectOption objects. Include the discord.view object as parameter &quot;view&quot; in a discord.Message to send it. &#10;&#10;Began moving dm.prof() over to new structure." />
     <MESSAGE value="dropdown menu times out after 5 minutes of not being interacted with" />
-    <option name="LAST_COMMIT_MESSAGE" value="dropdown menu times out after 5 minutes of not being interacted with" />
+    <MESSAGE value="rename dropdownView.py to professionMenuView.py&#10;&#10;added db.update_profession() call at end of professionMenu callback" />
+    <option name="LAST_COMMIT_MESSAGE" value="rename dropdownView.py to professionMenuView.py&#10;&#10;added db.update_profession() call at end of professionMenu callback" />
   </component>
 </project>

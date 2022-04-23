@@ -9,73 +9,29 @@ import db
 import globals
 import datetime
 import asyncio
+from professionMenuView import ProfessionMenuView
 
 
-async def request_entry(member: discord.Member, prof_string=None, status="NO"):
+async def request_entry(member: discord.Member, status=None):
     """
-    Prompt member to provide data entry for SQL database.
-    To be called when member attempts to do update a value, but they are not yet in the database
-    Returns False if entry fails, True if succeeds. This allows the function that invokes request_entry() to print out
-        an error message if input was unsuccessful.
+    Prompt unregistered user to provide data entry for SQL database.
+    Called when user reacts to event for the first time, or uses DM command $lotto before being added to DB
     """
-    # prompt member to provide data entry for SQL
-    # if they do not respond in 1 hr, initialize entry with status "NO", empty profession, 0 tokens, opt-in lotto
 
     if member.dm_channel is None:
         await member.create_dm()
     dmChannel = member.dm_channel
 
-    # if prof_string provided through $prof
-    if prof_string is not None:
-        # parse prof_string with db.parse_profession()
-        prof_array = db.parse_profession(prof_string)
-        if not prof_array:
-            success = False
-        else:
-            entry = [member.id, *prof_array, status, 0, 1]
-            db.add_entry(entry)
-            success = True
-            await ack_change(member)
-
-    # default case (no profession string given)
-    # happens when user reacts to event or uses $lotto
+    if status is not None:
+        cont = "Your event reaction has been removed because you are not in the database.\n" \
+               "After entering your profession, you may react to the event again.\n"
     else:
-        profPrompt = "CLASS: {MM, CE}\n" \
-                     "UNIT: {A, F, N} (skip if CEM)\n" \
-                     "MM levels: {0T, 3T, 5T, 10, E}\n" \
-                     "CE levels: {2, 3, 3X, 3XE, M}\n" \
-                     "EXAMPLES: MMA3T, CEN3XE\n"
+        cont = "You do not have an existing entry in the database. Please enter profession.\n"
+    cont += "Menu will disappear in 5 minutes."
 
-        msg = "You do not have an existing entry in the database. Please enter Profession with following format: "
-        msg += profPrompt
-        # TODO: do a timestring: "You have until <TIME> to reply"
-        msg += "You have 5 minutes to reply."
-        await dmChannel.send(msg)
-
-        def check(m):
-            return m.channel == dmChannel and m.author == member
-
-        try:
-            reply = await globals.bot.wait_for('message', timeout=300, check=check)
-        except asyncio.TimeoutError:
-            # TODO: should edit message to indicate that time is up and they can no longer reply
-            reply = None
-
-        if reply is None:
-            # user failed to reply in time.
-            success = False
-        else:
-            prof_array = db.parse_profession(reply.content)
-            if not prof_array:
-                success = False
-            else:
-                entry = [member.id, *prof_array, status, 0, 1]
-                db.add_entry(entry)
-                success = True
-                await ack_change(member)
-
-    # return something indicating if user responded to prompt, or if it was set to NO automatically
-    return success
+    msg = await dmChannel.send(content=cont)
+    view = ProfessionMenuView(msg, 'class', first_entry=True)
+    await msg.edit(view=view)
 
 
 async def ack_change(member: discord.Member, show_change=None):
@@ -106,6 +62,7 @@ async def ack_change(member: discord.Member, show_change=None):
         eventInfo = eventTitle + ' @ ' + eventTime
         eventStatus = f'You are marked as **{status}** for {eventInfo}\n'
 
+    # get this from db.format_profession()?
     profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
 
     lotto_in_out = '**in** to' if lottery else '**out** of'
@@ -120,8 +77,6 @@ async def ack_change(member: discord.Member, show_change=None):
     elif show_change == 'status':
         if message_id:
             msg += eventStatus
-    elif show_change == 'profession':
-        msg += profession
     elif show_change == 'lotto':
         msg += lotto
 
@@ -133,17 +88,13 @@ async def confirm_maybe(member: discord.member):
     pass
 
 
-@globals.bot.command(usage="[PROFESSION] {CLASS}{UNIT}{LEVEL}")
+@globals.bot.command(usage='EDIT: $prof, SHOW: $prof ?')
 @commands.dm_only()
 async def prof(ctx, *, arg=None):
     """
     $prof to update profession, $prof ? to check profession
-    CLASS: {MM, CE}
-    UNIT: {A, F, N} (skip if CEM)
-    MM levels: {0T, 3T, 5T, 10, E}
-    CE levels: {2, 3, 3X, 3XE, M}
-    EXAMPLES: MMA3T, CEN3XE
     """
+
     member = ctx.author
     ID = member.id
 
@@ -155,27 +106,19 @@ async def prof(ctx, *, arg=None):
         return
 
     entry = db.get_entry(ID)
-    if not entry:   # check if invoker has been registered in DB. if not, register them
-        success = await request_entry(member, arg)
+    if not entry:   # check if user has been registered in DB. if not, register them
+        await request_entry(member, arg)
     elif intent == "edit":
-        prof_array = db.parse_profession(arg)
-        if prof_array:
-            success = db.update_profession(ID, prof_array)
-        else:
-            success = False
+        msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
+        view = ProfessionMenuView(msg, 'class')
+        await msg.edit(view=view)
     elif intent == "show":
         clas = entry[1]
         unit = entry[2]
         level = str(entry[3])
+        # TODO: introduce db.format_profession() to print this out nicely in an embed
         msg = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
         await ctx.send(msg)
-
-    if not success:
-        msg = f"ERROR: Failed to {intent} profession"
-        await ctx.send(msg)
-
-    else:
-        await ack_change(member, show_change='profession')
 
 
 # @globals.bot.command(usage="[PROFESSION] {CLASS}{UNIT}{LEVEL}")

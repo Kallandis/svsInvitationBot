@@ -24,8 +24,9 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 
 - IDEA: pin the event (is this necessary?)
 
-- CHANGE: global variable for eventMessage_ID. if it is None, then populate it from the DB.
+- CHANGE: global variable for event variables. if it is None, then populate it from the DB.
     -> reduces database reads. Should only have to read DB once per restart / new event
+    -> will have to read DB every time if there is no event. but that's fine.
 
 
 ---------PRIORITY--------------
@@ -36,10 +37,17 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?
     https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor or maybe this?
+    *** https://pypi.org/project/aiosqlite/     aiosqlite?
+        "aiosqlite allows interaction with SQLite databases on the main AsyncIO event loop without blocking execution of
+         other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
+         connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
 
 - CHANGE: make db.request_entry() send an embed, and format it more nicely (aligned columns?)
          Do the same for dm.ack_change()
+         Do the same for ProfessionMenuView?
          $prof, $lotto prompts can be in the embed footer
+
+         see professionMenuView for a reference (not completed)
 
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
@@ -58,6 +66,8 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 
         TODO:   call db.update_profession() from ProfessionMenuView. Delete db.parse_profession(). Refactor all profession
                 edits to be done through ProfessionMenuView objects via the form below
+                Also need to update on_raw_reaction_add() to this new style...
+                Not going to deal with "status" in professionMenuView. Just tell them that they can react again
 
                 msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
                 view = ProfessionMenuView(msg, 'class')
