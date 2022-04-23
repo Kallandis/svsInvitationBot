@@ -31,7 +31,7 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 
 ---------PRIORITY--------------
 
-- IMPLEMENT: add "NO" field to main.create_event()
+- IMPLEMENT: add "NO" and X emoji back to main.create_event()
 
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
@@ -52,23 +52,4 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
 - CHANGE: use Select Menu to get profession instead of user-input (would be much easier for the users)
-    INTENDED BEHAVIOR:
-        db.parse_profession() pulls up a Select Menu using dropdownView.py. Includes option to CANCEL and keep old prof
-            - The menu should prompt for
-        $prof calls db.parse_profession() to change profession, $prof ? tells you your current registered profession
-        request_entry() calls db.parse_profession()
-
-    After being interacted with, Select menu should delete / be replaced by new Select menu for the next field
-        f.x., CLASS -> UNIT ---(if not M)--> LEVEL
-        - This avoids including 2 * 3 * 5 entries. Can show only relevant UNITS, LEVELS based on CLASS.
-        - Pass parameters into DropdownView __init__() to control which options are shown.
-        - delete or edit the message in the Dropdown.callback()?
-
-        TODO:   call db.update_profession() from ProfessionMenuView. Delete db.parse_profession(). Refactor all profession
-                edits to be done through ProfessionMenuView objects via the form below
-                Also need to update on_raw_reaction_add() to this new style...
-                Not going to deal with "status" in professionMenuView. Just tell them that they can react again
-
-                msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
-                view = ProfessionMenuView(msg, 'class')
-                await msg.edit(view=view)
+    TODO: update on_raw_reaction_add/remove() to new selectmenu system

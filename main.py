@@ -135,7 +135,7 @@ async def on_raw_reaction_add(payload):
 
     else:
         # triggers on_raw_reaction_remove(), which in turn calls update_event_field() and updates the database
-        # global var tells orr_remove() not to ACK to avoid double ACK. Resets to False in orr_remove()
+        # global var tells orr_remove() not to ACK, to avoid double ACK. Resets to False in orr_remove()
         globals.triggeredFromBotRemove = True
         await message.remove_reaction(otherEmoji, member)
         # sleep 1 second to avoid concurrency issues with status_logic() calling update_event_field()
@@ -147,14 +147,8 @@ async def on_raw_reaction_add(payload):
         # update_event_field() from on_raw_reaction_remove()
         message = await globals.mainChannel.fetch_message(payload.message_id)
         if not entry:
-            success = await dm.request_entry(member, status=status)
-            if not success:
-                await message.remove_reaction(payload.emoji, member)
-                if member.dm_channel is None:
-                    await member.create_dm()
-                msg = 'Failed to create database entry. You may react to the event to sign up again.'
-                await member.dm_channel.send(msg)
-                return
+            await message.remove_reaction(payload.emoji, member)
+            await dm.request_entry(member, event_reaction=True)
 
         else:
             db.update_status(member.id, status)
@@ -197,7 +191,6 @@ async def on_raw_reaction_remove(payload):
 
         if globals.triggeredFromBotRemove:
             globals.triggeredFromBotRemove = False
-
         else:
             await dm.ack_change(member, 'status')
 

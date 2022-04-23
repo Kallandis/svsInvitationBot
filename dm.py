@@ -12,7 +12,7 @@ import asyncio
 from professionMenuView import ProfessionMenuView
 
 
-async def request_entry(member: discord.Member, status=None):
+async def request_entry(member: discord.Member, event_reaction=False):
     """
     Prompt unregistered user to provide data entry for SQL database.
     Called when user reacts to event for the first time, or uses DM command $lotto before being added to DB
@@ -22,7 +22,7 @@ async def request_entry(member: discord.Member, status=None):
         await member.create_dm()
     dmChannel = member.dm_channel
 
-    if status is not None:
+    if event_reaction:
         cont = "Your event reaction has been removed because you are not in the database.\n" \
                "After entering your profession, you may react to the event again.\n"
     else:
