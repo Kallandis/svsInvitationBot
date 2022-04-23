@@ -1,10 +1,10 @@
-import discord
+import discord  # development branch 2.0.1 to be able to use SelectMenu, Interactions
 from discord.ext import commands
 import logging
 import globals
 
 logging.basicConfig(level=logging.INFO)
-intents = discord.Intents(messages=True, members=True, guilds=True, reactions=True)
+intents = discord.Intents(messages=True, members=True, guilds=True, reactions=True, message_content=True)
 
 bot = commands.Bot(command_prefix='$', intents=intents)
 globals.bot = bot
@@ -15,9 +15,10 @@ import tokenFile
 import time
 import datetime
 import asyncio
+from dropdownView import DropdownView
 
 
-# decorator to check if command was used in globals.mainChannel
+# custom decorator to check if command was used in globals.mainChannel
 def in_mainChannel():
     def predicate(ctx):
         return ctx.message.channel == globals.mainChannel
@@ -280,11 +281,9 @@ async def mail_db(ctx):
 
 
 @bot.command()
-async def foo(ctx, arg):
-    eventTitle, eventTime, eventMessageID = db.get_event()
-    message = await globals.mainChannel.fetch_message(eventMessageID)
-    member = ctx.author
-    await message.remove_reaction("✅", member)
+async def foo(ctx):
+    view = DropdownView('class')
+    await ctx.send(view=view)
 
 
 @bot.event
@@ -293,9 +292,8 @@ async def on_ready():
     globals.guild = bot.get_guild(964624340295499857)           # svsBotTestServer
     globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
     await globals.mainChannel.send(f'{bot.user.name} connected!')
-    db.sql_write.start()    # start the sql_write loop that executes sql writes every 30 seconds
+    db.sql_write.start()    # start the sql_write loop that executes sql writes every # seconds
     # await bot.change_presence(activity = discord.SOMETHING)
-
 
 if __name__ == "__main__":
     bot.run(tokenFile.token)

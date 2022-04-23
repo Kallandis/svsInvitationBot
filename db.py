@@ -198,17 +198,17 @@ def all_of_category(category: str, value):
     # all (ID, prof, tokens) of status
     if category == 'status':
         sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE STATUS = ?"
-        users = conn.execute(sql, [value])
+        users = list(conn.execute(sql, [value]))
 
     # all (ID, prof, tokens) of class
     elif category == "class":
         sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, TOKENS FROM USERS WHERE CLASS = ?"
-        users = conn.execute(sql, [value])
+        users = list(conn.execute(sql, [value]))
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = ?"
-        users = conn.execute(sql, value)
+        users = list(conn.execute(sql, value))
 
     else:
         return None

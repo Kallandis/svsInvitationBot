@@ -135,7 +135,7 @@ async def confirm_maybe(member: discord.member):
 
 @globals.bot.command(usage="[PROFESSION] {CLASS}{UNIT}{LEVEL}")
 @commands.dm_only()
-async def prof(ctx, arg):
+async def prof(ctx, *, arg=None):
     """
     $prof to update profession, $prof ? to check profession
     CLASS: {MM, CE}
@@ -147,29 +147,74 @@ async def prof(ctx, arg):
     member = ctx.author
     ID = member.id
 
-    entry = db.get_entry(ID)
+    intentDict = {None: "edit", "?": "show"}
+    intent = intentDict.get(arg, None)
+    if intent is None:
+        msg = "USAGE: $prof to edit profession, $prof ? to show profession"
+        await ctx.send(msg)
+        return
 
-    if not entry:
+    entry = db.get_entry(ID)
+    if not entry:   # check if invoker has been registered in DB. if not, register them
         success = await request_entry(member, arg)
-    else:
+    elif intent == "edit":
         prof_array = db.parse_profession(arg)
         if prof_array:
             success = db.update_profession(ID, prof_array)
         else:
             success = False
+    elif intent == "show":
+        clas = entry[1]
+        unit = entry[2]
+        level = str(entry[3])
+        msg = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**.\n'
+        await ctx.send(msg)
 
     if not success:
-        msg = "ERROR: Could not parse profession\n"
-        profPrompt = "CLASS: {MM, CE}\n" \
-                     "UNIT: {A, F, N} (skip if CEM)\n" \
-                     "MM levels: {0T, 3T, 5T, 10, E}\n" \
-                     "CE levels: {2, 3, 3X, 3XE, M}\n" \
-                     "EXAMPLES: MMA3T, CEN3XE\n"
-        msg += profPrompt
+        msg = f"ERROR: Failed to {intent} profession"
         await ctx.send(msg)
-        return
+
     else:
         await ack_change(member, show_change='profession')
+
+
+# @globals.bot.command(usage="[PROFESSION] {CLASS}{UNIT}{LEVEL}")
+# @commands.dm_only()
+# async def prof(ctx, arg):
+#     """
+#     $prof to update profession, $prof ? to check profession
+#     CLASS: {MM, CE}
+#     UNIT: {A, F, N} (skip if CEM)
+#     MM levels: {0T, 3T, 5T, 10, E}
+#     CE levels: {2, 3, 3X, 3XE, M}
+#     EXAMPLES: MMA3T, CEN3XE
+#     """
+#     member = ctx.author
+#     ID = member.id
+#
+#     entry = db.get_entry(ID)
+#
+#     if not entry:
+#         success = await request_entry(member, arg)
+#     else:
+#         prof_array = db.parse_profession(arg)
+#         if prof_array:
+#             success = db.update_profession(ID, prof_array)
+#         else:
+#             success = False
+#
+#     if not success:
+#         msg = "ERROR: Could not parse profession\n"
+#         profPrompt = "CLASS: {MM, CE}\n" \
+#                      "UNIT: {A, F, N} (skip if CEM)\n" \
+#                      "MM levels: {0T, 3T, 5T, 10, E}\n" \
+#                      "CE levels: {2, 3, 3X, 3XE, M}\n" \
+#                      "EXAMPLES: MMA3T, CEN3XE\n"
+#         msg += profPrompt
+#         await ctx.send(msg)
+#         return
+#     else:
+#         await ack_change(member, show_change='profession')
 
 
 @globals.bot.command()

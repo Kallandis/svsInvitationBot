@@ -2,7 +2,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 https://discordpy-message-components.readthedocs.io/en/latest/
 
 https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#Interaction.respond
-    Instead of DM? keep it all in the channel but with hidden messages
+    Instead of DM? keep it all in the channel but with hidden messages (ephemeral)
 
 - ISSUE: a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
         temporary soln: just don't add more names after 2048 chars (unlikely that this will happen anyways)
@@ -22,20 +22,35 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     on_raw_reaction_add() and on_raw_reaction_remove(). If it passes checks, fetch the entire Message object
     later in the function.
 
-- IDEA: take a loop at aiomysql module. Maybe it is better than sqlite3 for async programs?
 
 ---------PRIORITY--------------
+
+- IMPLEMENT: add "NO" field to main.create_event()
+
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
+    https://www.sqlite.org/wal.html or perhaps this is a solution?
+    https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor or maybe this?
 
 - CHANGE: make db.request_entry() send an embed, and format it more nicely (aligned columns?)
          Do the same for dm.ack_change()
          $prof, $lotto prompts can be in the embed footer
 
-- CHANGE: use Select Menu to get profession instead of user-input (would be much easier for the users)
-    https://pypi.org/project/discord-ui/
-    $prof pulls up the Select Menu. Includes option to CANCEL
-    $prof ? tells you your current registered profession
-    request_entry() also pulls up Select Menu, same as prof (maybe put the menu in parse_profession())
+- CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
-- IMPLEMENT: mail_csv()
+- CHANGE: use Select Menu to get profession instead of user-input (would be much easier for the users)
+    INTENDED BEHAVIOR:
+        db.parse_profession() pulls up a Select Menu using dropdownView.py. Includes option to CANCEL and keep old prof
+            - The menu should prompt for
+        $prof calls db.parse_profession() to change profession, $prof ? tells you your current registered profession
+        request_entry() calls db.parse_profession()
+
+    After being interacted with, Select menu should delete / be replaced by new Select menu for the next field
+        f.x., CLASS -> UNIT ---(if not M)--> LEVEL
+        - This avoids including 2 * 3 * 5 entries. Can show only relevant UNITS, LEVELS based on CLASS.
+        - Pass parameters into DropdownView __init__() to control which options are shown.
+        - delete or edit the message in the Dropdown.callback()?
+
+        TODO: give a timeout period for selectmenu
+              pass the selection in Dropdown.callback() to db.parse_profession(), parse the selection output there
+              is this possible? if not, can write to db from dropdownview.py, but would prefer not to
