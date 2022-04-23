@@ -55,10 +55,12 @@ async def create_event(ctx, *, datestring):
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     embed.add_field(name="YES", value="\u200b")
     embed.add_field(name="MAYBE", value="\u200b")
+    embed.add_field(name="NO", value="\u200b")
 
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
     await msg.add_reaction("❔")
+    await msg.add_reaction("❌")
 
     message_id = msg.id
     # store event data in eventInfo.db
@@ -69,22 +71,24 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
     embed = message.embeds[0]
     fields = embed.fields
 
-    fieldIndex = 0 if status == "YES" else 1
+    indexDict = {"YES": 0, "MAYBE": 1, "NO": 2}
+    fieldIndex = indexDict[status]
+    # fieldIndex = 0 if status == "YES" else 1
     fieldName = fields[fieldIndex].name
     fieldValue = fields[fieldIndex].value
     fieldValues = fieldValue.split('\n')
 
     # if remove flag is True and name in fieldValues
     if remove and name in fieldValues:
-        # print('rem', end=': ')
+        print('rem', end=': ')
         fieldValues.remove(name)
 
     # if adding name would not exceed 2048 characters
     elif len(fieldValue) + len(name) + 2 < 2048:
-        # print('app', end=': ')
+        print('app', end=': ')
         fieldValues.append(name)
 
-    # print(f'fieldname: {fieldName}, fieldValues: {fieldValues}')
+    print(f'fieldname: {fieldName}, fieldValues: {fieldValues}')
     fieldValue = '\n'.join(fieldValues)
     embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
 
@@ -113,14 +117,18 @@ async def on_raw_reaction_add(payload):
     if message.id != eventMessageID or member.bot:
         return
 
+    emojiList = ["✅", "❔", "❌"]
     if str(payload.emoji) == "✅":
         status = "YES"
-        otherEmoji = "❔"
+        emojiList.remove("✅")
     elif str(payload.emoji) == "❔":
         status = "MAYBE"
-        otherEmoji = "✅"
+        emojiList.remove("❔")
+    elif str(payload.emoji) == "❌":
+        status = "NO"
+        emojiList.remove("❌")
     else:
-        otherEmoji = None
+        emojiList = None
         status = None
 
     # status = None if rxn is not in approved list. Else "YES" or "MAYBE"
@@ -137,9 +145,10 @@ async def on_raw_reaction_add(payload):
         # triggers on_raw_reaction_remove(), which in turn calls update_event_field() and updates the database
         # global var tells orr_remove() not to ACK, to avoid double ACK. Resets to False in orr_remove()
         globals.triggeredFromBotRemove = True
-        await message.remove_reaction(otherEmoji, member)
+        await message.remove_reaction(emojiList[0], member)
+        await message.remove_reaction(emojiList[1], member)
         # sleep 1 second to avoid concurrency issues with status_logic() calling update_event_field()
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
 
     async def status_logic():
         entry = db.get_entry(member.id)
@@ -182,16 +191,18 @@ async def on_raw_reaction_remove(payload):
 
     # If member removed ✅ or ❔, set their status to "NO"
     # Don't need to check if bot, b/c bot does not have a database entry
-    elif str(payload.emoji) in ["✅", "❔"] and db.get_entry(payload.user_id):
-        status = "YES" if str(payload.emoji) == "✅" else "MAYBE"
+    elif str(payload.emoji) in ["✅", "❔", "❌"] and db.get_entry(payload.user_id):
+        statusDict = {"✅": "YES", "❔": "MAYBE", "❌": "NO"}
+        removed_status = statusDict[str(payload.emoji)]
+        # status = "YES" if str(payload.emoji) == "✅" else "MAYBE"
         member = globals.guild.get_member(payload.user_id)
         db.update_status(member.id, "NO")
         message = await globals.mainChannel.fetch_message(payload.message_id)
-        await update_event_field(message, member.display_name, status, remove=True)
+        await update_event_field(message, member.display_name, removed_status, remove=True)
 
         if globals.triggeredFromBotRemove:
             globals.triggeredFromBotRemove = False
-        else:
+        elif removed_status != "NO":
             await dm.ack_change(member, 'status')
 
 
