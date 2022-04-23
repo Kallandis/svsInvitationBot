@@ -36,9 +36,6 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
 
 ---------PRIORITY--------------
 
-- IMPLEMENT: add "NO" and X emoji back to main.create_event()
-    TODO: issue: changed some stuff to also include X, now it's broken lol
-
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?
