@@ -105,12 +105,15 @@ def info_embed(entry: list):
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
     if eventMessageID:
+        # if there is an active event, put the event and the user's status in the description field of the embed
         eventInfo = eventTitle + ' @ ' + eventTime
         descr = f'You are marked as **{status}** for {eventInfo}'
     else:
         descr = '\u200b'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.brand_green())
-    # there are a maximum of 3 fields in a row, stretched to fill a fixed width
+
+    # add fields to the embed for various entry parameters
+    # there are a maximum of 3 fields in a row, stretched to fill a fixed width. Add whitespace fields for alignment
     # row 1: Class, Unit(s), Level
     embed.add_field(**class_args)
     embed.add_field(**unit_args)
