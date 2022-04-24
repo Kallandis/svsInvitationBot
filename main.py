@@ -53,9 +53,12 @@ async def create_event(ctx, *, datestring):
     eventTime = descr.split('\n')[0]
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
-    embed.add_field(name=f"{'YES':<10}", value="\u200b")
-    embed.add_field(name=f"{'MAYBE':<10}", value="\u200b")
-    embed.add_field(name=f"{'NO':<10}", value="\u200b")
+    embed.add_field(name=f"{'YES':<20}", value="\u200b")
+    embed.add_field(name=f"{'MAYBE':<20}", value="\u200b")
+    embed.add_field(name=f"{'NO':<20}", value="\u200b")
+
+    cmdList = ['$edit_event', '$delete_event', '$mail_csv', '$mail_db']
+    embed.set_footer(text=', '.join(cmdList))
 
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("✅")
