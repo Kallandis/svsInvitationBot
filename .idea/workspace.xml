@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove unused import logging in db.py">
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,34 +128,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00033" summary="update_status() verifies that event exists in eventInfo.db">
-      <created>1650446488104</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1650446488104</updated>
-    </task>
-    <task id="LOCAL-00034" summary="added message_id field to eventInfo.db&#10;&#10;Updated db.update_event(), db.get_event(), and invocations of them in main.py and dm.py to account for message_id field">
-      <created>1650447132813</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1650447132813</updated>
-    </task>
-    <task id="LOCAL-00035" summary="add prompt to $prof error. I plan on moving to a Select Menu in the future but this will still be useful for compactness probably">
-      <created>1650447320244</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1650447320244</updated>
-    </task>
-    <task id="LOCAL-00036" summary="updated get_event() in update_status() (forgot to do it last time)">
-      <created>1650447414459</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1650447414459</updated>
     </task>
     <task id="LOCAL-00037" summary="lil change">
       <created>1650447445080</created>
@@ -472,7 +444,35 @@
       <option name="project" value="LOCAL" />
       <updated>1650795156952</updated>
     </task>
-    <option name="localTasksCounter" value="82" />
+    <task id="LOCAL-00082" summary="gitignore update">
+      <created>1650795173303</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795173303</updated>
+    </task>
+    <task id="LOCAL-00083" summary="some comments">
+      <created>1650795336234</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795336234</updated>
+    </task>
+    <task id="LOCAL-00084" summary="some comments">
+      <created>1650795383459</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795383459</updated>
+    </task>
+    <task id="LOCAL-00085" summary="remove unused import logging in db.py">
+      <created>1650795417954</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795417954</updated>
+    </task>
+    <option name="localTasksCounter" value="86" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -487,9 +487,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
-    <MESSAGE value="update_event_field() now properly updates the embed.&#10;&#10;Had to refetch message in status_logic(), as the reaction overwrite protection caused issues due to concurrency.&#10;&#10;If continues to be an issue, can probably just do the remove reaction loop AFTER status_logic()?" />
-    <MESSAGE value="Everything working properly with reactions to Event." />
     <MESSAGE value="Everything is actually working perfectly with reactions to Event." />
     <MESSAGE value="docstring" />
     <MESSAGE value="Fixed error in dm.prof()" />
@@ -512,6 +509,9 @@
     <MESSAGE value="update TODO.txt" />
     <MESSAGE value="shortened several ProfessionMenu selectmenu prompts to make them fit in the menu&#10;&#10;Began progress on db.info_embed(), which takes as inputs a database entry list and an optional &quot;show&quot; parameter, and returns a nicely formatted embed." />
     <MESSAGE value="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()" />
-    <option name="LAST_COMMIT_MESSAGE" value="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()" />
+    <MESSAGE value="gitignore update" />
+    <MESSAGE value="some comments" />
+    <MESSAGE value="remove unused import logging in db.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove unused import logging in db.py" />
   </component>
 </project>

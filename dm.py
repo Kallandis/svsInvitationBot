@@ -87,7 +87,7 @@ async def confirm_maybe(member: discord.member):
 
 @globals.bot.command()
 @commands.dm_only()
-async def prof(ctx, *, arg=None):
+async def prof(ctx, *, intent=None):
     """
     $prof (no argument) to edit profession, $prof ? to show profession
     """
@@ -96,7 +96,7 @@ async def prof(ctx, *, arg=None):
     ID = member.id
 
     intentDict = {None: "edit", "?": "show"}
-    intent = intentDict.get(arg, None)
+    intent = intentDict.get(intent, None)
     if intent is None:
         msg = "```USAGE:\n$prof to edit profession\n$prof ? to show profession```"
         await ctx.send(msg)
@@ -112,13 +112,9 @@ async def prof(ctx, *, arg=None):
         await msg.edit(view=view)
 
     elif intent == "show":
-        clas, unit, level, mm_traps, skins = entry[1:6]
-        level = str(level)
-
-        # TODO: introduce db.format_profession() to print this out nicely in an embed
-        msg = f'You are registered as CLASS: **{clas}**, UNIT(s): **{unit}**, LEVEL: **{level}**, SKIN(s): **{skins}**.\n'
-        # embed = discord.Embed(description=msg)
-        await ctx.send(msg)
+        file, embed = db.info_embed(entry)
+        args = {'file': file, 'embed': embed} if file else {'embed': embed}
+        await ctx.send(**args)
 
 
 @globals.bot.command()
