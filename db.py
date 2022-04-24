@@ -28,12 +28,13 @@ async def sql_write():
 
 def add_entry(values: list):
     """
-    param [list] entry: INT, STRING, STRING, INT, STRING, STRING, INT
+    param [list] entry: INT, STRING, STRING, INT, STRING, STRING, STRING, INT
     Status and Tokens default to 0
     Lottery default to 1
     Profession must be provided by User
     """
-    sql = "INSERT INTO USERS (discord_ID, class, unit, level, items, status, lottery) values(?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO USERS (discord_ID, class, unit, level, mm_traps, skins, status, lottery) " \
+          "values(?, ?, ?, ?, ?, ?, ?, ?)"
     globals.sqlEntries.append([sql, values])
 
 
@@ -73,7 +74,7 @@ def update_profession(discord_id, prof_array: list):
     Should only be called if prof_array is not None
     """
 
-    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ?, ITEMS = ? WHERE DISCORD_ID = ?"
+    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ?, MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
     globals.sqlEntries.append([sql, values])
     return True
@@ -114,22 +115,23 @@ def all_of_category(category: str, value):
     """
 
     conn = sql3.connect('userHistory.db')
-    # all (ID, prof, tokens) of status
+    # all (ID, prof) of status
     if category == 'status':
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, ITEMS FROM USERS WHERE STATUS = ?"
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE STATUS = ?"
         users = list(conn.execute(sql, [value]))
 
     # all (ID, prof) of class
     elif category == "class":
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, ITEMS FROM USERS WHERE CLASS = ?"
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE CLASS = ?"
         users = list(conn.execute(sql, [value]))
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
-        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = ?"
+        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = 1"
         users = list(conn.execute(sql, value))
 
     else:
+        conn.close()
         return None
 
     conn.close()

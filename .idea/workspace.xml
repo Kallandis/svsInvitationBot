@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="More changes to professionmenu, dm.py to move to new DB format">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,8 +116,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.reset_db" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.testmain" />
       </list>
     </recent_temporary>
@@ -130,13 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00024" summary="remove cursor object in sql_write()">
-      <created>1650428466976</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1650428466976</updated>
     </task>
     <task id="LOCAL-00025" summary="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]">
       <created>1650437967404</created>
@@ -474,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650753181098</updated>
     </task>
-    <option name="localTasksCounter" value="73" />
+    <task id="LOCAL-00073" summary="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs.">
+      <created>1650759006328</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1650759006328</updated>
+    </task>
+    <option name="localTasksCounter" value="74" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updated all usages of db.ack_change() to make use of new show_change parameter" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="lil comment" />
     <MESSAGE value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
@@ -514,6 +513,7 @@
     <MESSAGE value="Added 4th menu to ProfessionMenu &quot;items&quot;, select up to 2 items from list. Needs a new DB field.&#10;&#10;Fixed ProfessionMenuView timeout after successful selection issue" />
     <MESSAGE value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
     <MESSAGE value="More changes to professionmenu, dm.py to move to new DB format" />
-    <option name="LAST_COMMIT_MESSAGE" value="More changes to professionmenu, dm.py to move to new DB format" />
+    <MESSAGE value="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs." />
+    <option name="LAST_COMMIT_MESSAGE" value="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs." />
   </component>
 </project>
