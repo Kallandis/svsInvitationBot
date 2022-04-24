@@ -130,6 +130,8 @@ async def lottery(ctx):
     if not entry:
         await request_entry(member)
     else:
-        lottery = 1 - entry[6]
-        db.update_lotto(ID, lottery)
-        await ack_change(member, show_change='lotto')
+        lotto = 1 - entry[7]
+        lotto_in_out = 'in to' if lotto else 'out of'
+        msg = f'You have opted ' + lotto_in_out + ' the lottery.\n'
+        db.update_lotto(ID, lotto)
+        await ctx.send('```' + msg + '```')

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="updated dm.prof(intent=?) to use db.info_embed()">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="updated ProfessionMenuView.py to use db.info_embed()">
+      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,13 +129,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00038" summary="kill off old global var">
-      <created>1650447470064</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1650447470064</updated>
     </task>
     <task id="LOCAL-00039" summary="remove comment">
       <created>1650447514493</created>
@@ -474,7 +466,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650795564118</updated>
     </task>
-    <option name="localTasksCounter" value="87" />
+    <task id="LOCAL-00087" summary="updated ProfessionMenuView.py to use db.info_embed()">
+      <created>1650797468098</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1650797468098</updated>
+    </task>
+    <option name="localTasksCounter" value="88" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +488,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="docstring" />
     <MESSAGE value="Fixed error in dm.prof()" />
     <MESSAGE value="Added TODO.txt to repository" />
     <MESSAGE value="new class DropdownView() returns a discord.view object containing a Selectmenu of SelectOption objects. Include the discord.view object as parameter &quot;view&quot; in a discord.Message to send it. &#10;&#10;Began moving dm.prof() over to new structure." />
@@ -514,6 +512,7 @@
     <MESSAGE value="some comments" />
     <MESSAGE value="remove unused import logging in db.py" />
     <MESSAGE value="updated dm.prof(intent=?) to use db.info_embed()" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated dm.prof(intent=?) to use db.info_embed()" />
+    <MESSAGE value="updated ProfessionMenuView.py to use db.info_embed()" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated ProfessionMenuView.py to use db.info_embed()" />
   </component>
 </project>

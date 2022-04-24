@@ -51,7 +51,8 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
          other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
          connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
 
-- CHANGE: make db.format_message() which returns an embed to be sent with formatted info strings
-          Use in dm.ack_change(), ProfessionMenuView()
-          $prof, $lotto prompts can be in the embed footer
-          see professionMenuView for a reference (not completed)
+- CHANGE:   kill off dm.ack_change()
+            with the advent of db.info_embed(), ack_change is only used for reaction-status changes and lotto
+
+                -> reaction-status changes will call db.info_embed()        TODO
+                -> lotto will be handled in dm.lottery()                    DONE
