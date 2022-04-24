@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs.">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="updated reset_db to include new DB parameter &quot;mm_traps&quot;, renamed items to &quot;skins&quot;&#10;&#10;Updated db.py to new DB structure">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,13 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00025" summary="db.parse_profession() takes in profession-string from user-input. returns False if fail to parse, otherwise returns list [clas, unit, level]">
-      <created>1650437967404</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1650437967404</updated>
     </task>
     <task id="LOCAL-00026" summary="finish dm.request_entry()">
       <created>1650442913953</created>
@@ -474,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650759006328</updated>
     </task>
-    <option name="localTasksCounter" value="74" />
+    <task id="LOCAL-00074" summary="updated reset_db to include new DB parameter &quot;mm_traps&quot;, renamed items to &quot;skins&quot;&#10;&#10;Updated db.py to new DB structure">
+      <created>1650760062845</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1650760062845</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="minor changes" />
     <MESSAGE value="lil comment" />
     <MESSAGE value="uncommented error handler in main.py&#10;&#10;Now logs unknown errors to console." />
     <MESSAGE value="create_dm() only happens if member.dm_channel is None" />
@@ -514,6 +513,7 @@
     <MESSAGE value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
     <MESSAGE value="More changes to professionmenu, dm.py to move to new DB format" />
     <MESSAGE value="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs." />
-    <option name="LAST_COMMIT_MESSAGE" value="professionMenu updated to include new optional &quot;mm_traps&quot; category for MMs." />
+    <MESSAGE value="updated reset_db to include new DB parameter &quot;mm_traps&quot;, renamed items to &quot;skins&quot;&#10;&#10;Updated db.py to new DB structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated reset_db to include new DB parameter &quot;mm_traps&quot;, renamed items to &quot;skins&quot;&#10;&#10;Updated db.py to new DB structure" />
   </component>
 </project>

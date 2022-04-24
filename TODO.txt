@@ -28,13 +28,16 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     -> reduces database reads. Should only have to read DB once per restart / new event
     -> will have to read DB every time if there is no event. but that's fine.
 
-- IDEA: Make the reaction removal less clunky? Currently I just slap an asyncio.wait(2) to avoid concurrency issues
+
+
+---------PRIORITY--------------
+
+- ISSUE: Make the reaction removal less clunky? Currently I just slap an asyncio.wait(2) to avoid concurrency issues
         with triggering on_raw_reaction_remove(). Can I implement a queue using asyncio.queue?
         https://github.com/python-discord/bot/blob/main/bot/exts/help_channels/_cog.py
         https://docs.python.org/3/library/asyncio-queue.html#examples
             It seems that an asyncio Queue is a good way to handle this, but I'm not sure how to make it work.
-
----------PRIORITY--------------
+        https://codezup.com/python-program-reader-writer-problem-mutex/ hopefully this will do the trick
 
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)

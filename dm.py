@@ -49,12 +49,8 @@ async def ack_change(member: discord.Member, show_change=None):
 
     entry = db.get_entry(member.id)
 
-    clas = entry[1]
-    unit = entry[2]
-    level = str(entry[3])
-    items = entry[4]
-    status = entry[5]
-    lottery = entry[6]
+    clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
+    level = str(level)
 
     msg = ''
     eventStatus = ''
@@ -63,8 +59,8 @@ async def ack_change(member: discord.Member, show_change=None):
         eventInfo = eventTitle + ' @ ' + eventTime
         eventStatus = f'You are marked as **{status}** for {eventInfo}\n'
 
-    # get this from db.format_profession()?
-    profession = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**, ITEMS: **{items}**.\n'
+    # TODO: get this from db.format_profession()?
+    profession = f'You are registered as CLASS: **{clas}**, UNIT(s): **{unit}**, LEVEL: **{level}**, SKIN(s): **{skins}**.\n'
 
     lotto_in_out = '**in** to' if lottery else '**out** of'
     lotto = f'You have opted ' + lotto_in_out + ' the lottery.\n'
@@ -114,52 +110,12 @@ async def prof(ctx, *, arg=None):
         view = ProfessionMenuView(msg, 'class')
         await msg.edit(view=view)
     elif intent == "show":
-        clas = entry[1]
-        unit = entry[2]
-        level = str(entry[3])
-        items = entry[4]
+        clas, unit, level, mm_traps, skins = entry[1:6]
+        level = str(level)
+
         # TODO: introduce db.format_profession() to print this out nicely in an embed
-        msg = f'You are registered as CLASS: **{clas}**, UNIT: **{unit}**, LEVEL: **{level}**, ITEMS: **{items}**.\n'
+        msg = f'You are registered as CLASS: **{clas}**, UNIT(s): **{unit}**, LEVEL: **{level}**, SKIN(s): **{skins}**.\n'
         await ctx.send(msg)
-
-
-# @globals.bot.command(usage="[PROFESSION] {CLASS}{UNIT}{LEVEL}")
-# @commands.dm_only()
-# async def prof(ctx, arg):
-#     """
-#     $prof to update profession, $prof ? to check profession
-#     CLASS: {MM, CE}
-#     UNIT: {A, F, N} (skip if CEM)
-#     MM levels: {0T, 3T, 5T, 10, E}
-#     CE levels: {2, 3, 3X, 3XE, M}
-#     EXAMPLES: MMA3T, CEN3XE
-#     """
-#     member = ctx.author
-#     ID = member.id
-#
-#     entry = db.get_entry(ID)
-#
-#     if not entry:
-#         success = await request_entry(member, arg)
-#     else:
-#         prof_array = db.parse_profession(arg)
-#         if prof_array:
-#             success = db.update_profession(ID, prof_array)
-#         else:
-#             success = False
-#
-#     if not success:
-#         msg = "ERROR: Could not parse profession\n"
-#         profPrompt = "CLASS: {MM, CE}\n" \
-#                      "UNIT: {A, F, N} (skip if CEM)\n" \
-#                      "MM levels: {0T, 3T, 5T, 10, E}\n" \
-#                      "CE levels: {2, 3, 3X, 3XE, M}\n" \
-#                      "EXAMPLES: MMA3T, CEN3XE\n"
-#         msg += profPrompt
-#         await ctx.send(msg)
-#         return
-#     else:
-#         await ack_change(member, show_change='profession')
 
 
 @globals.bot.command()
