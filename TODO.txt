@@ -14,7 +14,7 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     AttributeError: 'Object' object has no attribute 'send'
     where destination should be the ctx of $help
 
-    $prof works fine, and the bot can DM me. so it's just $help that errors
+    (but sometimes it does! like right now)
 
 - IDEA: https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
 
@@ -53,5 +53,3 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
          see professionMenuView for a reference (not completed)
 
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
-
-- CHANGE: remove "tokens" field from DB. Add "items" field after "level". Items is a ', '-separated string that defaults to ''

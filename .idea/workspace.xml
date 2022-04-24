@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="More changes to professionmenu, dm.py to move to new DB format">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,7 +47,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/main.py" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/main.py" />
   </component>
   <component name="RunManager" selected="Python.main">
@@ -131,13 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00023" summary="Pseudocode for request_entry(). Mostly waiting on db.parse_profession() to finish it. &#10;&#10;Added a few TODOs for various things that need to be completed.">
-      <created>1650362191671</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1650362191671</updated>
     </task>
     <task id="LOCAL-00024" summary="remove cursor object in sql_write()">
       <created>1650428466976</created>
@@ -475,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650748227428</updated>
     </task>
-    <option name="localTasksCounter" value="72" />
+    <task id="LOCAL-00072" summary="More changes to professionmenu, dm.py to move to new DB format">
+      <created>1650753181098</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1650753181098</updated>
+    </task>
+    <option name="localTasksCounter" value="73" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -490,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added unused parameter &quot;show_change&quot; to &#10;db.ack_change()&#10;&#10;Added preliminary channel_ID check to on_raw_reaction_add() so that it doesn't have to access the database every time a message is reacted to in the server.&#10;&#10;Wrote on_raw_reaction_remove() to set status to &quot;NO&quot; if status was previously not &quot;NO&quot;" />
     <MESSAGE value="Updated all usages of db.ack_change() to make use of new show_change parameter" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="lil comment" />
@@ -515,6 +513,7 @@
     <MESSAGE value="Fixed ProfessionMenuView timeout after successful selection issue" />
     <MESSAGE value="Added 4th menu to ProfessionMenu &quot;items&quot;, select up to 2 items from list. Needs a new DB field.&#10;&#10;Fixed ProfessionMenuView timeout after successful selection issue" />
     <MESSAGE value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added &quot;items&quot; field to DB&#10;Added &quot;items&quot; to ProfessionMenu's call of update_profession()&#10;&#10;Refactored db.py functions to new database format" />
+    <MESSAGE value="More changes to professionmenu, dm.py to move to new DB format" />
+    <option name="LAST_COMMIT_MESSAGE" value="More changes to professionmenu, dm.py to move to new DB format" />
   </component>
 </project>
