@@ -30,9 +30,9 @@ async def sql_write():
 def add_entry(values: list):
     """
     param [list] entry: INT, STRING, STRING, INT, STRING, STRING, STRING, INT
-    Status and Tokens default to 0
-    Lottery default to 1
-    Profession must be provided by User
+    Status defaults to 0
+    Lottery defaults to 1
+    Profession must be provided by User via calls of ProfessionMenuView()
     """
     sql = "INSERT INTO USERS (discord_ID, class, unit, level, mm_traps, skins, status, lottery) " \
           "values(?, ?, ?, ?, ?, ?, ?, ?)"
@@ -68,7 +68,7 @@ def get_event():
     return eventTitle, eventTime, message_id
 
 
-def info_embed(entry: list, show=None):
+def info_embed(entry: list):
     # extract values from entry
     clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
 
@@ -79,46 +79,65 @@ def info_embed(entry: list, show=None):
 
     units = [unitDict[char] for char in unit]
     level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
-    mm_traps = mm_traps.split(', ')
+    traps = mm_traps.split(', ')
     skins = skins.split(', ')
     lottery = 'YES' if lottery == 1 else 'NO'
 
     # fields accept a string, so build a '\n'-separated string from lists
     units = '\n'.join(units)
-    mm_traps = '\n'.join(mm_traps)
+    traps = '\n'.join(traps)
     skins = '\n'.join(skins)
 
     unitTitle = 'Unit' if '\n' not in units else 'Units'
-    mm_trapsTitle = 'Trap' if '\n' not in mm_traps else 'Traps'
-    skinTitle = 'Skin' if '\n' not in skins else 'Skins'
+    trapsTitle = 'Trap' if '\n' not in traps else 'Traps'
+    skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # get event info
     eventTitle, eventTime, eventMessageID = get_event()
 
-    # make embed object, to be added to and returned
-    # embed = discord.Embed(title='Database Info', description='abcedasdad')
+    # initialize arg dictionaries to be used in field creation
+    class_args = {'name': 'Class', 'value': clas}
+    unit_args = {'name': unitTitle, 'value': units}
+    level_args = {'name': 'Level', 'value': level}
+    traps_args = {'name': trapsTitle, 'value': traps}
+    skins_args = {'name': skinsTitle, 'value': skins}
+    lottery_args = {'name': 'Lottery', 'value': lottery}
+    whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if show is None:    # show all info
-        title = 'Database Info'
-        if eventMessageID:
-            eventInfo = eventTitle + ' @ ' + eventTime
-            descr = f'You are marked as **{status}** for {eventInfo}'
-        else:
-            descr = '\u200b'
-        embed = discord.Embed(title=title, description=descr, color=discord.Color.brand_green())
-        # maximum of 3 fields in a row
-        embed.add_field(name='Class', value=clas)
-        embed.add_field(name=unitTitle, value=units)
-        embed.add_field(name='Level', value=level)
-        embed.add_field(name=mm_trapsTitle, value=mm_traps)
-        embed.add_field(name=skinTitle, value=skins)
-        embed.add_field(name='\u200b', value='\u200b')  # placeholder to align with above 3 fields
-        embed.add_field(name='Lottery', value=lottery, inline=False)
+    if eventMessageID:
+        eventInfo = eventTitle + ' @ ' + eventTime
+        descr = f'You are marked as **{status}** for {eventInfo}'
+    else:
+        descr = '\u200b'
+    embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.brand_green())
+    # there are a maximum of 3 fields in a row, stretched to fill a fixed width
+    # row 1: Class, Unit(s), Level
+    embed.add_field(**class_args)
+    embed.add_field(**unit_args)
+    embed.add_field(**level_args)
 
+    # row 2: Trap(s), Skin(s)
+    count = 0
+    for argDict in [traps_args, skins_args]:
+        if argDict['value']:
+            embed.add_field(**argDict)
+            count += 1
+    # add whitespace fields to align with first row
+    if count > 0:
+        for i in range(3 - count):
+            embed.add_field(**whitespace_args)
 
-    # add a local file as logo
-    file = discord.File(r'C:\Users\evanm\Pictures\logo.png', filename='logo.png')
-    embed.set_thumbnail(url='attachment://logo.png')
+    # row 3: Lottery
+    embed.add_field(**lottery_args)
+
+    # add a local file "logo.png" from the script directory as a thumbnail
+    if globals.logoPath:
+        file = discord.File(globals.logoPath, filename=globals.logoPath[-8:])
+        embed.set_thumbnail(url='attachment://logo.png')
+    else:
+        file = None
+
+    # command prompt for DM commands
     embed.set_footer(text="$prof to edit profession  |  $prof ? to show profession  |  "
                           "$lottery to toggle lottery participation")
 

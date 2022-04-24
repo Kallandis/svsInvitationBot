@@ -85,11 +85,11 @@ async def confirm_maybe(member: discord.member):
     pass
 
 
-@globals.bot.command(usage='EDIT: $prof, SHOW: $prof ?')
+@globals.bot.command()
 @commands.dm_only()
 async def prof(ctx, *, arg=None):
     """
-    $prof to update profession, $prof ? to check profession
+    $prof (no argument) to edit profession, $prof ? to show profession
     """
 
     member = ctx.author
@@ -98,17 +98,19 @@ async def prof(ctx, *, arg=None):
     intentDict = {None: "edit", "?": "show"}
     intent = intentDict.get(arg, None)
     if intent is None:
-        msg = "USAGE: $prof to edit profession, $prof ? to show profession"
+        msg = "```USAGE:\n$prof to edit profession\n$prof ? to show profession```"
         await ctx.send(msg)
         return
 
     entry = db.get_entry(ID)
     if not entry:   # check if user has been registered in DB. if not, register them
         await request_entry(member)
+
     elif intent == "edit":
         msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
         view = ProfessionMenuView(msg, 'class')
         await msg.edit(view=view)
+
     elif intent == "show":
         clas, unit, level, mm_traps, skins = entry[1:6]
         level = str(level)

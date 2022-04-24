@@ -287,13 +287,15 @@ async def mail_db(ctx):
 @bot.command()
 async def foo(ctx):
     file, embed = db.info_embed(db.get_entry(ctx.author.id))
-    await ctx.send(file=file, embed=embed)
+    args = {'file': file, 'embed': embed} if file else {'embed': embed}
+    await ctx.send(**args)
+
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
-    globals.guild = bot.get_guild(964624340295499857)           # svsBotTestServer
-    globals.mainChannel = bot.get_channel(964654664677212220)   # svsBotTestServer/botchannel
+    globals.guild = bot.get_guild(globals.guildID)
+    globals.mainChannel = bot.get_channel(globals.mainChannelID)
     await globals.mainChannel.send(f'{bot.user.name} connected!')
     db.sql_write.start()    # start the sql_write loop that executes sql writes every # seconds
     # await bot.change_presence(activity = discord.SOMETHING)
