@@ -140,7 +140,7 @@ def info_embed(entry: list):
     else:
         file = None
 
-    # command prompt for DM commands
+    # DM command information
     embed.set_footer(text="$prof to edit profession  |  $prof ? to show profession  |  "
                           "$lottery to toggle lottery participation")
 
