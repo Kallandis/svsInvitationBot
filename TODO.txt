@@ -20,7 +20,8 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     on_raw_reaction_add() and on_raw_reaction_remove(). If it passes checks, fetch the entire Message object
     later in the function.
 
-- IDEA: let $create_event user choose what time?
+- IDEA: let $create_event specify what time the event will be at
+        Might have to consider timezones here.
 
 - IDEA: pin the event (is this necessary?)
 

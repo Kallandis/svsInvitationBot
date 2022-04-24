@@ -15,7 +15,6 @@ import tokenFile
 import time
 import datetime
 import asyncio
-from professionMenuView import ProfessionMenuView
 
 
 # custom decorator to check if command was used in globals.mainChannel
@@ -49,8 +48,9 @@ async def create_event(ctx, *, datestring):
 
     # build title and dynamic timestamp for embed
     title = "SvS Event"
-    descr = f"<t:{unix_time}>\nIt's an SvS Event"
-    eventTime = descr.split('\n')[0]
+    eventTime = f"<t:{unix_time}>"
+    descr = "It's an SvS Event"
+    descr = eventTime + '\n' + descr
 
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_gold())
     embed.add_field(name=f"{'YES':<20}", value="\u200b")
@@ -286,9 +286,12 @@ async def mail_db(ctx):
 
 @bot.command()
 async def foo(ctx):
-    file, embed = db.info_embed(db.get_entry(ctx.author.id))
-    args = {'file': file, 'embed': embed} if file else {'embed': embed}
-    await ctx.send(**args)
+    message = await globals.mainChannel.fetch_message(globals.eventMessageID)
+    reactions = message.reactions
+
+    yes = [user async for user in reactions[0].users()]
+    maybe = [user async for user in reactions[0].users()]
+    no = [user async for user in reactions[0].users()]
 
 
 @bot.event
@@ -296,6 +299,13 @@ async def on_ready():
     print(f'{bot.user.name} connected!')
     globals.guild = bot.get_guild(globals.guildID)
     globals.mainChannel = bot.get_channel(globals.mainChannelID)
+
+    # populate the global event vars if bot is restarted while event is already active
+    eventTitle, eventTime, eventMessageID = db.get_event()
+    if eventMessageID:
+        globals.eventInfo = eventTitle + ' @ ' + eventTime
+        globals.eventMessageID = eventMessageID
+
     await globals.mainChannel.send(f'{bot.user.name} connected!')
     db.sql_write.start()    # start the sql_write loop that executes sql writes every # seconds
     # await bot.change_presence(activity = discord.SOMETHING)
