@@ -122,7 +122,7 @@ class ProfessionMenu(discord.ui.Select):
         else:   # the current category is "skins"
             # Remove the selectmenu, tell user what they selected, write the info to DB
 
-            formattedProfString = f'**CLASS**: {self.clas}, **UNIT(s)**: {self.units}, **LEVEL**: {self.level}'
+            # formattedProfString = f'**CLASS**: {self.clas}, **UNIT(s)**: {self.units}, **LEVEL**: {self.level}'
 
             skins = self.values
             # parse selection info into appropriate form for DB-submission
@@ -138,32 +138,35 @@ class ProfessionMenu(discord.ui.Select):
             # mm_traps
             if self.mm_traps is None or 'None' in self.mm_traps.split(', '):
                 self.mm_traps = ''
-            else:
-                formattedProfString += f', **TRAP(s)**: {self.mm_traps}'
+            # else:
+            #     formattedProfString += f', **TRAP(s)**: {self.mm_traps}'
 
             # skin(s)
             if 'None' in skins:
                 skins = ''
             else:
                 skins = ', '.join(skins)
-                formattedProfString += f', **SKIN(s)**: {skins}'
+                # formattedProfString += f', **SKIN(s)**: {skins}'
 
             prof_array = [self.clas, ''.join(unitChars), levelNum, self.mm_traps, skins]
 
             # if first-time user does not have an entry in DB (when called through dm.request_entry())
             if self.first_entry:
-                values = [interaction.user.id, *prof_array, "NO", 1]
-                db.add_entry(values)
-                msg = 'You are now registered in the database with profession:\n'
+                entry = [interaction.user.id, *prof_array, "NO", 1]
+                db.add_entry(entry)
+                file, embed = db.info_embed(entry, descr='You have been added to the database.\n')
 
             # else just update the profession
             else:
+                old_entry = db.get_entry(interaction.user.id)
+                status, lottery = old_entry[-2:]
+                new_entry = [interaction.user.id, *prof_array, status, lottery]
+                file, embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
                 db.update_profession(interaction.user.id, prof_array)
-                msg = 'Your profession has been updated to:\n'
 
             # send user's selection, remove the view
-            msg += formattedProfString
-            await interaction.response.edit_message(content=msg, view=None)
+            args = {'attachments': [file], 'embed': embed} if file else {'embed': embed}
+            await interaction.response.edit_message(content='', view=None, **args)
 
 
 class ProfessionMenuView(discord.ui.View):
@@ -180,9 +183,8 @@ class ProfessionMenuView(discord.ui.View):
         dm_channel = self.parent_message.channel
         ID = self.parent_message.id
         parent_message = await dm_channel.fetch_message(ID)
-        current_content = parent_message.content
 
-        # Check that the message has been edited to the selection completion strings, indicating that the user
-        # successfully completed selection. If not, timeout the message.
-        if not (current_content.startswith('You are') or current_content.startswith('Your profession')):
+        # check that the parent message has an embed, indicating that the user successfully completed selection.
+        # If not, timeout the message.
+        if not parent_message.embeds:
             await self.parent_message.edit(content='Profession menu timed out.', view=None)

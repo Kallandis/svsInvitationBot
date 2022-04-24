@@ -67,7 +67,7 @@ def get_event():
     return eventTitle, eventTime, message_id
 
 
-def info_embed(entry: list):
+def info_embed(entry: list, descr=''):
     # extract values from entry
     clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
 
@@ -106,9 +106,9 @@ def info_embed(entry: list):
     if eventMessageID:
         # if there is an active event, put the event and the user's status in the description field of the embed
         eventInfo = eventTitle + ' @ ' + eventTime
-        descr = f'You are marked as **{status}** for {eventInfo}'
+        descr += f'You are marked as **{status}** for {eventInfo}'
     else:
-        descr = '\u200b'
+        descr += '\u200b'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.brand_green())
 
     # add fields to the embed for various entry parameters

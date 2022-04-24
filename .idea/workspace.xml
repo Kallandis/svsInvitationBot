@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="remove unused import logging in db.py">
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="updated dm.prof(intent=?) to use db.info_embed()">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,13 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00037" summary="lil change">
-      <created>1650447445080</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1650447445080</updated>
     </task>
     <task id="LOCAL-00038" summary="kill off old global var">
       <created>1650447470064</created>
@@ -472,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650795417954</updated>
     </task>
-    <option name="localTasksCounter" value="86" />
+    <task id="LOCAL-00086" summary="updated dm.prof(intent=?) to use db.info_embed()">
+      <created>1650795564118</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795564118</updated>
+    </task>
+    <option name="localTasksCounter" value="87" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -487,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Everything is actually working perfectly with reactions to Event." />
     <MESSAGE value="docstring" />
     <MESSAGE value="Fixed error in dm.prof()" />
     <MESSAGE value="Added TODO.txt to repository" />
@@ -512,6 +513,7 @@
     <MESSAGE value="gitignore update" />
     <MESSAGE value="some comments" />
     <MESSAGE value="remove unused import logging in db.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove unused import logging in db.py" />
+    <MESSAGE value="updated dm.prof(intent=?) to use db.info_embed()" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated dm.prof(intent=?) to use db.info_embed()" />
   </component>
 </project>
