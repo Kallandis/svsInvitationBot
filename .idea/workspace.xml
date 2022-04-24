@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="shortened several ProfessionMenu selectmenu prompts to make them fit in the menu&#10;&#10;Began progress on db.info_embed(), which takes as inputs a database entry list and an optional &quot;show&quot; parameter, and returns a nicely formatted embed.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,13 +128,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00032" summary="few comments">
-      <created>1650446227170</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1650446227170</updated>
     </task>
     <task id="LOCAL-00033" summary="update_status() verifies that event exists in eventInfo.db">
       <created>1650446488104</created>
@@ -476,7 +465,14 @@
       <option name="project" value="LOCAL" />
       <updated>1650790529484</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()">
+      <created>1650795156952</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1650795156952</updated>
+    </task>
+    <option name="localTasksCounter" value="82" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -491,7 +487,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
     <MESSAGE value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
     <MESSAGE value="update_event_field() now properly updates the embed.&#10;&#10;Had to refetch message in status_logic(), as the reaction overwrite protection caused issues due to concurrency.&#10;&#10;If continues to be an issue, can probably just do the remove reaction loop AFTER status_logic()?" />
     <MESSAGE value="Everything working properly with reactions to Event." />
@@ -516,6 +511,7 @@
     <MESSAGE value="add command footer to event embed" />
     <MESSAGE value="update TODO.txt" />
     <MESSAGE value="shortened several ProfessionMenu selectmenu prompts to make them fit in the menu&#10;&#10;Began progress on db.info_embed(), which takes as inputs a database entry list and an optional &quot;show&quot; parameter, and returns a nicely formatted embed." />
-    <option name="LAST_COMMIT_MESSAGE" value="shortened several ProfessionMenu selectmenu prompts to make them fit in the menu&#10;&#10;Began progress on db.info_embed(), which takes as inputs a database entry list and an optional &quot;show&quot; parameter, and returns a nicely formatted embed." />
+    <MESSAGE value="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()" />
+    <option name="LAST_COMMIT_MESSAGE" value="added new global var &quot;logoPath&quot; that points to the file to be used as logo thumbnail for embeds. Must be a literal-string (r'asdasd'). Can be set to None or '' to avoid sending a logo.&#10;&#10;added new global vars mainChannelID, guildID to support user-config of guild and channel to connect to.&#10;&#10;Finished db.info_embed()" />
   </component>
 </project>
