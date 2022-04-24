@@ -115,6 +115,7 @@ async def prof(ctx, *, arg=None):
 
         # TODO: introduce db.format_profession() to print this out nicely in an embed
         msg = f'You are registered as CLASS: **{clas}**, UNIT(s): **{unit}**, LEVEL: **{level}**, SKIN(s): **{skins}**.\n'
+        # embed = discord.Embed(description=msg)
         await ctx.send(msg)
 
 

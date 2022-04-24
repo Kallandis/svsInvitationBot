@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="tiny formatting change">
+    <list default="true" id="b63e644d-fb26-4a9e-b4c7-ec71f01e54a6" name="Changes" comment="update TODO.txt">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dm.py" beforeDir="false" afterPath="$PROJECT_DIR$/dm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/professionMenuView.py" beforeDir="false" afterPath="$PROJECT_DIR$/professionMenuView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reset_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/reset_db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,20 +133,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1650061823702</updated>
-    </task>
-    <task id="LOCAL-00029" summary="remove conn object from every function in main.py, dm.py">
-      <created>1650445673606</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1650445673606</updated>
-    </task>
-    <task id="LOCAL-00030" summary="removed deprecated sqlite3 imports from dm.py, main.py">
-      <created>1650445850418</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1650445850418</updated>
     </task>
     <task id="LOCAL-00031" summary="few comments">
       <created>1650446196443</created>
@@ -473,7 +463,21 @@
       <option name="project" value="LOCAL" />
       <updated>1650761621266</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="add command footer to event embed">
+      <created>1650761932755</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1650761932755</updated>
+    </task>
+    <task id="LOCAL-00079" summary="update TODO.txt">
+      <created>1650762190705</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1650762190705</updated>
+    </task>
+    <option name="localTasksCounter" value="80" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -488,8 +492,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="create_dm() only happens if member.dm_channel is None" />
-    <MESSAGE value="add empty fields to Event embed. To be populated with attendees upon status updates in db.update_status(), dm.request_entry()&#10;&#10;fix SQL for db.get_entry()" />
     <MESSAGE value="fixed asyncio.sleep() in dm.ack_change()&#10;fixed lotto string in dm.ack_change()&#10;&#10;added global variable guild&#10;&#10;added main.update_event_field() to dynamically update the fields of the event with user display names (not working yet)&#10;&#10;got on_raw_remove_reaction() working, but still need to add in update_event_field() call" />
     <MESSAGE value="did some reworking of on_raw_reaction_add() to make it more efficient, calls update_event_field() to remove rxns when they react multiple times to Event" />
     <MESSAGE value="added update_event_field() call in on_raw_reaction_remove()&#10;&#10;added comment in dm.prof()&#10;&#10;For some reason, $help is working in DMs now. Wahoo!" />
@@ -513,6 +515,8 @@
     <MESSAGE value="updated reset_db to include new DB parameter &quot;mm_traps&quot;, renamed items to &quot;skins&quot;&#10;&#10;Updated db.py to new DB structure" />
     <MESSAGE value="updated dm.py to new format (really need to get db.format_message working though)" />
     <MESSAGE value="tiny formatting change" />
-    <option name="LAST_COMMIT_MESSAGE" value="tiny formatting change" />
+    <MESSAGE value="add command footer to event embed" />
+    <MESSAGE value="update TODO.txt" />
+    <option name="LAST_COMMIT_MESSAGE" value="update TODO.txt" />
   </component>
 </project>

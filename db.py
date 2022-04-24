@@ -1,4 +1,5 @@
 import globals
+import discord
 from discord.ext.tasks import loop
 import sqlite3 as sql3
 import logging
@@ -65,6 +66,63 @@ def get_event():
     with sql3.connect('eventInfo.db') as conn:
         eventTitle, eventTime, message_id = list(conn.execute(sql))[0]
     return eventTitle, eventTime, message_id
+
+
+def info_embed(entry: list, show=None):
+    # extract values from entry
+    clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
+
+    # format values for display
+    unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
+    ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
+    mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
+
+    units = [unitDict[char] for char in unit]
+    level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
+    mm_traps = mm_traps.split(', ')
+    skins = skins.split(', ')
+    lottery = 'YES' if lottery == 1 else 'NO'
+
+    # fields accept a string, so build a '\n'-separated string from lists
+    units = '\n'.join(units)
+    mm_traps = '\n'.join(mm_traps)
+    skins = '\n'.join(skins)
+
+    unitTitle = 'Unit' if '\n' not in units else 'Units'
+    mm_trapsTitle = 'Trap' if '\n' not in mm_traps else 'Traps'
+    skinTitle = 'Skin' if '\n' not in skins else 'Skins'
+
+    # get event info
+    eventTitle, eventTime, eventMessageID = get_event()
+
+    # make embed object, to be added to and returned
+    # embed = discord.Embed(title='Database Info', description='abcedasdad')
+
+    if show is None:    # show all info
+        title = 'Database Info'
+        if eventMessageID:
+            eventInfo = eventTitle + ' @ ' + eventTime
+            descr = f'You are marked as **{status}** for {eventInfo}'
+        else:
+            descr = '\u200b'
+        embed = discord.Embed(title=title, description=descr, color=discord.Color.brand_green())
+        # maximum of 3 fields in a row
+        embed.add_field(name='Class', value=clas)
+        embed.add_field(name=unitTitle, value=units)
+        embed.add_field(name='Level', value=level)
+        embed.add_field(name=mm_trapsTitle, value=mm_traps)
+        embed.add_field(name=skinTitle, value=skins)
+        embed.add_field(name='\u200b', value='\u200b')  # placeholder to align with above 3 fields
+        embed.add_field(name='Lottery', value=lottery, inline=False)
+
+
+    # add a local file as logo
+    file = discord.File(r'C:\Users\evanm\Pictures\logo.png', filename='logo.png')
+    embed.set_thumbnail(url='attachment://logo.png')
+    embed.set_footer(text="$prof to edit profession  |  $prof ? to show profession  |  "
+                          "$lottery to toggle lottery participation")
+
+    return file, embed
 
 
 def update_profession(discord_id, prof_array: list):

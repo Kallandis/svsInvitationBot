@@ -20,7 +20,7 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='CE'),
                 discord.SelectOption(label='CANCEL', description='Pick this to cancel changing profession')
             ]
-            placeholder = f'Choose your {category}'
+            placeholder = f'Select your {category}'
 
         elif category == "unit":
             options = [
@@ -29,7 +29,7 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Navy')
             ]
             max_vals = 3
-            placeholder = f'Choose your {category}(s)'
+            placeholder = f'Main unit & others w/ mostly purple, >= 8 perks'
 
         elif category == "level":
             if self.clas == 'MM':
@@ -50,7 +50,7 @@ class ProfessionMenu(discord.ui.Select):
             else:
                 print(f"ERROR: Dropdown optional parameter 'clas': {self.clas} invalid")
                 return
-            placeholder = f'Choose your progress in the {self.clas} class tree (Pick highest that applies)'
+            placeholder = f'Select {self.clas} progress (Highest that applies)'
 
         elif category == "mm_traps":
             options = [
@@ -60,7 +60,7 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Electro Missiles')
             ]
             max_vals = 3
-            placeholder = f'Which of these traps can you build'
+            placeholder = f'Select which traps you can build'
 
         elif category == "skins":
             options = [
@@ -69,16 +69,16 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Ark')
             ]
             max_vals = 2
-            placeholder = f'Which of these base skins do you have'
+            placeholder = f'Select which base skins you own'
 
         else:
             print("ERROR: Dropdown required parameter 'category' either empty or invalid")
             return
 
-        if max_vals > 1:
-            placeholder += f' (PICK UP TO {max_vals})'
-
-        placeholder += '...'
+        # if max_vals > 1:
+        #     placeholder += f' (PICK UP TO {max_vals})'
+        #
+        # placeholder += '...'
         super().__init__(placeholder=placeholder, min_values=1, max_values=max_vals, options=options)
 
     async def callback(self, interaction: discord.Interaction):
@@ -101,7 +101,7 @@ class ProfessionMenu(discord.ui.Select):
             nextCategory = "level"
         elif self.category == "level":
             self.level = choice
-            nextCategory = "mm_trap" if self.clas == "MM" else "skins"
+            nextCategory = "mm_traps" if self.clas == "MM" else "skins"
         elif self.category == "mm_traps":
             self.mm_traps = choice
             nextCategory = "skins"
@@ -136,7 +136,7 @@ class ProfessionMenu(discord.ui.Select):
             levelNum = ceLevelDict[self.level] if self.clas == 'CE' else mmLevelDict[self.level]
 
             # mm_traps
-            if 'None' in self.mm_traps.split(', ') or self.mm_traps is None:
+            if self.mm_traps is None or 'None' in self.mm_traps.split(', '):
                 self.mm_traps = ''
             else:
                 formattedProfString += f', **TRAP(s)**: {self.mm_traps}'

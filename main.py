@@ -285,11 +285,9 @@ async def mail_db(ctx):
 
 
 @bot.command()
-@in_mainChannel()
 async def foo(ctx):
-    msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
-    view = ProfessionMenuView(msg, 'class')
-    await msg.edit(view=view)
+    file, embed = db.info_embed(db.get_entry(ctx.author.id))
+    await ctx.send(file=file, embed=embed)
 
 @bot.event
 async def on_ready():
