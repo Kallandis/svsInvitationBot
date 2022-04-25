@@ -1,11 +1,4 @@
 https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
-https://discordpy-message-components.readthedocs.io/en/latest/
-
-https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#Interaction.respond
-    Instead of DM? keep it all in the channel but with hidden messages (ephemeral)
-
-- ISSUE: a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
-        temporary soln: just don't add more names after 2048 chars (unlikely that this will happen anyways)
 
 - IMPLEMENT: edit_event()   # I have no idea what functionality this should have
 
@@ -27,6 +20,26 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     -> will have to read DB every time if there is no event. but that's fine.
 
 - IMPLEMENT: get a profile pic for the bot
+
+- CHANGE:    a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
+            - current soln: just don't add names if it'd go over 2048 chars (not great, expect 200-250 people)
+            - better soln: create 3 YES fields in bottom row, populate them one-by-one. maximum of ~600 people
+                MAYBE, WHITESPACE, NO fields in top row
+
+- CHANGE:   - When the fields become long, the buttons will be far below the event message.
+            - soln: make the buttons be above the event message
+            - blankMsg = await ctx.send('')
+            - eventMsg = await ctx.send(embed=eventEmbed)
+            - view = EventButtons(eventMsg)
+            - await blankMsg.edit(view=view)
+
+- CHANGE:   - mainChannel -> mainChannels[], allow bot to exist in several channels
+            - Have one active channel, currentEventChannel, that commands will listen to (store this in DB)
+            - create_event() should error with "There is already an active event in {currentEventChannel}" if used in a
+                different channel, or "There is already an active event" if used in currentEventChannel
+            - Event commands should error with "There is already an active event in {currentEventChannel}" if used in a
+                different channel
+
 
 ---------PRIORITY--------------
 

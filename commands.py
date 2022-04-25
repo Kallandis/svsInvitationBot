@@ -22,9 +22,6 @@ async def create_event(ctx, *, datestring):
     Creates event for the specified date at 11:00AM PST
     Requires ADMIN Role
     """
-    # check if invoker is ADMIN and channel is mainChannel
-    # if not ('ADMIN' in ctx.author.roles and ctx.channel == globals.mainChannel):
-    #     return
 
     # parse MM/DD/YY from command input
     arg = [int(x) for x in datestring.split('/')]
@@ -53,22 +50,19 @@ async def create_event(ctx, *, datestring):
     cmdList = ['$edit_event', '$delete_event', '$mail_csv', '$mail_db']
     embed.set_footer(text=', '.join(cmdList))
 
-    # create the event embed
-    msg = await ctx.send(embed=embed)
+    # event embed
+    eventMessage = await ctx.send(embed=embed)
+    # add the view to event embed. Updating of status, database, and embed fields will be handled in
+    # eventInteraction.py through user interactions with the buttons.
+    view = EventButtons(eventMessage)
+    await eventMessage.edit(embed=embed, view=view)
 
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo
-    globals.eventMessageID = msg.id
-
-    # make the view to be added to event embed. Updating of status, database, and embed fields will be handled in
-    # eventInteraction.py through user interactions with the buttons.
-    view = EventButtons(msg)
-    await msg.edit(embed=embed, view=view)
+    globals.eventMessageID = eventMessage.id
 
     # store event data in eventInfo.db
-    db.update_event(title, eventTime, msg.id)
-
-
+    db.update_event(title, eventTime, eventMessage.id)
 
 
 @globals.bot.command(usage="pass")

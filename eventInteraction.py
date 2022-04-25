@@ -2,7 +2,6 @@ import discord  # development branch 2.0.1 to be able to use SelectMenu, Interac
 
 import dm
 import globals
-import tokenFile
 import db
 
 
