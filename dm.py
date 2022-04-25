@@ -12,7 +12,7 @@ import asyncio
 from professionMenuView import ProfessionMenuView
 
 
-async def request_entry(member: discord.Member, event_reaction=False):
+async def request_entry(member: discord.Member, event_attempt=False):
     """
     Prompt unregistered user to provide data entry for SQL database.
     Called when user reacts to event for the first time, or uses DM command $lotto before being added to DB
@@ -22,7 +22,7 @@ async def request_entry(member: discord.Member, event_reaction=False):
         await member.create_dm()
     dmChannel = member.dm_channel
 
-    if event_reaction:
+    if event_attempt:
         cont = "Your event reaction has been removed because you are not in the database.\n" \
                "After entering your profession, you may react to the event again.\n"
     else:
@@ -32,53 +32,6 @@ async def request_entry(member: discord.Member, event_reaction=False):
     msg = await dmChannel.send(content=cont)
     view = ProfessionMenuView(msg, 'class', first_entry=True)
     await msg.edit(view=view)
-
-
-async def ack_change(member: discord.Member, show_change=None):
-
-    # async sleep until next write
-    nextWrite = db.sql_write.next_iteration.replace(tzinfo=None)
-    now = datetime.datetime.utcnow()
-    timeUntilNextWrite = (nextWrite - now).total_seconds()
-
-    if member.dm_channel is None:
-        await member.create_dm()
-
-    async with member.dm_channel.typing():
-        await asyncio.sleep(timeUntilNextWrite + 1)
-
-    entry = db.get_entry(member.id)
-
-    clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
-    level = str(level)
-
-    msg = ''
-    eventStatus = ''
-    eventTitle, eventTime, message_id = db.get_event()
-    if message_id:
-        eventInfo = eventTitle + ' @ ' + eventTime
-        eventStatus = f'You are marked as **{status}** for {eventInfo}\n'
-
-    # TODO: get this from db.format_profession()?
-    profession = f'You are registered as CLASS: **{clas}**, UNIT(s): **{unit}**, LEVEL: **{level}**, SKIN(s): **{skins}**.\n'
-
-    lotto_in_out = '**in** to' if lottery else '**out** of'
-    lotto = f'You have opted ' + lotto_in_out + ' the lottery.\n'
-    helpString = f'$prof to change profession. $prof ? to show profession. $lottery to toggle lottery participation'
-
-    # default case: show everything
-    if show_change is None:
-        if message_id:
-            msg += eventStatus
-        msg += profession + lotto
-    elif show_change == 'status':
-        if message_id:
-            msg += eventStatus
-    elif show_change == 'lotto':
-        msg += lotto
-
-    msg += helpString
-    await member.dm_channel.send(msg)
 
 
 async def confirm_maybe(member: discord.member):

@@ -109,7 +109,7 @@ def info_embed(entry: list, descr=''):
         descr += f'You are marked as **{status}** for {eventInfo}'
     else:
         descr += '\u200b'
-    embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.brand_green())
+    embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
 
     # add fields to the embed for various entry parameters
     # there are a maximum of 3 fields in a row, stretched to fill a fixed width. Add whitespace fields for alignment
@@ -133,9 +133,12 @@ def info_embed(entry: list, descr=''):
     embed.add_field(**lottery_args)
 
     # add a local file "logo.png" from the script directory as a thumbnail
+    # or another way to do it: upload the png to the remote github, use that as URL. Might be easier on the RPI CPU
+    # EX: https://raw.githubusercontent.com/python-discord/branding/main/icons/checkmark/green-question-mark-dist.png
     if globals.logoPath:
-        file = discord.File(globals.logoPath, filename=globals.logoPath[-8:])
-        embed.set_thumbnail(url='attachment://logo.png')
+        filename = globals.logoPath.split('\\')[-1]
+        file = discord.File(globals.logoPath, filename=filename)
+        embed.set_thumbnail(url=f'attachment://{filename}')
     else:
         file = None
 

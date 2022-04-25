@@ -4,8 +4,6 @@ guild = None
 sqlEntries = []   # insert, update
 eventInfo = ''
 eventMessageID = 0
-# need this because message.remove_reaction() triggers on_raw_reaction_remove(), sending an extra ACK.. disgusting
-triggeredFromBotRemove = False
 
 #
 # BEGIN user-specific variables
@@ -20,4 +18,4 @@ mainChannelID = 964654664677212220  # svsBotTestServer/botchannel
 adminRole = 'evan'
 
 # path to the locally-stored logo picture. Must be a literal-string (r'PATH'). set this to None or '' to not send pic
-logoPath = r'C:\Users\evanm\Desktop\Coding\discord_bots\invitationBot\logo.png'
+logoPath = r'C:\Users\evanm\Desktop\Coding\discord_bots\invitationBot\transparent_logo.png'
