@@ -26,7 +26,7 @@ https://discordpy-message-components.readthedocs.io/en/latest/interaction.html#I
     -> reduces database reads. Should only have to read DB once per restart / new event
     -> will have to read DB every time if there is no event. but that's fine.
 
-- CHANGE: change bot name to AvoBot
+- IMPLEMENT: get a profile pic for the bot
 
 ---------PRIORITY--------------
 
