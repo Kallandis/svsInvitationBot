@@ -10,7 +10,7 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 globals.bot = bot
 
 import commands
-import dm
+import requestEntry
 import db
 import tokenFile
 

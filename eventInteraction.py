@@ -1,11 +1,10 @@
-import discord  # development branch 2.0.1 to be able to use SelectMenu, Interactions
-
-import dm
+import discord  # development branch 2.0.0a to be able to use SelectMenu, Interactions
+from requestEntry import request_entry
 import globals
 import db
 
 
-class EventButtons(discord.ui.View):
+class EventButtonsView(discord.ui.View):
     def __init__(self, parent_message: discord.Message):
         super().__init__(timeout=None)
         self.parent_message = parent_message
@@ -69,7 +68,7 @@ async def handle_interaction(last_status, status, interaction, parent_message):
     user = interaction.user
     entry = db.get_entry(user.id)
     if not entry:
-        await dm.request_entry(user, event_attempt=True)
+        await request_entry(user, event_attempt=True)
         return False
 
     # send ephemeral message to mainChannel

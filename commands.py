@@ -4,7 +4,9 @@ import globals
 import db
 import time
 import datetime
-from eventInteraction import EventButtons
+from eventInteraction import EventButtonsView
+from professionInteraction import ProfessionMenuView
+from requestEntry import request_entry
 
 
 # custom decorator to check if command was used in globals.mainChannel
@@ -54,7 +56,7 @@ async def create_event(ctx, *, datestring):
     eventMessage = await ctx.send(embed=embed)
     # add the view to event embed. Updating of status, database, and embed fields will be handled in
     # eventInteraction.py through user interactions with the buttons.
-    view = EventButtons(eventMessage)
+    view = EventButtonsView(eventMessage)
     await eventMessage.edit(embed=embed, view=view)
 
     # set globals to reduce DB accessing
@@ -121,6 +123,58 @@ async def mail_db(ctx):
 async def foo(ctx):
     message = await globals.mainChannel.fetch_message(globals.eventMessageID)
     reactions = message.reactions
+
+
+@globals.bot.command()
+@commands.dm_only()
+async def prof(ctx, *, intent=None):
+    """
+    $prof (no argument) to edit profession, $prof ? to show profession
+    """
+
+    member = ctx.author
+    ID = member.id
+
+    intentDict = {None: "edit", "?": "show"}
+    intent = intentDict.get(intent, None)
+    if intent is None:
+        msg = "```USAGE:\n$prof to edit profession\n$prof ? to show profession```"
+        await ctx.send(msg)
+        return
+
+    entry = db.get_entry(ID)
+    if not entry:   # check if user has been registered in DB. if not, register them
+        await request_entry(member)
+
+    elif intent == "edit":
+        msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
+        view = ProfessionMenuView(msg, 'class')
+        await msg.edit(view=view)
+
+    elif intent == "show":
+        file, embed = db.info_embed(entry)
+        args = {'file': file, 'embed': embed} if file else {'embed': embed}
+        await ctx.send(**args)
+
+
+@globals.bot.command()
+@commands.dm_only()
+async def lottery(ctx):
+    """
+    Toggles lottery opt in/out status
+    """
+    member = ctx.author
+    ID = member.id
+    entry = db.get_entry(ID)
+
+    if not entry:
+        await request_entry(member)
+    else:
+        lotto = 1 - entry[7]
+        lotto_in_out = 'in to' if lotto else 'out of'
+        msg = f'You have opted ' + lotto_in_out + ' the lottery.\n'
+        db.update_lotto(ID, lotto)
+        await ctx.send('```' + msg + '```')
 
 
 # @globals.bot.event

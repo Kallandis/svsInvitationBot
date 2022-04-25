@@ -188,3 +188,4 @@ class ProfessionMenuView(discord.ui.View):
         # If not, timeout the message.
         if not parent_message.embeds:
             await self.parent_message.edit(content='Profession menu timed out.', view=None)
+
