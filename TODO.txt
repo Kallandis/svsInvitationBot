@@ -33,14 +33,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             - view = EventButtons(eventMsg)
             - await blankMsg.edit(view=view)
 
-- CHANGE:   - mainChannel -> mainChannels[], allow bot to exist in several channels
-            - Have one active channel, currentEventChannel, that commands will listen to (store this in DB)
-            - create_event() should error with "There is already an active event in {currentEventChannel}" if used in a
-                different channel, or "There is already an active event" if used in currentEventChannel
-            - Event commands should error with "There is already an active event in {currentEventChannel}" if used in a
-                different channel
-
-
 ---------PRIORITY--------------
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
@@ -59,7 +51,10 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
          other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
          connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
 
-- CHANGE:   move lottery() to commands.py
-            move request_entry to db.py
-
-            -> kill off dm.py
+- CHANGE:   - mainChannel -> mainChannels[], allow bot to exist in several channels
+            - Have one active channel, currentEventChannel, that commands will listen to
+                -> store "eventChannelID" in database, populate globals.eventChannel in on_ready() and create_event()
+            - create_event() should error with "There is already an active event in {currentEventChannel}" if used in a
+                different channel, or "There is already an active event" if used in currentEventChannel
+            - Event commands should error with "There is already an active event in {currentEventChannel}" if used in a
+                different channel

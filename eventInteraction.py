@@ -1,4 +1,4 @@
-import discord  # development branch 2.0.0a to be able to use SelectMenu, Interactions
+import discord
 from requestEntry import request_entry
 import globals
 import db
