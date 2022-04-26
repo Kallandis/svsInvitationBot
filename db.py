@@ -92,7 +92,7 @@ def info_embed(entry: list, descr=''):
     skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # get event info
-    eventTitle, eventTime, eventMessageID, activeEventChannel = get_event()
+    eventTitle, eventTime, message_id, channel_id = get_event()
 
     # initialize arg dictionaries to be used in field creation
     class_args = {'name': 'Class', 'value': clas}
@@ -174,7 +174,7 @@ def update_status(discord_id, status: str):
     """
     Called by on_raw_reaction_add() to update status when a member reacts to the event embed
     """
-    eventTitle, eventTime, message_id = get_event()
+    eventTitle, eventTime, message_id, channel_id = get_event()
     if not message_id:
         return
 
