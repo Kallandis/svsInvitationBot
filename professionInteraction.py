@@ -75,10 +75,6 @@ class ProfessionMenu(discord.ui.Select):
             print("ERROR: Dropdown required parameter 'category' either empty or invalid")
             return
 
-        # if max_vals > 1:
-        #     placeholder += f' (PICK UP TO {max_vals})'
-        #
-        # placeholder += '...'
         super().__init__(placeholder=placeholder, min_values=1, max_values=max_vals, options=options)
 
     async def callback(self, interaction: discord.Interaction):
@@ -122,9 +118,8 @@ class ProfessionMenu(discord.ui.Select):
         else:   # the current category is "skins"
             # Remove the selectmenu, tell user what they selected, write the info to DB
 
-            # formattedProfString = f'**CLASS**: {self.clas}, **UNIT(s)**: {self.units}, **LEVEL**: {self.level}'
+            skins = ', '.join(self.values)
 
-            skins = self.values
             # parse selection info into appropriate form for DB-submission
             # unit(s)
             unitCharDict = {'Army': 'A', 'Air Force': 'F', 'Navy': 'N'}
@@ -136,37 +131,38 @@ class ProfessionMenu(discord.ui.Select):
             levelNum = ceLevelDict[self.level] if self.clas == 'CE' else mmLevelDict[self.level]
 
             # mm_traps
-            if self.mm_traps is None or 'None' in self.mm_traps.split(', '):
+            if self.mm_traps is None or 'None' in self.mm_traps:
+                # if user selected "None" in the MenuView, set mm_traps to ''
                 self.mm_traps = ''
-            # else:
-            #     formattedProfString += f', **TRAP(s)**: {self.mm_traps}'
 
             # skin(s)
             if 'None' in skins:
+                # if user selected "None" in the MenuView, set skins to ''
                 skins = ''
-            else:
-                skins = ', '.join(skins)
-                # formattedProfString += f', **SKIN(s)**: {skins}'
 
             prof_array = [self.clas, ''.join(unitChars), levelNum, self.mm_traps, skins]
 
-            # if first-time user does not have an entry in DB (when called through dm.request_entry())
+            # if first-time user does not have an entry in DB, add one (happens when called through dm.request_entry())
             if self.first_entry:
+                # set status to "NO", lottery to 1 (default vals)
                 entry = [interaction.user.id, *prof_array, "NO", 1]
+
                 db.add_entry(entry)
                 file, embed = db.info_embed(entry, descr='You have been added to the database.\n')
 
-            # else just update the profession
+            # else just update the user's profession
             else:
+                # need to get old DB entry to send to db.info_embed()
                 old_entry = db.get_entry(interaction.user.id)
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
+
                 file, embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
                 db.update_profession(interaction.user.id, prof_array)
 
-            # send user's selection, remove the view
-            args = {'attachments': [file], 'embed': embed} if file else {'embed': embed}
-            await interaction.response.edit_message(content='', view=None, **args)
+            # send user's selection as an info-embed, remove the view
+            kwargs = {'attachments': [file], 'embed': embed} if file else {'embed': embed}
+            await interaction.response.edit_message(content='', view=None, **kwargs)
 
 
 class ProfessionMenuView(discord.ui.View):

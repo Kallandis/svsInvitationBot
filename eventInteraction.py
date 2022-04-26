@@ -71,7 +71,7 @@ async def handle_interaction(last_status, status, interaction, parent_message):
         await request_entry(user, event_attempt=True)
         return False
 
-    # send ephemeral message to mainChannel
+    # send ephemeral message to eventChannel
     await interaction.response.send_message(f'Registered as **{status}** for {globals.eventInfo}.', ephemeral=True)
     # update the event field, removing user's name from the previous field they were in if it exists
     await update_event_field(parent_message, user.display_name, status, last_status)
@@ -98,8 +98,8 @@ async def dm_to_user(user, entry=None, new_status=None, last_status=None):
     # full info embed
     if entry is not None:
         file, embed = db.info_embed(entry)
-        args = {'file': file, 'embed': embed} if file else {'embed': embed}
-        await dmChannel.send(**args)
+        kwargs = {'file': file, 'embed': embed} if file else {'embed': embed}
+        await dmChannel.send(**kwargs)
 
     # smaller DM to ACK change
     elif new_status is not None:

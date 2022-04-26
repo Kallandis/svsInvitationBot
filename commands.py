@@ -10,15 +10,15 @@ from requestEntry import request_entry
 
 
 # custom decorator to check if command was used in globals.mainChannel
-def in_mainChannel():
+def in_mainChannels():
     def predicate(ctx):
-        return ctx.message.channel == globals.mainChannel
+        return ctx.message.channel in globals.mainChannels
     return commands.check(predicate)
 
 
 @globals.bot.command(usage="MM/DD/YY")
 @commands.has_role(globals.adminRole)
-@in_mainChannel()
+@in_mainChannels()
 async def create_event(ctx, *, datestring):
     """
     Creates event for the specified date at 11:00AM PST
@@ -69,7 +69,7 @@ async def create_event(ctx, *, datestring):
 
 @globals.bot.command(usage="pass")
 @commands.has_role(globals.adminRole)
-@in_mainChannel()
+@in_mainChannels()
 async def edit_event(ctx, *, arg):
     """
     Edit the existing event
@@ -80,7 +80,7 @@ async def edit_event(ctx, *, arg):
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannel()
+@in_mainChannels()
 async def delete_event(ctx):
     """
     Sets eventInfo.db to default value
@@ -93,7 +93,7 @@ async def delete_event(ctx):
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannel()
+@in_mainChannels()
 async def mail_csv(ctx):
     """
     Close signups and send sorted .csv of attendees to user
@@ -105,7 +105,7 @@ async def mail_csv(ctx):
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannel()
+@in_mainChannels()
 async def mail_db(ctx):
     """
     Sends dump of SQL database to user
@@ -117,12 +117,6 @@ async def mail_db(ctx):
     db.dump_db()
     await ctx.author.dm_channel.send(file=discord.File('svs_userHistory_dump.sql'))
     pass
-
-
-@globals.bot.command()
-async def foo(ctx):
-    message = await globals.mainChannel.fetch_message(globals.eventMessageID)
-    reactions = message.reactions
 
 
 @globals.bot.command()
@@ -153,8 +147,8 @@ async def prof(ctx, *, intent=None):
 
     elif intent == "show":
         file, embed = db.info_embed(entry)
-        args = {'file': file, 'embed': embed} if file else {'embed': embed}
-        await ctx.send(**args)
+        kwargs = {'file': file, 'embed': embed} if file else {'embed': embed}
+        await ctx.send(**kwargs)
 
 
 @globals.bot.command()

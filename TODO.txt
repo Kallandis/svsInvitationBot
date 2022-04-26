@@ -54,9 +54,13 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
          connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
 
 - CHANGE:   - mainChannel -> mainChannels[], allow bot to exist in several channels
-            - Have one active channel, currentEventChannel, that commands will listen to
+            - Have one active channel, activeEventChannel, that commands will listen to
                 -> store "eventChannelID" in database, populate globals.eventChannel in on_ready() and create_event()
-            - create_event() should error with "There is already an active event in {currentEventChannel}" if used in a
-                different channel, or "There is already an active event" if used in currentEventChannel
-            - Event commands should error with "There is already an active event in {currentEventChannel}" if used in a
+            - create_event() should error with "There is already an active event in {activeEventChannel}" if used in a
+                different channel, or "There is already an active event" if used in activeEventChannel
+            - Event commands should error with "There is already an active event in {activeEventChannel}" if used in a
                 different channel
+
+
+            TODO:   add new global variable eventMessage which is direct reference to the eventMessage. can replace
+                    eventMessageID global variable (still need to store eventMessageID in the database)
