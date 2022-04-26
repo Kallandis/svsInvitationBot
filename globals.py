@@ -4,6 +4,7 @@ guild = None
 sqlEntries = []     # exhausted in db.sql_write() loop
 eventInfo = ''
 eventMessageID = 0
+eventChannel = None
 
 #
 #
@@ -13,8 +14,8 @@ eventMessageID = 0
 # ID of the guild the bot is to operate in
 guildID = 964624340295499857    # svsBotTestServer
 
-# ID of the channel that the bot is to use for event-management
-mainChannelID = 964654664677212220  # svsBotTestServer/botchannel
+# IDs of all guild channels that the bot is allowed to create events and interpret messages in
+mainChannelIDs = [964654664677212220]  # svsBotTestServer/botchannel
 
 # name of the role that allows usage of event-related commands in the mainChannel
 adminRole = 'evan'
