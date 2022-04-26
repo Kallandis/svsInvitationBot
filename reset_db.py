@@ -3,6 +3,8 @@ import os
 
 
 def reset_db():
+
+    # User database
     if os.path.exists("userHistory.db"):
         os.remove("userHistory.db")
 
@@ -20,7 +22,7 @@ def reset_db():
                 );
             """)
 
-
+    # Event database
     if os.path.exists("eventInfo.db"):
         os.remove("eventInfo.db")
 
@@ -28,10 +30,11 @@ def reset_db():
         conn.execute("""CREATE TABLE EVENT (
                 title TEXT,
                 time TEXT,
-                message_ID INT
+                message_ID INT,
+                channel_ID INT
                 );
             """)
-        conn.execute("INSERT INTO EVENT (title, time, message_ID) values ('placeholder', 'placeholder', 0)")
+        conn.execute("INSERT INTO EVENT (title, time, message_ID) values ('placeholder', 'placeholder', 0, 0)")
 
 
 if __name__ == "__main__":
