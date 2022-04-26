@@ -40,24 +40,38 @@ async def create_event(ctx, *, datestring):
     title = "SvS Event"
     eventTime = f"<t:{unix_time}>"
 
+    # and then format them up a bit
     eventInfo = title + ' @ ' + eventTime
-    descr = "It's an SvS Event"
-    descr = '@ ' + eventTime + '\n' + descr
+    descr = '@ ' + eventTime + '\n\n'
+    descr += "It's an SvS Event"
+    descr += '\n\u200b'
 
+    # create embed and add fields
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_red())
     embed.add_field(name=f"{'YES':<20}", value="\u200b")
     embed.add_field(name=f"{'MAYBE':<20}", value="\u200b")
     embed.add_field(name=f"{'NO':<20}", value="\u200b")
 
-    cmdList = ['$edit_event', '$delete_event', '$mail_csv', '$mail_db']
+    # create footer
+    cmdList = ['edit_event', 'delete_event', 'mail_csv', 'mail_db']
+    cmdList = [globals.commandPrefix + cmd for cmd in cmdList]
     embed.set_footer(text=', '.join(cmdList))
 
-    # event embed
+    # get the file to be sent with the event embed
+    if globals.logoPath:
+        filename = globals.logoPath.split('\\')[-1]
+        attachments = [discord.File(globals.logoPath, filename=filename)]
+        embed.set_thumbnail(url=f'attachment://{filename}')
+    else:
+        attachments = []
+
+    # send event embed
     eventMessage = await ctx.send(embed=embed)
+
     # add the view to event embed. Updating of status, database, and embed fields will be handled in
     # eventInteraction.py through user interactions with the buttons.
     view = EventButtonsView(eventMessage)
-    await eventMessage.edit(embed=embed, view=view)
+    await eventMessage.edit(embed=embed, view=view, attachments=attachments)
 
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo

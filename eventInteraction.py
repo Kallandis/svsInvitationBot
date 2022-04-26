@@ -5,6 +5,9 @@ import db
 
 
 class EventButtonsView(discord.ui.View):
+
+    __slots__ = ('parent_message', 'last_status')
+
     def __init__(self, parent_message: discord.Message):
         super().__init__(timeout=None)
         self.parent_message = parent_message

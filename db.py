@@ -92,7 +92,7 @@ def info_embed(entry: list, descr=''):
     skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # get event info
-    eventTitle, eventTime, eventMessageID = get_event()
+    eventTitle, eventTime, eventMessageID, activeEventChannel = get_event()
 
     # initialize arg dictionaries to be used in field creation
     class_args = {'name': 'Class', 'value': clas}
@@ -108,7 +108,7 @@ def info_embed(entry: list, descr=''):
         eventInfo = eventTitle + ' @ ' + eventTime
         descr += f'You are marked as **{status}** for {eventInfo}'
     else:
-        descr += '\u200b'
+        descr += 'There is no event open for signups.'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
 
     # add fields to the embed for various entry parameters
@@ -143,8 +143,9 @@ def info_embed(entry: list, descr=''):
         file = None
 
     # DM command information
-    embed.set_footer(text="$prof to edit profession  |  $prof ? to show profession  |  "
-                          "$lottery to toggle lottery participation")
+    _ = globals.commandPrefix
+    embed.set_footer(text=f"{_}prof to edit profession  |  {_}prof ? to show profession  |  "
+                          f"{_}lottery to toggle lottery participation")
 
     return file, embed
 

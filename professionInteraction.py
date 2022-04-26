@@ -3,6 +3,9 @@ import db
 
 
 class ProfessionMenu(discord.ui.Select):
+
+    __slots__ = ('parent_message', 'category', 'clas', 'units', 'level', 'mm_traps', 'first_entry')
+
     def __init__(self, parent_message, category, clas=None, units=None, level=None, mm_traps=None, first_entry=None):
         self.parent_message = parent_message
         self.category = category
@@ -18,7 +21,7 @@ class ProfessionMenu(discord.ui.Select):
             options = [
                 discord.SelectOption(label='MM'),
                 discord.SelectOption(label='CE'),
-                discord.SelectOption(label='CANCEL', description='Pick this to cancel changing profession')
+                discord.SelectOption(label='CANCEL', description='Pick this to cancel updating profession')
             ]
             placeholder = f'Select your {category}'
 
@@ -166,6 +169,9 @@ class ProfessionMenu(discord.ui.Select):
 
 
 class ProfessionMenuView(discord.ui.View):
+
+    __slots__ = ('parent_message', 'category', 'clas', 'units', 'level', 'mm_traps', 'first_entry')
+
     def __init__(self, parent_message, category, clas=None, units=None, level=None, mm_traps=None, first_entry=None):
         super().__init__(timeout=300)
         self.parent_message = parent_message
