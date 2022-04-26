@@ -9,6 +9,8 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
     (but sometimes it does! like right now)
 
+- CHANGE:   move the user-defined global variables into a different file (config.txt)
+            then populate those user-defined global vars in on_ready()
 
 - CHANGE: let $create_event specify what time the event will be at, and also the title of the event
           Might have to consider timezones here.

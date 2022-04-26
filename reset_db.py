@@ -34,7 +34,7 @@ def reset_db():
                 channel_ID INT
                 );
             """)
-        conn.execute("INSERT INTO EVENT (title, time, message_ID) values ('placeholder', 'placeholder', 0, 0)")
+        conn.execute("INSERT INTO EVENT (title, time, message_ID, channel_ID) values ('placeholder', 'placeholder', 0, 0)")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,12 @@
 bot = None
-mainChannel = None
 guild = None
-sqlEntries = []     # exhausted in db.sql_write() loop
+mainChannels = []
+
 eventInfo = ''
 eventMessageID = 0
 eventChannel = None
+
+sqlEntries = []     # exhausted in db.sql_write() loop
 
 #
 #
@@ -17,7 +19,7 @@ commandPrefix = '$'
 # ID of the guild the bot is to operate in
 guildID = 964624340295499857    # svsBotTestServer
 
-# IDs of all guild channels that the bot is allowed to create events and interpret messages in
+# IDs of all guild channels that the bot is allowed to create events and listen for commands in
 mainChannelIDs = [964654664677212220]  # svsBotTestServer/botchannel
 
 # name of the role that allows usage of event-related commands in the mainChannel

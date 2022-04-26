@@ -63,8 +63,8 @@ def update_event(title: str, time: str, message_id: int):
 def get_event():
     sql = "SELECT * FROM EVENT"
     with sql3.connect('eventInfo.db') as conn:
-        eventTitle, eventTime, message_id = list(conn.execute(sql))[0]
-    return eventTitle, eventTime, message_id
+        eventTitle, eventTime, message_id, channel_id = list(conn.execute(sql))[0]
+    return eventTitle, eventTime, message_id, channel_id
 
 
 def info_embed(entry: list, descr=''):
