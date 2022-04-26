@@ -25,7 +25,6 @@ async def on_ready():
     globals.guild = bot.get_guild(globals.guildID)
     for _id in globals.mainChannelIDs:
         globals.mainChannels.append(bot.get_channel(_id))
-    # globals.mainChannel = bot.get_channel(globals.mainChannelID)
 
     # populate the global event vars if bot is restarted while event is already active
     eventTitle, eventTime, eventMessageID, eventChannelID = db.get_event()
@@ -36,8 +35,6 @@ async def on_ready():
 
     # start the sql_write loop that executes sql writes every # seconds
     db.sql_write.start()
-
-    # await bot.change_presence(activity=discord.CustomActivity(name='Managing events'))
 
 if __name__ == "__main__":
     bot.run(tokenFile.token)
