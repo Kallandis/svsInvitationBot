@@ -46,6 +46,8 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT: info_embed() should have a Message.mention() linking to the event embed
 
+- CHANGE:   info_embed() should send a github URL for the thumbnail (don't want to upload file every time)
+
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?
