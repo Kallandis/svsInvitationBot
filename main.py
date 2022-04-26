@@ -5,8 +5,9 @@ import globals
 
 logging.basicConfig(level=logging.INFO)
 
+# create the bot
 intents = discord.Intents(messages=True, members=True, guilds=True, message_content=True)
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix=globals.commandPrefix, intents=intents)
 globals.bot = bot
 
 import commands
@@ -19,6 +20,8 @@ import tokenFile
 async def on_ready():
     print(f'{bot.user.name} connected!')
     print(f'discord.py version = {discord.__version__}')
+
+    # populate guild variables
     globals.guild = bot.get_guild(globals.guildID)
     globals.mainChannel = bot.get_channel(globals.mainChannelID)
 

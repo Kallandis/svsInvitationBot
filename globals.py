@@ -11,6 +11,9 @@ eventChannel = None
 #
 # ---------------- BEGIN user-specific variables ----------------
 
+# prefix that indicates a command (e.g. $prof, $create_event [args])
+commandPrefix = '$'
+
 # ID of the guild the bot is to operate in
 guildID = 964624340295499857    # svsBotTestServer
 
