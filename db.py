@@ -53,9 +53,9 @@ def get_entry(discord_id: int):
         return user[0]
 
 
-def update_event(title: str, time: str, message_id: int):
-    sql = "UPDATE EVENT SET TITLE = ?, TIME = ?, MESSAGE_ID = ?"
-    values = [title, time, message_id]
+def update_event(title: str, time: str, message_id: int, channel_id: int):
+    sql = "UPDATE EVENT SET TITLE = ?, TIME = ?, MESSAGE_ID = ?, CHANNEL_ID = ?"
+    values = [title, time, message_id, channel_id]
     with sql3.connect('eventInfo.db') as conn:
         conn.execute(sql, values)
 
@@ -92,7 +92,7 @@ def info_embed(entry: list, descr=''):
     skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # get event info
-    eventTitle, eventTime, message_id, channel_id = get_event()
+    # eventTitle, eventTime, message_id, channel_id = get_event()
 
     # initialize arg dictionaries to be used in field creation
     class_args = {'name': 'Class', 'value': clas}
@@ -103,10 +103,10 @@ def info_embed(entry: list, descr=''):
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if eventMessageID:
+    if globals.activeEventChannel:
         # if there is an active event, put the event and the user's status in the description field of the embed
-        eventInfo = eventTitle + ' @ ' + eventTime
-        descr += f'You are marked as **{status}** for {eventInfo}'
+        # eventInfo = eventTitle + ' @ ' + eventTime
+        descr += f'You are marked as **{status}** for {globals.eventInfo}'
     else:
         descr += 'There is no event open for signups.'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
@@ -190,7 +190,7 @@ async def confirm_maybe(member: discord.member):
 
     # include a URL to jump to the event message?
     content = f'This is a reminder that you are registered as **MAYBE** for {globals.eventInfo}\n' \
-              f'If you would like to change your status, go to {globals.eventChannel.name} and press the appropriate button.'
+              f'If you would like to change your status, go to {globals.activeEventChannel.name} and press the appropriate button.'
     pass
 
 
@@ -232,8 +232,8 @@ def all_of_category(category: str, value):
     return list(users)    # list of user tuples
 
 
-def dump_db():
-    with open('svs_userHistory_dump.sql', 'w') as file:
+def dump_db(filename: str):
+    with open(filename, 'w') as file:
         with sql3.connect('userHistory.db') as conn:
             for line in conn.iterdump():
                 file.write(line + '\n')

@@ -7,23 +7,46 @@ import datetime
 from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
 from requestEntry import request_entry
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
-# custom decorator to check if command was used in globals.mainChannel
-def in_mainChannels():
-    def predicate(ctx):
-        return ctx.message.channel in globals.mainChannels
-    return commands.check(predicate)
+# hard to pass the info from these custom decorators to on_error(), not worth using
+# # custom decorator to check if command was used in a valid channel
+# def in_mainChannels():
+#     def predicate(ctx):
+#         return ctx.message.channel in globals.mainChannels
+#     return commands.check(predicate)
+#
+#
+# # custom decorator to check if command was used in the active event channel, if it exists
+# def in_validEventChannel():
+#     def predicate(ctx):
+#         if globals.activeEventChannel is not None:
+#             return ctx.message.channel == globals.activeEventChannel
+#         else:
+#             return True
+#     return commands.check(predicate)
 
 
 @globals.bot.command(usage="MM/DD/YY")
 @commands.has_role(globals.adminRole)
-@in_mainChannels()
+@commands.guild_only()
 async def create_event(ctx, *, datestring):
     """
     Creates event for the specified date at 11:00AM PST
     Requires ADMIN Role
     """
+
+    # check if there is an active event
+    if globals.activeEventChannel is not None:
+        if ctx.channel != globals.activeEventChannel:
+            await ctx.send(f'ERROR: An event is already active in {globals.activeEventChannel.mention}.')
+        elif ctx.channel == globals.activeEventChannel:
+            await ctx.send(f'```ERROR: An event is already active in this channel.\n'
+                           f'$delete_event to delete the active event.```')
+        return
 
     # parse MM/DD/YY from command input
     arg = [int(x) for x in datestring.split('/')]
@@ -76,60 +99,94 @@ async def create_event(ctx, *, datestring):
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo
     globals.eventMessageID = eventMessage.id
+    globals.activeEventChannel = ctx.channel
 
     # store event data in eventInfo.db
-    db.update_event(title, eventTime, eventMessage.id)
+    db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
 
 
 @globals.bot.command(usage="pass")
 @commands.has_role(globals.adminRole)
-@in_mainChannels()
+@commands.guild_only()
 async def edit_event(ctx, *, arg):
     """
     Edit the existing event
     Does not change the status of current attendees
     """
+    if globals.activeEventChannel is None:
+        await ctx.send(f'ERROR: No active event found')
+    elif ctx.channel != globals.activeEventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+
     pass
 
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannels()
+@commands.guild_only()
 async def delete_event(ctx):
     """
     Sets eventInfo.db to default value
     Sets everyone's status to "NO"
     Empties the sql_write() "buffer"
     """
-    db.update_event('placeholder', 'placeholder', 0)
+
+    if globals.activeEventChannel is None:
+        await ctx.send(f'ERROR: No active event found')
+    elif ctx.channel != globals.activeEventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+
+    # reset global vars
+    globals.eventInfo = ''
+    globals.eventMessageID = 0
+    globals.activeEventChannel = None
+
+    # reset database
+    db.update_event('placeholder', 'placeholder', 0, 0)
     db.reset_status()
 
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannels()
+@commands.guild_only()
 async def mail_csv(ctx):
     """
     Close signups and send sorted .csv of attendees to user
     Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
     Requires ADMIN role
     """
+
+    if globals.activeEventChannel is None:
+        await ctx.send(f'ERROR: No active event found')
+    elif ctx.channel != globals.activeEventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+
     pass
 
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
-@in_mainChannels()
+@commands.guild_only()
 async def mail_db(ctx):
     """
     Sends dump of SQL database to user
     Requires ADMIN role
     """
+
+    if globals.activeEventChannel is None:
+        await ctx.send(f'ERROR: No active event found')
+    elif ctx.channel != globals.activeEventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+
     if ctx.author.dm_channel is None:
         await ctx.author.create_dm()
 
-    db.dump_db()
-    await ctx.author.dm_channel.send(file=discord.File('svs_userHistory_dump.sql'))
+    db.dump_db('svs_userHistory_dump.sql')
+    await ctx.author.dm_channel.send(attachments=[discord.File('svs_userHistory_dump.sql')])
     pass
 
 
@@ -169,7 +226,7 @@ async def prof(ctx, *, intent=None):
 @commands.dm_only()
 async def lottery(ctx):
     """
-    Toggles lottery opt in/out status
+    Toggles lottery opt in/out
     """
     member = ctx.author
     ID = member.id
@@ -180,21 +237,29 @@ async def lottery(ctx):
     else:
         lotto = 1 - entry[7]
         lotto_in_out = 'in to' if lotto else 'out of'
-        msg = f'You have opted ' + lotto_in_out + ' the lottery.\n'
+        msg = f'You have opted ' + lotto_in_out + ' the lottery\n'
         db.update_lotto(ID, lotto)
-        await ctx.send('```' + msg + '```')
+        # await ctx.send('```' + msg + '```')
+        # code blocks look nice, but they break time and message-link formatting. So don't use for consistency
+        await ctx.send(msg)
 
 
 # @globals.bot.event
 # async def on_command_error(ctx, error):
+#     logger.error(str(error))
+#
+#     # command has local error handler
+#     if hasattr(ctx.command, 'on_error'):
+#         return
+#
 #     # generic error handling
-#     errmsg = "ERROR: "
-#     if isinstance(error, commands.MissingRequiredArgument):
+#     errmsg = f"{ctx.command} ERROR: "
+#     if isinstance(error, commands.CheckFailure):
+#         errmsg += str(error) + '\n'
+#     elif isinstance(error, commands.MissingRequiredArgument):
 #         errmsg += "Missing argument.\n"
-#     elif isinstance(error, commands.PrivateMessageOnly):
-#         errmsg += "Command must be used in DM.\n"
 #     elif isinstance(error, commands.NoPrivateMessage):
-#         errmsg += "Command only works in DM.\n"
+#         errmsg += "Command does not work in DM.\n"
 #     elif isinstance(error, commands.BotMissingRole):
 #         errmsg += "Bot lacks required role for this command.\n"
 #     elif isinstance(error, commands.BotMissingPermissions):
@@ -204,8 +269,7 @@ async def lottery(ctx):
 #     elif isinstance(error, commands.MissingPermissions):
 #         errmsg += "User lacks required permissions for this command.\n"
 #     else:
-#         logging.error(str(error))
 #         errmsg += 'Unknown error.\n'
 #
-#     errmsg += "$help [command] for specific info. $help for generic info"
-#     await ctx.send(errmsg)
+#     errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
+#     await ctx.send(f'```{errmsg}```')

@@ -4,7 +4,7 @@ mainChannels = []
 
 eventInfo = ''
 eventMessageID = 0
-eventChannel = None
+activeEventChannel = None
 
 sqlEntries = []     # exhausted in db.sql_write() loop
 
