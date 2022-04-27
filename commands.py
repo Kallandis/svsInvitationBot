@@ -12,6 +12,7 @@ import csv
 
 import logging
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.ERROR)
 
 
 @globals.bot.command(usage="MM/DD/YY")
@@ -205,6 +206,7 @@ def _build_csv():
     """
     parses the user database into csv subcategories
     """
+    import csv
     filename = r'svs_attendees.csv'
     csv = discord.File(filename)
     return csv
@@ -286,32 +288,34 @@ async def lottery(ctx):
         await ctx.send(msg)
 
 
-# @globals.bot.event
-# async def on_command_error(ctx, error):
-#     logger.error(str(error))
-#
-#     # command has local error handler
-#     if hasattr(ctx.command, 'on_error'):
-#         return
-#
-#     # generic error handling
-#     errmsg = f"{ctx.command} ERROR: "
-#     if isinstance(error, commands.CheckFailure):
-#         errmsg += str(error) + '\n'
-#     elif isinstance(error, commands.MissingRequiredArgument):
-#         errmsg += "Missing argument.\n"
-#     elif isinstance(error, commands.NoPrivateMessage):
-#         errmsg += "Command does not work in DM.\n"
-#     elif isinstance(error, commands.BotMissingRole):
-#         errmsg += "Bot lacks required role for this command.\n"
-#     elif isinstance(error, commands.BotMissingPermissions):
-#         errmsg += "Bot lacks required permissions for this command.\n"
-#     elif isinstance(error, commands.MissingRole):
-#         errmsg += "User lacks required role for this command.\n"
-#     elif isinstance(error, commands.MissingPermissions):
-#         errmsg += "User lacks required permissions for this command.\n"
-#     else:
-#         errmsg += 'Unknown error.\n'
-#
-#     errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
-#     await ctx.send(f'```{errmsg}```')
+@globals.bot.event
+async def on_command_error(ctx, error):
+    logger.error(str(error))
+
+    # command has local error handler
+    if hasattr(ctx.command, 'on_error'):
+        return
+
+    # generic error handling
+    errmsg = f"{ctx.command} ERROR: "
+    if isinstance(error, commands.CheckFailure):
+        errmsg += str(error) + '\n'
+    elif isinstance(error, commands.MissingRequiredArgument):
+        errmsg += "Missing argument.\n"
+    elif isinstance(error, commands.NoPrivateMessage):
+        errmsg += "Command does not work in DM.\n"
+    elif isinstance(error, commands.BotMissingRole):
+        errmsg += "Bot lacks required role for this command.\n"
+    elif isinstance(error, commands.BotMissingPermissions):
+        errmsg += "Bot lacks required permissions for this command.\n"
+    elif isinstance(error, commands.MissingRole):
+        errmsg += "User lacks required role for this command.\n"
+    elif isinstance(error, commands.MissingPermissions):
+        errmsg += "User lacks required permissions for this command.\n"
+    else:
+        errmsg += 'Unknown error.\n'
+        print('Ignoring exception in command {}:'.format(ctx.command))
+        print(error.__traceback__)
+
+    errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
+    await ctx.send(f'```{errmsg}```')
