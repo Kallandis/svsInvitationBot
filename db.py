@@ -212,26 +212,22 @@ def reset_status() -> None:
         conn.execute(sql, [val])
 
 
-def all_of_category(category: str, value: Union[str, int]) -> Optional[list[tuple]]:
+def all_attending_of_category(category: str, value: Union[str, int]) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
     """
 
     conn = sql3.connect('userHistory.db')
-    # all (ID, prof) of status
-    if category == 'status':
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE STATUS = ?"
-        users = conn.execute(sql, [value])
 
     # all (ID, prof) of class
-    elif category == "class":
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE CLASS = ?"
-        users = conn.execute(sql, [value])
+    if category == "class":
+        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE STATUS = ? AND CLASS = ?"
+        users = conn.execute(sql, ['YES', value])
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
-        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = 1"
-        users = conn.execute(sql, value)
+        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ? AND LOTTERY = ?"
+        users = conn.execute(sql, ['YES', value])
 
     else:
         conn.close()

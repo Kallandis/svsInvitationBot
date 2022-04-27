@@ -23,11 +23,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT: get a profile pic for the bot
 
-- CHANGE:    a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
-            - current soln: just don't add names if it'd go over 2048 chars (not great, expect 200-250 people)
-            - better soln: create 3 YES fields in bottom row, populate them one-by-one. maximum of ~600 people
-                MAYBE, WHITESPACE, NO fields in top row
-
 - CHANGE:   - When the fields become long, the buttons will be far below the event message.
             - soln: make the buttons be above the event message
             - blankMsg = await ctx.send('')
@@ -35,12 +30,18 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             - view = EventButtons(eventMsg)
             - await blankMsg.edit(view=view)
 
-- IMPLEMENT:    logging to file for each module, with timestamps and error messages
-
 - ISSUE:    after bot restarts, I don't think EventButtons work anymore. fixable or limitation? must test.
 
 
 ---------PRIORITY--------------
+
+- CHANGE:    a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
+            - current soln: just don't add names if it'd go over 2048 chars (not great, expect 200-250 people)
+            - better soln: create 3 YES fields in bottom row, populate them one-by-one. maximum of ~600 people
+                MAYBE, WHITESPACE, NO fields in top row
+
+            - actually, a field can only hold 1024 characters... If don't want to do the 3 yes fields, can just do a
+            "..." at the bottom of the field.
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)

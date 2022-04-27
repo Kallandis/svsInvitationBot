@@ -214,30 +214,38 @@ def _build_csv(filename: str) -> discord.File:
     """
 
     # select lotto winners
-    lottoEntries = db.all_of_category('lotto', 1)
-    random.shuffle(lottoEntries)
-    lottoEntries = lottoEntries[:globals.numberOfLottoWinners]
+    lottoEntries = db.all_attending_of_category('lotto', 1)
+    # get the displayed names of the winners from discord IDs
+    lottoWinners = [globals.guild.get_member(entry[0]).display_name for entry in lottoEntries]
+    random.shuffle(lottoWinners)
+    lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
 
-    mm = db.all_of_category('class', 'MM')
-    ce = db.all_of_category('class', 'CE')
+    ce = db.all_attending_of_category('class', 'CE')
+    mm = db.all_attending_of_category('class', 'MM')
 
     # entries with more than one unit type
     multiUnitArrays = [
-        filter(lambda x: len(x[2]) > 1, mm),
-        filter(lambda x: len(x[2]) > 1, ce)
+        filter(lambda x: len(x[2]) > 1, ce),
+        filter(lambda x: len(x[2]) > 1, mm)
     ]
-    # sort each by highest level
-    multiUnitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in multiUnitArrays]
 
+    # sort each by number of units, then by level
+    # have to do level first
+    multiUnitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in multiUnitArrays]
+    # then final sort by number of units
+    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[2]), reverse=True) for subArray in multiUnitArrays]
+
+    #
     # split the single-unit entries of each class into 3 arrays, one for each unit type
     unitArrays = [
-        filter(lambda x: x == 'A', mm),
-        filter(lambda x: x == 'N', mm),
-        filter(lambda x: x == 'F', mm),
         filter(lambda x: x == 'A', ce),
         filter(lambda x: x == 'N', ce),
         filter(lambda x: x == 'F', ce),
+        filter(lambda x: x == 'A', mm),
+        filter(lambda x: x == 'N', mm),
+        filter(lambda x: x == 'F', mm)
     ]
+
     # sort the unit arrays by highest level
     unitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in unitArrays]
 
