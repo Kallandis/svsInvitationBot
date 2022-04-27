@@ -3,6 +3,10 @@ import discord
 from discord.ext.tasks import loop
 import sqlite3 as sql3
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 # temporary function for testing purposes
 @globals.bot.command()

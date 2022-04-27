@@ -8,6 +8,8 @@ from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
 from requestEntry import request_entry
 from asyncio import TimeoutError
+import csv
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -126,7 +128,7 @@ async def edit_event(ctx, *, arg):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
-async def delete_event(ctx, intent='delete'):
+async def delete_event(ctx):
     """
     Sets eventInfo.db to default value
     Sets everyone's status to "NO"
@@ -143,55 +145,13 @@ async def delete_event(ctx, intent='delete'):
         return
 
     user = ctx.author
-    if user.dm_channel is None:
-        await user.create_dm()
-    dmChannel = user.dm_channel
-
-    # prompt the user to send "confirm" in dmChannel to confirm their command
-    timeout = 60
-    prompt = ''
-    if intent == 'delete':
-        prompt += f'Type "confirm" within {timeout} seconds to confirm you want to delete the event.'
-    elif intent == 'close':
-        prompt += f'Type "confirm" within {timeout} seconds ' \
-                  f'to confirm you want to close signups and send a CSV of attendees.'
-    prompt = await user.dm_channel.send(prompt)
-
-    try:
-        reply = await globals.bot.wait_for('message', timeout=timeout, check=lambda m: m.channel == dmChannel)
-    except TimeoutError:
-        edit = f'No response received in {timeout} seconds, event **{intent}** aborted'
-        await prompt.edit(edit)
-        return
-
-    # check if they responded with "confirm"
-    if reply.content.lower() != 'confirm':
-        edit = f'Event **{intent}** aborted'
-        await prompt.edit(edit)
-        return
-    else:
-        edit = f'Event **{intent}** successful'
-        await prompt.edit(edit)
-
-    # remove the eventMessage buttons, set the top-line of description to "this event is closed for signups"
-    content = '```This event is closed for signups.```'
-    await globals.eventMessage.edit(content=content, view=None)
-
-    # reset global vars
-    globals.eventInfo = ''
-    # globals.eventMessageID = 0
-    globals.eventMessage = None
-    globals.eventChannel = None
-
-    # reset database
-    db.update_event('placeholder', 'placeholder', 0, 0)
-    db.reset_status()
+    await _delete_event(user, intent='delete')
 
 
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
-async def mail_csv(ctx):
+async def finalize_event(ctx):
     """
     Close signups and send sorted .csv of attendees to user
     Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
@@ -206,6 +166,67 @@ async def mail_csv(ctx):
         return
 
     pass
+
+
+# to be called in delete_event(),
+async def _delete_event(user: discord.Member, intent):
+    if user.dm_channel is None:
+        await user.create_dm()
+    dmChannel = user.dm_channel
+
+    # prompt the user to send "confirm" in dmChannel to confirm their command
+    timeout = 60
+    prompt = ''
+    if intent == 'delete':
+        prompt += f'Type "confirm" within {timeout} seconds to confirm you want to delete the event.'
+    elif intent == 'make_csv':
+        prompt += f'Type "confirm" within {timeout} seconds ' \
+                  f'to confirm you want to close signups and send a CSV of attendees.'
+    prompt = await dmChannel.send(prompt)
+
+    # wait for a response from the user
+    try:
+        reply = await globals.bot.wait_for('message', timeout=timeout, check=lambda m: m.channel == dmChannel)
+    except TimeoutError:
+        edit = f'No response received in {timeout} seconds, event **{intent}** aborted'
+        await prompt.edit(content=edit)
+        return
+
+    actionDict = {'delete': 'Delete event', 'make_csv': 'Make CSV'}
+    # check if they responded with "confirm"
+    if reply.content.lower() != 'confirm':
+        edit = f'Event **{actionDict[intent]}** cancelled'
+        await prompt.edit(content=edit)
+        return
+    else:
+        edit = f'**{actionDict[intent]}** successful'
+        await prompt.edit(content=edit)
+
+    # remove the EventButtons view, put some text above the embed indicating it's closed
+    edit = '```Sign-ups for this event are closed.```'
+    await globals.eventMessage.edit(content=edit, view=None)
+
+    if intent == 'make_csv':
+        csv = _build_csv()
+        await dmChannel.send(file=csv)
+
+    # reset global vars
+    globals.eventInfo = ''
+    globals.eventMessage = None
+    globals.eventChannel = None
+
+    # reset database
+    db.update_event('placeholder', 'placeholder', 0, 0)
+    db.reset_status()
+
+
+def _build_csv():
+    """
+    parses the user database into csv subcategories
+    """
+    filename = r'svs_attendees.csv'
+    csv = discord.File(filename)
+    return csv
 
 
 @globals.bot.command()

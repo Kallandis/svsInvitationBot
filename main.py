@@ -3,7 +3,8 @@ from discord.ext import commands
 import logging
 import globals
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 # create the bot
 intents = discord.Intents(messages=True, members=True, guilds=True, message_content=True)

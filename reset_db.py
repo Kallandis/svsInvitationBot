@@ -1,6 +1,10 @@
 import sqlite3 as sql3
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 def reset_db():
 

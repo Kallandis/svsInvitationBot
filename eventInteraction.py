@@ -3,6 +3,10 @@ from requestEntry import request_entry
 import globals
 import db
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 class EventButtonsView(discord.ui.View):
 
@@ -76,8 +80,8 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
     fieldValue = fields[fieldIndex].value
     fieldValues = fieldValue.split('\n')
 
-    # if adding name would not exceed 1024 characters
-    if len(fieldValue) + len(name) + 2 < 1024:
+    # if adding name would not exceed 1024 (max chars in field value)
+    if len(fieldValue) + len(name) + 1 < 1024:
         fieldValues.append(name)
         fieldValue = '\n'.join(fieldValues)     # fields hold a string, so make a '\n'-separated string -> column
         embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)

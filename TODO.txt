@@ -39,11 +39,15 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - ISSUE:    after bot restarts, I don't think EventButtons work anymore. fixable or limitation? must test.
 
+
 ---------PRIORITY--------------
 
 - IMPLEMENT: add a timestamp to the event embed
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
+
+- IMPLEMENT: _build_csv() should put a lock on updating the database, and any writes that go out should be rejected
+             with a response to their context indicating that the write failed
 
 - IMPLEMENT: confirm_maybe()
     https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
@@ -68,5 +72,3 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             Can move the code-blocks to embeds instead to preserve the time, hyperlink formatting
             send various error messages as embeds?
             send "event **delete** successful" from $delete_event as embed?
-
-- CHANGE:   make $delete_event call db._delete_event(), so that I can also call it in $mail_csv()
