@@ -212,7 +212,7 @@ def reset_status() -> None:
         conn.execute(sql, [val])
 
 
-def all_attending_of_category(category: str, value: Union[str, int]) -> Optional[list[tuple]]:
+def all_attending_of_category(category: str, value: Union[str, int], display_name=True) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
     """
@@ -234,6 +234,15 @@ def all_attending_of_category(category: str, value: Union[str, int]) -> Optional
         return None
 
     conn.close()
+
+    if display_name:
+        # convert discord ID to display names
+        # I tested and this is slightly faster than using a map
+        newUsers = []
+        for entry in users:
+            newUsers.append((globals.guild.get_member(entry[0]), *entry[1:]))
+        users = newUsers
+
     return list(users)    # list of user tuples
 
 

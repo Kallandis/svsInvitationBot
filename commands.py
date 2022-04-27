@@ -215,9 +215,7 @@ def _build_csv(filename: str) -> discord.File:
 
     # select lotto winners
     lottoEntries = db.all_attending_of_category('lotto', 1)
-    # get the displayed names of the winners from discord IDs
-    lottoWinners = [globals.guild.get_member(entry[0]).display_name for entry in lottoEntries]
-    random.shuffle(lottoWinners)
+    random.shuffle(lottoEntries)
     lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
 
     ce = db.all_attending_of_category('class', 'CE')
@@ -238,22 +236,61 @@ def _build_csv(filename: str) -> discord.File:
     #
     # split the single-unit entries of each class into 3 arrays, one for each unit type
     unitArrays = [
-        filter(lambda x: x == 'A', ce),
-        filter(lambda x: x == 'N', ce),
-        filter(lambda x: x == 'F', ce),
-        filter(lambda x: x == 'A', mm),
-        filter(lambda x: x == 'N', mm),
-        filter(lambda x: x == 'F', mm)
+        filter(lambda x: x[2] == 'A', ce),
+        filter(lambda x: x[2] == 'N', ce),
+        filter(lambda x: x[2] == 'F', ce),
+        filter(lambda x: x[2] == 'A', mm),
+        filter(lambda x: x[2] == 'N', mm),
+        filter(lambda x: x[2] == 'F', mm)
     ]
 
     # sort the unit arrays by highest level
     unitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in unitArrays]
 
+    #
+    # convert data into human-readable text (convert level to text, convert traps to acronym, remove traps from CE)
+
+    # get conversion dicts
     _, ceLevelDict, mmLevelDict, mmTrapsDict = db.profession_dicts()
 
-    # TODO: figure out how this stuff should be arranged and formatted
+    # fxn to convert the big arrays
+    def convert_array(array: list):
 
-    with open(filename, newline='') as csvfile:
+        def parse_entry(entry_: tuple, cls: str):
+            # remove the traps entry from CE
+            if cls == 'CE':
+                newEntry = (
+                    *entry_[:3],
+                    ceLevelDict[entry_[3]],
+                    entry_[5]
+                )
+            else:
+                # for MM, put the traps entry at the end so it does not conflict with CE entries in same col
+                newEntry = (
+                    *entry_[:3],
+                    mmLevelDict[entry_[3]],
+                    entry_[5],
+                    ', '.join(map(mmTrapsDict.get, entry_[4].split(', '))),
+                )
+            return newEntry
+
+        for i in range(len(array)):
+            class_ = array[i][0][1]
+            for j in range(len(array[i])):
+                entry = array[i][j]
+                entry = parse_entry(entry, class_)
+                array[i][j] = entry
+
+        return array
+
+    # convert the big arrays
+    multiUnitArrays = convert_array(multiUnitArrays)
+    unitArrays = convert_array(unitArrays)
+
+    # multi-unit should be separate from the rest, just write those in one column
+    # single-unit should be one column for each unit type, grouped within column by class, ordered by level
+
+    with open(filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
 
