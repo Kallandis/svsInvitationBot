@@ -83,12 +83,8 @@ async def create_event(ctx, *, datestring):
     embed.set_footer(text=', '.join(cmdList))
 
     # get the file to be sent with the event embed
-    if globals.logoPath:
-        filename = globals.logoPath.split('\\')[-1]
-        attachments = [discord.File(globals.logoPath, filename=filename)]
-        embed.set_thumbnail(url=f'attachment://{filename}')
-    else:
-        attachments = []
+    if globals.logoURL:
+        embed.set_thumbnail(url=globals.logoURL)
 
     # send event embed
     eventMessage = await ctx.send(embed=embed)
@@ -97,7 +93,7 @@ async def create_event(ctx, *, datestring):
     # eventInteraction.py through user interactions with the buttons.
     view = EventButtonsView(eventMessage)
     # await eventMessage.edit(embed=embed, view=view, attachments=attachments)
-    await eventMessage.edit(embed=embed, view=view, attachments=attachments)
+    await eventMessage.edit(embed=embed, view=view)
 
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo
@@ -178,9 +174,6 @@ async def delete_event(ctx, intent='delete'):
         await prompt.edit(edit)
 
     # remove the eventMessage buttons, set the top-line of description to "this event is closed for signups"
-    eventEmbed = globals.eventMessage.embeds[0]
-    eventAttachments = globals.eventMessage.attachments
-
     content = '```This event is closed for signups.```'
     await globals.eventMessage.edit(content=content, view=None)
 
@@ -265,9 +258,8 @@ async def prof(ctx, *, intent=None):
         await msg.edit(view=view)
 
     elif intent == "show":
-        file, embed = db.info_embed(entry)
-        kwargs = {'file': file, 'embed': embed} if file else {'embed': embed}
-        await ctx.send(**kwargs)
+        embed = db.info_embed(entry)
+        await ctx.send(embed=embed)
 
 
 @globals.bot.command()

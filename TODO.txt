@@ -52,8 +52,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT: info_embed() should have a Message.mention() linking to the event embed
 
-- CHANGE:   info_embed() should send a github URL for the thumbnail (don't want to upload file every time)
-
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?
@@ -63,8 +61,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
          other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
          connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
 
-- IMPLEMENT:    write delete_event() to delete the current event (with confirmation prompt, probably in DM)
-                call delete_event() when building the csv
+- IMPLEMENT:    call delete_event() when building the csv
                 rename mail_csv() to something better (finalize_event()?)
 
 - CHANGE:   get rid of all code-blocks for consistency, as they break string formatting.

@@ -132,22 +132,17 @@ def info_embed(entry: list, descr=''):
     # row 3: Lottery
     embed.add_field(**lottery_args)
 
-    # add a local file "logo.png" from the script directory as a thumbnail
-    # or another way to do it: upload the png to the remote github, use that as URL. Might be easier on the RPI CPU
-    # EX: https://raw.githubusercontent.com/python-discord/branding/main/icons/checkmark/green-question-mark-dist.png
-    if globals.logoPath:
-        filename = globals.logoPath.split('\\')[-1]
-        file = discord.File(globals.logoPath, filename=filename)
-        embed.set_thumbnail(url=f'attachment://{filename}')
-    else:
-        file = None
+    # set thumbnail image
+    if globals.logoURL:
+        embed.set_thumbnail(url=globals.logoURL)
 
     # DM command information
     _ = globals.commandPrefix
     embed.set_footer(text=f"{_}prof to edit profession  |  {_}prof ? to show profession  |  "
                           f"{_}lottery to toggle lottery participation")
 
-    return file, embed
+    # return file, embed
+    return embed
 
 
 def update_profession(discord_id, prof_array: list):

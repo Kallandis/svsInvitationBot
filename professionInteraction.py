@@ -151,7 +151,7 @@ class ProfessionMenu(discord.ui.Select):
                 entry = [interaction.user.id, *prof_array, "NO", 1]
 
                 db.add_entry(entry)
-                file, embed = db.info_embed(entry, descr='You have been added to the database.\n')
+                embed = db.info_embed(entry, descr='You have been added to the database.\n')
 
             # else just update the user's profession
             else:
@@ -160,12 +160,11 @@ class ProfessionMenu(discord.ui.Select):
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
 
-                file, embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
+                embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
                 db.update_profession(interaction.user.id, prof_array)
 
             # send user's selection as an info-embed, remove the view
-            kwargs = {'attachments': [file], 'embed': embed} if file else {'embed': embed}
-            await interaction.response.edit_message(content='', view=None, **kwargs)
+            await interaction.response.edit_message(content='', embed=embed, view=None)
 
 
 class ProfessionMenuView(discord.ui.View):

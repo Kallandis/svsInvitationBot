@@ -26,6 +26,6 @@ commandPrefix = '$'
 # name of the role that allows usage of event-related commands in the mainChannel
 adminRole = 'evan'
 
-# path to the locally-stored logo picture. Must be a literal-string (r'PATH'). set this to '' or "" to not send
-# a thumbnail with the info-embeds sent in DMs
-logoPath = r'transparent_logo.png'
+# url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
+# thumbnail with the embeds
+logoURL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/transparent_logo.png'

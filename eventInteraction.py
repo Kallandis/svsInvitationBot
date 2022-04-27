@@ -68,9 +68,6 @@ async def handle_interaction(last_status, status, interaction, parent_message):
 # avoid reader-writer problem. ask in discord?
 async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str):
     embed = message.embeds[0]
-    attachments = message.attachments
-    print(f'{attachments= }')
-    # embed.set_thumbnail(url=f'attachment://{attachments[0]}')
     fields = embed.fields
 
     indexDict = {"YES": 0, "MAYBE": 1, "NO": 2}
@@ -103,13 +100,12 @@ async def dm_to_user(user, entry=None, new_status=None, last_status=None):
         await user.create_dm()
     dmChannel = user.dm_channel
 
-    # full info embed
+    # send user an info embed
     if entry is not None:
-        file, embed = db.info_embed(entry)
-        kwargs = {'file': file, 'embed': embed} if file else {'embed': embed}
-        await dmChannel.send(**kwargs)
+        embed = db.info_embed(entry)
+        await dmChannel.send(embed=embed)
 
-    # smaller DM to ACK change
+    # send a small text message to ACK change
     elif new_status is not None:
         await dmChannel.send(f'Your status has been changed from '
                              f'**{last_status}** to **{new_status}** for {globals.eventInfo}')
