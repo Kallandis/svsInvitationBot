@@ -94,9 +94,6 @@ def info_embed(entry: list, descr=''):
     trapsTitle = 'Trap' if '\n' not in traps else 'Traps'
     skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
-    # get event info
-    # eventTitle, eventTime, message_id, channel_id = get_event()
-
     # initialize arg dictionaries to be used in field creation
     class_args = {'name': 'Class', 'value': clas}
     unit_args = {'name': unitTitle, 'value': units}
@@ -109,7 +106,8 @@ def info_embed(entry: list, descr=''):
     if globals.eventChannel:
         # if there is an active event, put the event and the user's status in the description field of the embed
         # eventInfo = eventTitle + ' @ ' + eventTime
-        descr += f'You are marked as **{status}** for {globals.eventInfo}'
+        descr += f'You are **{status}** for {globals.eventInfo}\n' \
+                 f'[Event Message]({globals.eventMessage.jump_url})'
     else:
         descr += 'There is no event open for signups.'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
@@ -121,19 +119,23 @@ def info_embed(entry: list, descr=''):
     embed.add_field(**unit_args)
     embed.add_field(**level_args)
 
-    # row 2: Trap(s), Skin(s)
+    # row 2: Trap(s), Skin(s), lottery
     count = 0
     for argDict in [traps_args, skins_args]:
         if argDict['value']:
             embed.add_field(**argDict)
             count += 1
+
+    # lottery
+    embed.add_field(**lottery_args)
+
     # add whitespace fields to align with first row
     if count > 0:
-        for i in range(3 - count):
+        for i in range(2 - count):
             embed.add_field(**whitespace_args)
 
-    # row 3: Lottery
-    embed.add_field(**lottery_args)
+    # # row 3: Lottery
+    # embed.add_field(**lottery_args)
 
     # set thumbnail image
     if globals.logoURL:
