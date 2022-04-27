@@ -80,7 +80,7 @@ def profession_dicts() -> tuple:
     return unitDict, ceLevelDict, mmLevelDict
 
 
-def info_embed(entry: list, descr='') -> discord.Embed:
+def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     # extract values from entry
     clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
 
@@ -196,9 +196,9 @@ async def confirm_maybe(member: discord.Member):
     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
     """
 
-    # include a URL to jump to the event message?
+    # make this an embed and include a link to the event message.
     content = f'This is a reminder that you are registered as **MAYBE** for {globals.eventInfo}\n' \
-              f'If you would like to change your status, go to {globals.eventChannel.name} and press the appropriate button.'
+              f'If you would like to change your status, go to {globals.eventChannel.name}.'
     pass
 
 
