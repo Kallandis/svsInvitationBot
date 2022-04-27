@@ -182,6 +182,7 @@ def update_status(discord_id, status: str):
     entry = [status, discord_id]
     globals.sqlEntries.append([sql, entry])
 
+
 # TODO
 async def confirm_maybe(member: discord.member):
     """
@@ -212,17 +213,17 @@ def all_of_category(category: str, value):
     # all (ID, prof) of status
     if category == 'status':
         sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE STATUS = ?"
-        users = list(conn.execute(sql, [value]))
+        users = conn.execute(sql, [value])
 
     # all (ID, prof) of class
     elif category == "class":
         sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE CLASS = ?"
-        users = list(conn.execute(sql, [value]))
+        users = conn.execute(sql, [value])
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = YES AND LOTTERY = 1"
-        users = list(conn.execute(sql, value))
+        users = conn.execute(sql, value)
 
     else:
         conn.close()

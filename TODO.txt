@@ -48,6 +48,9 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: _build_csv() should put a lock on updating the database, and any writes that go out should be rejected
              with a response to their context indicating that the write failed
 
+             I think opening a file is blocking, so this is already accomplished?
+
+
 - IMPLEMENT: confirm_maybe()
     https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
 
@@ -64,6 +67,10 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
         "aiosqlite allows interaction with SQLite databases on the main AsyncIO event loop without blocking execution of
          other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
          connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
+
+    https://github.com/Rapptz/asqlite
+        Rapptz version of aiosqlite, so I'll use it bc it's rapptz
+        https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
 
 - CHANGE:   get rid of all code-blocks for consistency, as they break string formatting.
             Can move the code-blocks to embeds instead to preserve the time, hyperlink formatting

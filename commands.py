@@ -189,8 +189,8 @@ async def _delete_event(user: discord.Member, intent):
     await globals.eventMessage.edit(content=edit, view=None)
 
     if intent == 'make_csv':
-        csv = _build_csv()
-        await dmChannel.send(file=csv)
+        svs_attendees = _build_csv(globals.csvFileName)
+        await dmChannel.send(f'CSV for {globals.eventInfo}', file=svs_attendees)
 
     # reset global vars
     globals.eventInfo = ''
@@ -202,14 +202,17 @@ async def _delete_event(user: discord.Member, intent):
     db.reset_status()
 
 
-def _build_csv():
+def _build_csv(filename: str) -> discord.File:
     """
     parses the user database into csv subcategories
     """
-    import csv
-    filename = r'svs_attendees.csv'
-    csv = discord.File(filename)
-    return csv
+
+    with open(filename, newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        atds = db.all_of_category('status', 'YES')
+
+    eventCSV = discord.File(filename)
+    return eventCSV
 
 
 @globals.bot.command()

@@ -29,3 +29,6 @@ adminRole = 'evan'
 # url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
 # thumbnail with the embeds
 logoURL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/transparent_logo.png'
+
+# name of the csv file that is made by $finalize_event()
+csvFileName = r'svs_attendees.csv'
