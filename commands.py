@@ -14,24 +14,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# hard to pass the info from these custom decorators to on_error(), not worth using
-# # custom decorator to check if command was used in a valid channel
-# def in_mainChannels():
-#     def predicate(ctx):
-#         return ctx.message.channel in globals.mainChannels
-#     return commands.check(predicate)
-#
-#
-# # custom decorator to check if command was used in the active event channel, if it exists
-# def in_validEventChannel():
-#     def predicate(ctx):
-#         if globals.activeEventChannel is not None:
-#             return ctx.message.channel == globals.activeEventChannel
-#         else:
-#             return True
-#     return commands.check(predicate)
-
-
 @globals.bot.command(usage="MM/DD/YY")
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
