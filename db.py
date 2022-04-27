@@ -103,7 +103,7 @@ def info_embed(entry: list, descr=''):
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if globals.activeEventChannel:
+    if globals.eventChannel:
         # if there is an active event, put the event and the user's status in the description field of the embed
         # eventInfo = eventTitle + ' @ ' + eventTime
         descr += f'You are marked as **{status}** for {globals.eventInfo}'
@@ -190,17 +190,17 @@ async def confirm_maybe(member: discord.member):
 
     # include a URL to jump to the event message?
     content = f'This is a reminder that you are registered as **MAYBE** for {globals.eventInfo}\n' \
-              f'If you would like to change your status, go to {globals.activeEventChannel.name} and press the appropriate button.'
+              f'If you would like to change your status, go to {globals.eventChannel.name} and press the appropriate button.'
     pass
 
 
 # this one can just run immediately rather than go into write-loop
 def reset_status():
-    sql = "UPDATE USERS SET STATUS = NO"
-
+    sql = "UPDATE USERS SET STATUS = ?"
+    val = "NO"
     globals.sqlEntries = []
     with sql3.connect('userHistory.db') as conn:
-        conn.execute(sql)
+        conn.execute(sql, [val])
 
 
 def all_of_category(category: str, value):

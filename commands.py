@@ -7,6 +7,7 @@ import datetime
 from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
 from requestEntry import request_entry
+from asyncio import TimeoutError
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -40,10 +41,11 @@ async def create_event(ctx, *, datestring):
     """
 
     # check if there is an active event
-    if globals.activeEventChannel is not None:
-        if ctx.channel != globals.activeEventChannel:
-            await ctx.send(f'ERROR: An event is already active in {globals.activeEventChannel.mention}.')
-        elif ctx.channel == globals.activeEventChannel:
+    if globals.eventChannel is not None:
+        if ctx.channel != globals.eventChannel:
+            await ctx.send(f'ERROR: An event is already active in {globals.eventChannel.mention}.\n'
+                           f'Only one event at a time may be active.')
+        elif ctx.channel == globals.eventChannel:
             await ctx.send(f'```ERROR: An event is already active in this channel.\n'
                            f'$delete_event to delete the active event.```')
         return
@@ -94,12 +96,14 @@ async def create_event(ctx, *, datestring):
     # add the view to event embed. Updating of status, database, and embed fields will be handled in
     # eventInteraction.py through user interactions with the buttons.
     view = EventButtonsView(eventMessage)
+    # await eventMessage.edit(embed=embed, view=view, attachments=attachments)
     await eventMessage.edit(embed=embed, view=view, attachments=attachments)
 
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo
-    globals.eventMessageID = eventMessage.id
-    globals.activeEventChannel = ctx.channel
+    # globals.eventMessageID = eventMessage.id
+    globals.eventMessage = eventMessage
+    globals.eventChannel = ctx.channel
 
     # store event data in eventInfo.db
     db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
@@ -113,10 +117,11 @@ async def edit_event(ctx, *, arg):
     Edit the existing event
     Does not change the status of current attendees
     """
-    if globals.activeEventChannel is None:
+    if globals.eventChannel is None:
         await ctx.send(f'ERROR: No active event found')
-    elif ctx.channel != globals.activeEventChannel:
-        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+    elif ctx.channel != globals.eventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.eventChannel.mention}')
         return
 
     pass
@@ -125,23 +130,65 @@ async def edit_event(ctx, *, arg):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
-async def delete_event(ctx):
+async def delete_event(ctx, intent='delete'):
     """
     Sets eventInfo.db to default value
     Sets everyone's status to "NO"
     Empties the sql_write() "buffer"
     """
 
-    if globals.activeEventChannel is None:
+    # check if there is currently an event
+    if globals.eventChannel is None:
         await ctx.send(f'ERROR: No active event found')
-    elif ctx.channel != globals.activeEventChannel:
-        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
         return
+    # if there is an event, check if it is in this channel
+    elif ctx.channel != globals.eventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.eventChannel.mention}')
+        return
+
+    user = ctx.author
+    if user.dm_channel is None:
+        await user.create_dm()
+    dmChannel = user.dm_channel
+
+    # prompt the user to send "confirm" in dmChannel to confirm their command
+    timeout = 60
+    prompt = ''
+    if intent == 'delete':
+        prompt += f'Type "confirm" within {timeout} seconds to confirm you want to delete the event.'
+    elif intent == 'close':
+        prompt += f'Type "confirm" within {timeout} seconds ' \
+                  f'to confirm you want to close signups and send a CSV of attendees.'
+    prompt = await user.dm_channel.send(prompt)
+
+    try:
+        reply = await globals.bot.wait_for('message', timeout=timeout, check=lambda m: m.channel == dmChannel)
+    except TimeoutError:
+        edit = f'No response received in {timeout} seconds, event **{intent}** aborted'
+        await prompt.edit(edit)
+        return
+
+    # check if they responded with "confirm"
+    if reply.content.lower() != 'confirm':
+        edit = f'Event **{intent}** aborted'
+        await prompt.edit(edit)
+        return
+    else:
+        edit = f'Event **{intent}** successful'
+        await prompt.edit(edit)
+
+    # remove the eventMessage buttons, set the top-line of description to "this event is closed for signups"
+    eventEmbed = globals.eventMessage.embeds[0]
+    eventAttachments = globals.eventMessage.attachments
+
+    content = '```This event is closed for signups.```'
+    await globals.eventMessage.edit(content=content, view=None)
 
     # reset global vars
     globals.eventInfo = ''
-    globals.eventMessageID = 0
-    globals.activeEventChannel = None
+    # globals.eventMessageID = 0
+    globals.eventMessage = None
+    globals.eventChannel = None
 
     # reset database
     db.update_event('placeholder', 'placeholder', 0, 0)
@@ -158,10 +205,11 @@ async def mail_csv(ctx):
     Requires ADMIN role
     """
 
-    if globals.activeEventChannel is None:
+    if globals.eventChannel is None:
         await ctx.send(f'ERROR: No active event found')
-    elif ctx.channel != globals.activeEventChannel:
-        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
+        return
+    elif ctx.channel != globals.eventChannel:
+        await ctx.send(f'ERROR: Must use command in {globals.eventChannel.mention}')
         return
 
     pass
@@ -176,17 +224,12 @@ async def mail_db(ctx):
     Requires ADMIN role
     """
 
-    if globals.activeEventChannel is None:
-        await ctx.send(f'ERROR: No active event found')
-    elif ctx.channel != globals.activeEventChannel:
-        await ctx.send(f'ERROR: Must use command in {globals.activeEventChannel.mention}')
-        return
-
     if ctx.author.dm_channel is None:
         await ctx.author.create_dm()
+    dmChannel = ctx.author.dm_channel
 
     db.dump_db('svs_userHistory_dump.sql')
-    await ctx.author.dm_channel.send(attachments=[discord.File('svs_userHistory_dump.sql')])
+    await dmChannel.send(attachments=[discord.File('svs_userHistory_dump.sql')])
     pass
 
 
@@ -195,6 +238,11 @@ async def mail_db(ctx):
 async def prof(ctx, *, intent=None):
     """
     $prof (no argument) to edit profession, $prof ? to show profession
+
+    If the user is not in the database, prompts user to provide a database entry
+
+    Else, sends the user either a ProfessionMenuView view object to change their profession, or an info embed made with
+    db.info_embed() to show their database information
     """
 
     member = ctx.author

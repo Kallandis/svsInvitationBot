@@ -23,7 +23,7 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='CE'),
                 discord.SelectOption(label='CANCEL', description='Pick this to cancel updating profession')
             ]
-            placeholder = f'Select your {category}'
+            placeholder = f'Select your class'
 
         elif category == "unit":
             options = [
@@ -190,4 +190,3 @@ class ProfessionMenuView(discord.ui.View):
         # If not, timeout the message.
         if not parent_message.embeds:
             await self.parent_message.edit(content='Profession menu timed out.', view=None)
-

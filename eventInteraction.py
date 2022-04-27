@@ -35,35 +35,6 @@ class EventButtonsView(discord.ui.View):
             self.last_status = status
 
 
-async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str):
-    embed = message.embeds[0]
-    fields = embed.fields
-
-    indexDict = {"YES": 0, "MAYBE": 1, "NO": 2}
-    fieldIndex = indexDict[status]
-    fieldName = fields[fieldIndex].name
-    fieldValue = fields[fieldIndex].value
-    fieldValues = fieldValue.split('\n')
-
-    # if adding name would not exceed 2048 characters
-    if len(fieldValue) + len(name) + 2 < 2048:
-        fieldValues.append(name)
-        fieldValue = '\n'.join(fieldValues)     # fields hold a string, so make a '\n'-separated string -> column
-        embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
-
-    # remove from old field
-    if remove_status is not None:
-        oldFieldIndex = indexDict[remove_status]
-        oldFieldName = fields[oldFieldIndex].name
-        oldFieldValue = fields[oldFieldIndex].value
-        oldFieldValues = oldFieldValue.split('\n')
-        oldFieldValues.remove(name)
-        oldFieldValue = '\n'.join(oldFieldValues)
-        embed.set_field_at(oldFieldIndex, name=oldFieldName, value=oldFieldValue)
-
-    await message.edit(embed=embed)
-
-
 async def handle_interaction(last_status, status, interaction, parent_message):
     if last_status == status:  # don't do anything if they are already in this category
         return False
@@ -91,6 +62,40 @@ async def handle_interaction(last_status, status, interaction, parent_message):
         await dm_to_user(user, new_status=status, last_status=last_status)
 
     return True
+
+
+# do I need to worry about people pressing buttons near-simultaneously? ideally calls to this should be queued to
+# avoid reader-writer problem. ask in discord?
+async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str):
+    embed = message.embeds[0]
+    attachments = message.attachments
+    print(f'{attachments= }')
+    # embed.set_thumbnail(url=f'attachment://{attachments[0]}')
+    fields = embed.fields
+
+    indexDict = {"YES": 0, "MAYBE": 1, "NO": 2}
+    fieldIndex = indexDict[status]
+    fieldName = fields[fieldIndex].name
+    fieldValue = fields[fieldIndex].value
+    fieldValues = fieldValue.split('\n')
+
+    # if adding name would not exceed 1024 characters
+    if len(fieldValue) + len(name) + 2 < 1024:
+        fieldValues.append(name)
+        fieldValue = '\n'.join(fieldValues)     # fields hold a string, so make a '\n'-separated string -> column
+        embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
+
+    # remove from old field
+    if remove_status is not None:
+        oldFieldIndex = indexDict[remove_status]
+        oldFieldName = fields[oldFieldIndex].name
+        oldFieldValue = fields[oldFieldIndex].value
+        oldFieldValues = oldFieldValue.split('\n')
+        oldFieldValues.remove(name)
+        oldFieldValue = '\n'.join(oldFieldValues)
+        embed.set_field_at(oldFieldIndex, name=oldFieldName, value=oldFieldValue)
+
+    await message.edit(embed=embed)
 
 
 async def dm_to_user(user, entry=None, new_status=None, last_status=None):

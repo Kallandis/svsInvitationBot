@@ -3,8 +3,9 @@ guild = None
 mainChannels = []
 
 eventInfo = ''
-eventMessageID = 0
-activeEventChannel = None
+# eventMessageID = 0
+eventMessage = None
+eventChannel = None
 
 sqlEntries = []     # exhausted in db.sql_write() loop
 

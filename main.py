@@ -30,8 +30,9 @@ async def on_ready():
     eventTitle, eventTime, eventMessageID, eventChannelID = db.get_event()
     if eventMessageID:
         globals.eventInfo = eventTitle + ' @ ' + eventTime
-        globals.eventMessageID = eventMessageID
-        globals.activeEventChannel = bot.get_channel(eventChannelID)
+        # globals.eventMessageID = eventMessageID
+        globals.eventChannel = bot.get_channel(eventChannelID)
+        globals.eventMessage = await globals.eventChannel.fetch_message(eventMessageID)
 
     # start the sql_write loop that executes sql writes every # seconds
     db.sql_write.start()
