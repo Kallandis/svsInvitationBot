@@ -76,8 +76,9 @@ def profession_dicts() -> tuple:
     unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
     ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
     mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
+    mmTrapsDict = {'Corrosive Mucus': 'CM', 'Supermagnetic Field': 'SF', 'Electro Missiles': 'EM'}
 
-    return unitDict, ceLevelDict, mmLevelDict
+    return unitDict, ceLevelDict, mmLevelDict, mmTrapsDict
 
 
 def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
@@ -85,7 +86,7 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
 
     # format values for display
-    unitDict, ceLevelDict, mmLevelDict = profession_dicts()
+    unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
 
     units = [unitDict[char] for char in unit]
     level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]

@@ -241,7 +241,7 @@ def _build_csv(filename: str) -> discord.File:
     # sort the unit arrays by highest level
     unitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in unitArrays]
 
-    _, ceLevelDict, mmLevelDict = db.profession_dicts()
+    _, ceLevelDict, mmLevelDict, mmTrapsDict = db.profession_dicts()
 
     # TODO: figure out how this stuff should be arranged and formatted
 
