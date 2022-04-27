@@ -38,7 +38,7 @@ class EventButtonsView(discord.ui.View):
             self.last_status = status
 
 
-async def handle_interaction(last_status, status, interaction, parent_message):
+async def handle_interaction(last_status, status, interaction, parent_message) -> bool:
     if last_status == status:  # don't do anything if they are already in this category
         return False
 
@@ -69,7 +69,7 @@ async def handle_interaction(last_status, status, interaction, parent_message):
 
 # do I need to worry about people pressing buttons near-simultaneously? ideally calls to this should be queued to
 # avoid reader-writer problem. ask in discord?
-async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str):
+async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str) -> None:
     embed = message.embeds[0]
     fields = embed.fields
 
@@ -98,7 +98,7 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
     await message.edit(embed=embed)
 
 
-async def dm_to_user(user, entry=None, new_status=None, last_status=None):
+async def dm_to_user(user, entry=None, new_status=None, last_status=None) -> None:
     if user.dm_channel is None:
         await user.create_dm()
     dmChannel = user.dm_channel

@@ -32,3 +32,7 @@ logoURL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/
 
 # name of the csv file that is made by $finalize_event()
 csvFileName = r'svs_attendees.csv'
+
+# number of people to select as lottery winners. This should be higher than the intended number of winners, to account
+# for no-shows or other cases in which a randomly selected winner should not actually be given a prize.
+numberOfLottoWinners = 40

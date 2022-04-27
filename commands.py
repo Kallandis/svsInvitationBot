@@ -4,6 +4,7 @@ import globals
 import db
 import time
 import datetime
+import random
 from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
 from requestEntry import request_entry
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 @globals.bot.command(usage="MM/DD/YY")
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
+@commands.max_concurrency(1)
 async def create_event(ctx, *, datestring):
     """
     Creates event for the specified date at 11:00AM PST
@@ -92,6 +94,7 @@ async def create_event(ctx, *, datestring):
 @globals.bot.command(usage="pass")
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
+@commands.max_concurrency(1)
 async def edit_event(ctx, *, arg):
     """
     Edit the existing event
@@ -110,6 +113,7 @@ async def edit_event(ctx, *, arg):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
+@commands.max_concurrency(1)
 async def delete_event(ctx):
     """
     Sets eventInfo.db to default value
@@ -133,6 +137,7 @@ async def delete_event(ctx):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
+@commands.max_concurrency(1)
 async def finalize_event(ctx):
     """
     Close signups and send sorted .csv of attendees to user
@@ -163,7 +168,8 @@ async def _delete_event(user: discord.Member, intent):
         prompt += f'Type "confirm" within {timeout} seconds to confirm you want to delete the event.'
     elif intent == 'make_csv':
         prompt += f'Type "confirm" within {timeout} seconds ' \
-                  f'to confirm you want to close signups and send a CSV of attendees.'
+                  f'to confirm you want to close signups and send a CSV of attendees. Doing this is non-reversible, ' \
+                  f'as it will reset everyone\'s status to \"NO\".'
     prompt = await dmChannel.send(prompt)
 
     # wait for a response from the user
@@ -207,9 +213,44 @@ def _build_csv(filename: str) -> discord.File:
     parses the user database into csv subcategories
     """
 
+    # select lotto winners
+    lottoEntries = db.all_of_category('lotto', 1)
+    random.shuffle(lottoEntries)
+    lottoEntries = lottoEntries[:globals.numberOfLottoWinners]
+
+    mm = db.all_of_category('class', 'MM')
+    ce = db.all_of_category('class', 'CE')
+
+    # entries with more than one unit type
+    multiUnitArrays = [
+        filter(lambda x: len(x[2]) > 1, mm),
+        filter(lambda x: len(x[2]) > 1, ce)
+    ]
+    # sort each by highest level
+    multiUnitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in multiUnitArrays]
+
+    # split the single-unit entries of each class into 3 arrays, one for each unit type
+    unitArrays = [
+        filter(lambda x: x == 'A', mm),
+        filter(lambda x: x == 'N', mm),
+        filter(lambda x: x == 'F', mm),
+        filter(lambda x: x == 'A', ce),
+        filter(lambda x: x == 'N', ce),
+        filter(lambda x: x == 'F', ce),
+    ]
+    # sort the unit arrays by highest level
+    unitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in unitArrays]
+
+    _, ceLevelDict, mmLevelDict = db.profession_dicts()
+
+    # TODO: figure out how this stuff should be arranged and formatted
+
     with open(filename, newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        atds = db.all_of_category('status', 'YES')
+
+
+
+
 
     eventCSV = discord.File(filename)
     return eventCSV
@@ -218,7 +259,7 @@ def _build_csv(filename: str) -> discord.File:
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
-async def mail_db(ctx):
+async def dump_db(ctx):
     """
     Sends dump of SQL database to user
     Requires ADMIN role
@@ -228,14 +269,13 @@ async def mail_db(ctx):
         await ctx.author.create_dm()
     dmChannel = ctx.author.dm_channel
 
-    db.dump_db('svs_userHistory_dump.sql')
-    await dmChannel.send(attachments=[discord.File('svs_userHistory_dump.sql')])
-    pass
+    dump = db.dump_db('svs_userHistory_dump.sql')
+    await dmChannel.send("dump of userHistory.db database", file=dump)
 
 
 @globals.bot.command()
 @commands.dm_only()
-async def prof(ctx, *, intent=None):
+async def prof(ctx, *, intent=None) -> None:
     """
     $prof (no argument) to edit profession, $prof ? to show profession
 
@@ -271,7 +311,7 @@ async def prof(ctx, *, intent=None):
 
 @globals.bot.command()
 @commands.dm_only()
-async def lottery(ctx):
+async def lottery(ctx) -> None:
     """
     Toggles lottery opt in/out
     """

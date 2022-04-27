@@ -56,9 +56,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
-- IMPLEMENT: finalize_event()
-             - use csv.writer: https://docs.python.org/3/library/csv.html#csv.writer
-
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?
@@ -76,3 +73,11 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             Can move the code-blocks to embeds instead to preserve the time, hyperlink formatting
             send various error messages as embeds?
             send "event **delete** successful" from $delete_event as embed?
+
+- IMPLEMENT: finalize_event()
+             - use csv.writer: https://docs.python.org/3/library/csv.html#csv.writer
+             - need to get some feedback on how these should be sorted, displayed
+                - adjacent cols of same unit type?
+                - separate the high-level people into a "high level" category?
+
+

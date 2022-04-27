@@ -2,6 +2,7 @@ import globals
 import discord
 from discord.ext.tasks import loop
 import sqlite3 as sql3
+from typing import Union, Optional
 
 import logging
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ async def sql_write():
     globals.sqlEntries = []
 
 
-def add_entry(values: list):
+def add_entry(values: Union[list, tuple]) -> None:
     """
     param [list] entry: INT, STRING, STRING, INT, STRING, STRING, STRING, INT
     Status defaults to 0
@@ -41,43 +42,50 @@ def add_entry(values: list):
     globals.sqlEntries.append([sql, values])
 
 
-def get_entry(discord_id: int):
+def get_entry(discord_id: int) -> Optional[tuple]:
     """
-    Returns entry (list) associated with unique discord ID. If no entry exists, returns False
+    Returns entry (list) associated with unique discord ID. If no entry exists, returns None
     """
     sql = "SELECT * FROM USERS WHERE DISCORD_ID = ?"
     values = [discord_id]
     with sql3.connect('userHistory.db') as conn:
-        user = list(conn.execute(sql, values))
+        entry = list(conn.execute(sql, values))
 
-    if not user:
-        return False
+    if not entry:
+        return None
     else:
-        return user[0]
+        return entry[0]
 
 
-def update_event(title: str, time: str, message_id: int, channel_id: int):
+def update_event(title: str, time: str, message_id: discord.Message.id, channel_id: discord.TextChannel.id) -> None:
     sql = "UPDATE EVENT SET TITLE = ?, TIME = ?, MESSAGE_ID = ?, CHANNEL_ID = ?"
     values = [title, time, message_id, channel_id]
     with sql3.connect('eventInfo.db') as conn:
         conn.execute(sql, values)
 
 
-def get_event():
+def get_event() -> tuple[str, str, int, int]:
     sql = "SELECT * FROM EVENT"
     with sql3.connect('eventInfo.db') as conn:
         eventTitle, eventTime, message_id, channel_id = list(conn.execute(sql))[0]
     return eventTitle, eventTime, message_id, channel_id
 
 
-def info_embed(entry: list, descr=''):
+def profession_dicts() -> tuple:
+    # return a tuple of dictionaries to be used for formatting database info into human-readable text
+    unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
+    ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
+    mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
+
+    return unitDict, ceLevelDict, mmLevelDict
+
+
+def info_embed(entry: list, descr='') -> discord.Embed:
     # extract values from entry
     clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
 
     # format values for display
-    unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
-    ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
-    mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
+    unitDict, ceLevelDict, mmLevelDict = profession_dicts()
 
     units = [unitDict[char] for char in unit]
     level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
@@ -150,7 +158,7 @@ def info_embed(entry: list, descr=''):
     return embed
 
 
-def update_profession(discord_id, prof_array: list):
+def update_profession(discord_id: discord.Member.id, prof_array: list) -> None:
     """
     param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
     formatting instructions to be given in private message
@@ -160,17 +168,16 @@ def update_profession(discord_id, prof_array: list):
     sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ?, MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
     globals.sqlEntries.append([sql, values])
-    return True
 
 
-def update_lotto(discord_id, lotto: int):
+def update_lotto(discord_id: discord.Member.id, lotto: int) -> None:
     sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
     entry = [lotto, discord_id]
     # conn.execute(sql, entry)
     globals.sqlEntries.append([sql, entry])
 
 
-def update_status(discord_id, status: str):
+def update_status(discord_id: discord.Member.id, status: str) -> None:
     """
     Called by on_raw_reaction_add() to update status when a member reacts to the event embed
     """
@@ -184,7 +191,7 @@ def update_status(discord_id, status: str):
 
 
 # TODO
-async def confirm_maybe(member: discord.member):
+async def confirm_maybe(member: discord.Member):
     """
     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
     """
@@ -196,7 +203,7 @@ async def confirm_maybe(member: discord.member):
 
 
 # this one can just run immediately rather than go into write-loop
-def reset_status():
+def reset_status() -> None:
     sql = "UPDATE USERS SET STATUS = ?"
     val = "NO"
     globals.sqlEntries = []
@@ -204,7 +211,7 @@ def reset_status():
         conn.execute(sql, [val])
 
 
-def all_of_category(category: str, value):
+def all_of_category(category: str, value: Union[str, int]) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
     """
@@ -233,8 +240,10 @@ def all_of_category(category: str, value):
     return list(users)    # list of user tuples
 
 
-def dump_db(filename: str):
+def dump_db(filename: str) -> discord.File:
     with open(filename, 'w') as file:
         with sql3.connect('userHistory.db') as conn:
             for line in conn.iterdump():
                 file.write(line + '\n')
+
+    return discord.File(filename)
