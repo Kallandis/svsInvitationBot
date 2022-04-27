@@ -3,7 +3,6 @@ import db
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class ProfessionMenu(discord.ui.Select):

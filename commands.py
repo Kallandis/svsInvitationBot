@@ -12,7 +12,6 @@ import csv
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 # hard to pass the info from these custom decorators to on_error(), not worth using

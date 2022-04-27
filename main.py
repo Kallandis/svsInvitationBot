@@ -3,8 +3,10 @@ from discord.ext import commands
 import logging
 import globals
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(filename='bot.log', level=logging.INFO,
+                    format='%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',
+                    datefmt='%Y/%m/%d %H:%M:%S (UTC%z)')
+
 
 # create the bot
 intents = discord.Intents(messages=True, members=True, guilds=True, message_content=True)
@@ -15,6 +17,7 @@ import commands
 import requestEntry
 import db
 import tokenFile
+
 
 
 @bot.event
