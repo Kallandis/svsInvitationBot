@@ -17,6 +17,7 @@ import commands
 import requestEntry
 import db
 import tokenFile
+from eventInteraction import EventButtonsView
 
 
 @bot.event
@@ -36,6 +37,10 @@ async def on_ready():
         # globals.eventMessageID = eventMessageID
         globals.eventChannel = bot.get_channel(eventChannelID)
         globals.eventMessage = await globals.eventChannel.fetch_message(eventMessageID)
+
+        # re-initializes EventButtonsView instance so that buttons still work
+        view = EventButtonsView(globals.eventMessage)
+        await globals.eventMessage.edit(view=view)
 
     # start the sql_write loop that executes sql writes every # seconds
     db.sql_write.start()

@@ -25,8 +25,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             - view = EventButtons(eventMsg)
             - await blankMsg.edit(view=view)
 
-- ISSUE:    after bot restarts, I don't think EventButtons work anymore. fixable or limitation? must test.
-
 - CHANGE:   the CSV can probably be formatted a little more conveniently. Leave out duplicate info like class, unit
             within certain categories? since they are always the same.
 
@@ -45,9 +43,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT: _build_csv() should put a lock on updating the database, and any writes that go out should be rejected
              with a response to their context indicating that the write failed
-
-             I think opening a file is blocking, so this is already accomplished?
-
+             - I think opening a file is blocking, so this is already accomplished?
 
 - IMPLEMENT: confirm_maybe()
     https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
@@ -67,6 +63,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
         Rapptz version of aiosqlite, so I'll use it bc it's rapptz
         https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
 
-- CHANGE:   get rid of all code-blocks for consistency, as they break string formatting.
-            Can move the code-blocks to embeds instead to preserve the time, hyperlink formatting
-            send various error messages as embeds?
+- CHANGE:   change error messages to embeds?
+
+- TEST:     if two people press an EventButton at the same time, can it break the field due to async read-write of the
+            field value? I think so. get ian to test.
