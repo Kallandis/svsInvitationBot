@@ -192,24 +192,21 @@ async def _delete_event(user: discord.Member, intent):
         # await prompt.edit(content=edit)
         await prompt.edit(embed=embed)
         return
-    # else:
-    #     edit = f'**{actionDict[intent]}** successful'
-    #     await prompt.edit(content=edit)
-
-    # remove the EventButtons view, put some text above the embed indicating it's closed
-    edit = '```Sign-ups for this event are closed.```'
-    await globals.eventMessage.edit(content=edit, view=None)
 
     title = f'{cmd} Success'
     if intent == 'make_csv':
+        eventMessageEdit = '```Sign-ups for this event are closed.```'
         csvFile = _build_csv(globals.csvFileName)
         description = f'CSV built containing all that responded "YES" to {globals.eventInfo}\n' \
                       f'[Event Message]({globals.eventMessage.jump_url})'
     else:
+        eventMessageEdit = '```This event was deleted with $delete_event.```'
         description = f'Deleted {globals.eventInfo}\n' \
                       f'[Event Message]({globals.eventMessage.jump_url})'
         csvFile = None
 
+    # remove the EventButtons view, put some text above the embed indicating it's closed
+    await globals.eventMessage.edit(content=eventMessageEdit, view=None)
     embed = discord.Embed(title=title, description=description)
     kwargs = {'embed': embed, 'attachments': [csvFile]} if csvFile else {'embed': embed}
     await prompt.edit(**kwargs)
