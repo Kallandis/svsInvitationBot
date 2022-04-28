@@ -120,6 +120,8 @@ def build_csv(filename: str) -> discord.File:
     lottoEntries = db.all_attending_of_category('lotto', 1)
     random.shuffle(lottoEntries)
     lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
+    # get just the name
+    lottoWinners = [winner[0] for winner in lottoWinners]
 
     ce = db.all_attending_of_category('class', 'CE')
     mm = db.all_attending_of_category('class', 'MM')
@@ -263,6 +265,14 @@ def build_csv(filename: str) -> discord.File:
         writer.writerow(['MM single units'])
         writer.writerow([*colTitles, 'Traps', '', *colTitles, 'Traps', '', *colTitles, 'Traps'])
         writer.writerows(combined_mmSingles)
+
+        # whitespace
+        writer.writerows([''] * 5)
+
+        # lotto winners
+        writer.writerow(['Lottery Winners'])
+        writer.writerow([''])
+        writer.writerows(lottoWinners)
 
     eventCSV = discord.File(filename)
     return eventCSV

@@ -64,7 +64,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - CHANGE:   change error messages to embeds?
 
-- TEST:     if two people press an EventButton at the same time, can it break the field due to async read-write of the
+- ISSUE:    if two people press an EventButton at the same time, can it break the field due to async read-write of the
             field value? I think so. get ian to test.
 
             CONFIRMED, need to implement a queue here.
