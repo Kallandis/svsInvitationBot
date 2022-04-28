@@ -233,6 +233,7 @@ def all_attending_of_category(category: str, value: Union[str, int], display_nam
         conn.close()
         return None
 
+    users = list(users)
     conn.close()
 
     if display_name:
@@ -243,7 +244,7 @@ def all_attending_of_category(category: str, value: Union[str, int], display_nam
             newUsers.append((globals.guild.get_member(entry[0]), *entry[1:]))
         users = newUsers
 
-    return list(users)    # list of user tuples
+    return users    # list of user tuples
 
 
 def dump_db(filename: str) -> discord.File:

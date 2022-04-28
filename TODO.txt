@@ -15,15 +15,10 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - CHANGE: let $create_event specify what time the event will be at, and also the title of the event
           Might have to consider timezones here.
 
-- IDEA: pin the event (is this necessary?)
-
-- CHANGE: global variable for event variables. if it is None, then populate it from the DB.
-    -> reduces database reads. Should only have to read DB once per restart / new event
-    -> will have to read DB every time if there is no event. but that's fine.
-
 - IMPLEMENT: get a profile pic for the bot
 
-- CHANGE:   - When the fields become long, the buttons will be far below the event message.
+- CHANGE:   DEPRECATED FOR NOW (was not received well)
+            - When the fields become long, the buttons will be far below the event message.
             - soln: make the buttons be above the event message
             - blankMsg = await ctx.send('')
             - eventMsg = await ctx.send(embed=eventEmbed)
@@ -32,6 +27,8 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - ISSUE:    after bot restarts, I don't think EventButtons work anymore. fixable or limitation? must test.
 
+- CHANGE:   the CSV can probably be formatted a little more conveniently. Leave out duplicate info like class, unit
+            within certain categories? since they are always the same.
 
 ---------PRIORITY--------------
 
@@ -41,7 +38,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 MAYBE, WHITESPACE, NO fields in top row
 
             - actually, a field can only hold 1024 characters... If don't want to do the 3 yes fields, can just do a
-            "..." at the bottom of the field.
+            "..." at the bottom of the field. 3 yes fields will hold roughly 300 people
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
@@ -73,12 +70,3 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - CHANGE:   get rid of all code-blocks for consistency, as they break string formatting.
             Can move the code-blocks to embeds instead to preserve the time, hyperlink formatting
             send various error messages as embeds?
-            send "event **delete** successful" from $delete_event as embed?
-
-- IMPLEMENT: finalize_event()
-             - use csv.writer: https://docs.python.org/3/library/csv.html#csv.writer
-             - need to get some feedback on how these should be sorted, displayed
-                - adjacent cols of same unit type?
-                - separate the high-level people into a "high level" category?
-
-
