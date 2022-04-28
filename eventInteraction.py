@@ -1,7 +1,8 @@
 import discord
-from requestEntry import request_entry
+from helpers import request_entry
 import globals
 import db
+
 
 import logging
 logger = logging.getLogger(__name__)

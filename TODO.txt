@@ -47,9 +47,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
              with a response to their context indicating that the write failed
              - I think opening a file is blocking, so this is already accomplished?
 
-- IMPLEMENT: confirm_maybe()
-    https://github.com/gawel/aiocron    use aiocron to check on the MAYBE's X hrs before event Start
-
 - CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
@@ -69,3 +66,12 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - TEST:     if two people press an EventButton at the same time, can it break the field due to async read-write of the
             field value? I think so. get ian to test.
+
+            CONFIRMED, need to implement a queue here.
+
+- IMPLEMENT:    confirm_maybe()
+                in create_event, create a loop that will only run once, X hours before the event time
+                    when it executes, DM "Maybe" reacts with a reminder
+
+                edit_event() can restart the loop with a new value, if that functionality is desired
+
