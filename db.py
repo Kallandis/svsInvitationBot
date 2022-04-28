@@ -181,18 +181,6 @@ def update_status(discord_id: discord.Member.id, status: str) -> None:
     globals.sqlEntries.append([sql, entry])
 
 
-# TODO
-async def confirm_maybe(member: discord.Member):
-    """
-    When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
-    """
-
-    # make this an embed and include a link to the event message.
-    content = f'This is a reminder that you are registered as **MAYBE** for {globals.eventInfo}\n' \
-              f'If you would like to change your status, go to {globals.eventChannel.name}.'
-    pass
-
-
 # this one can just run immediately rather than go into write-loop
 def reset_status() -> None:
     sql = "UPDATE USERS SET STATUS = ?"

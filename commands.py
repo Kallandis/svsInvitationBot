@@ -44,11 +44,20 @@ async def create_event(ctx, *, datestring):
         year += 2000
 
     # TODO: use discord time function instead? not sure about timezones
+    # TODO: Verify that the event is in the future
     # convert MM/DD/YY to unix time
     date_time = datetime.datetime(year, month, day, 11, 0)
     unix_time = int(time.mktime(date_time.timetuple()))
 
     # start loop that will call confirm_maybe()
+
+    # TODO: calculate time in seconds until event, then subtract globals.maybe
+    # if this is less than 0, don't start loop
+    td = datetime.timedelta(seconds=time.time() - unix_time)
+
+    @tasks.loop()
+    async def confirm_maybe_loop():
+        await helpers.confirm_maybe()
 
     # build title and dynamic timestamp for embed
     title = "SvS Event"
