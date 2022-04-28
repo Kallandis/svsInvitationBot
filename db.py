@@ -8,16 +8,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# temporary function for testing purposes
-@globals.bot.command()
-async def print_db(ctx):
-    with sql3.connect('userHistory.db') as conn:
-        entries = conn.execute("SELECT * FROM USERS")
-
-    for entry in entries:
-        print(entry)
-
-
 @loop(seconds=5, reconnect=True)
 async def sql_write():
     with sql3.connect('userHistory.db') as conn:

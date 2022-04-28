@@ -25,6 +25,9 @@ async def create_event(ctx, *, datestring):
     Creates event for the specified date at 11:00AM PST
     Requires ADMIN Role
     """
+    # check if channel is in mainChannels
+    if ctx.channel.id not in globals.mainChannelIDs:
+        return
 
     # check if there is an active event
     if globals.eventChannel is not None:
@@ -100,6 +103,11 @@ async def edit_event(ctx, *, arg):
     Edit the existing event
     Does not change the status of current attendees
     """
+
+    # check if channel is in mainChannels
+    if ctx.channel.id not in globals.mainChannelIDs:
+        return
+
     if globals.eventChannel is None:
         await ctx.send(f'ERROR: No active event found')
         return
@@ -120,6 +128,10 @@ async def delete_event(ctx):
     Sets everyone's status to "NO"
     Empties the sql_write() "buffer"
     """
+
+    # check if channel is in mainChannels
+    if ctx.channel.id not in globals.mainChannelIDs:
+        return
 
     # check if there is currently an event
     if globals.eventChannel is None:
@@ -143,6 +155,10 @@ async def finalize_event(ctx):
     Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
     Requires ADMIN role
     """
+
+    # check if channel is in mainChannels
+    if ctx.channel.id not in globals.mainChannelIDs:
+        return
 
     if globals.eventChannel is None:
         await ctx.send(f'ERROR: No active event found')
@@ -386,6 +402,10 @@ async def dump_db(ctx):
     Sends dump of SQL database to user
     Requires ADMIN role
     """
+
+    # check if channel is in mainChannels
+    if ctx.channel.id not in globals.mainChannelIDs:
+        return
 
     if ctx.author.dm_channel is None:
         await ctx.author.create_dm()

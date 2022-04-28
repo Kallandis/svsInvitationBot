@@ -18,6 +18,8 @@ sqlEntries = []     # exhausted in db.sql_write() loop
 guildID = 964624340295499857    # svsBotTestServer
 
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
+# this is only on the bot's end. You must ensure that the bot has permissions and access to these channels in the server
+# it is recommended but not required to ONLY add the bot to the channels that it is intended to be active in
 mainChannelIDs = [964654664677212220]  # svsBotTestServer/botchannel
 
 # prefix that indicates a command (e.g. $prof, $create_event [args])
