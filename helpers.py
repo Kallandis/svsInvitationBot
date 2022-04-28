@@ -1,5 +1,4 @@
 import discord
-from discord.ext import tasks
 import random
 import csv
 from asyncio import TimeoutError
@@ -7,9 +6,10 @@ from asyncio import TimeoutError
 import db
 import globals
 from professionInteraction import ProfessionMenuView
+from typing import Union
 
 
-async def request_entry(member: discord.Member, event_attempt=False):
+async def request_entry(member: Union[discord.Member, discord.User], event_attempt=False) -> None:
     """
     Prompt unregistered user to provide data entry for SQL database.
     Called when user reacts to an event or uses DM command $lotto or $prof before being added to DB
@@ -33,7 +33,7 @@ async def request_entry(member: discord.Member, event_attempt=False):
 
 
 # to be called in delete_event(), finalize_event()
-async def delete_event(user: discord.Member, intent):
+async def delete_event(user: discord.Member, intent: str) -> None:
     if user.dm_channel is None:
         await user.create_dm()
     dmChannel = user.dm_channel

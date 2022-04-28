@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import globals
 import db
 import time
@@ -47,6 +47,8 @@ async def create_event(ctx, *, datestring):
     # convert MM/DD/YY to unix time
     date_time = datetime.datetime(year, month, day, 11, 0)
     unix_time = int(time.mktime(date_time.timetuple()))
+
+    # start loop that will call confirm_maybe()
 
     # build title and dynamic timestamp for embed
     title = "SvS Event"
