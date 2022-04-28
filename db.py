@@ -231,7 +231,7 @@ def all_attending_of_category(category: str, value: Union[str, int], display_nam
         # I tested and this is slightly faster than using a map
         newUsers = []
         for entry in users:
-            newUsers.append((globals.guild.get_member(entry[0]), *entry[1:]))
+            newUsers.append((globals.guild.get_member(entry[0]).display_name, *entry[1:]))
         users = newUsers
 
     return users    # list of user tuples
