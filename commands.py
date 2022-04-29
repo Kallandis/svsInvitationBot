@@ -4,6 +4,7 @@ import globals
 import db
 import time
 import datetime
+import asyncio
 
 from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
@@ -47,18 +48,26 @@ async def create_event(ctx, *, datestring):
     # TODO: Verify that the event is in the future
     # convert MM/DD/YY to unix time
     date_time = datetime.datetime(year, month, day, 11, 0)
+    # date_time = datetime.datetime(year, month, day, 0, 28)
     unix_time = int(time.mktime(date_time.timetuple()))
 
     # start loop that will call confirm_maybe()
 
     # TODO: calculate time in seconds until event, then subtract globals.maybe
-    # if this is less than 0, don't start loop
-    td = datetime.timedelta(seconds=time.time() - unix_time)
+    # get time until event
+    td = datetime.timedelta(seconds=unix_time - time.time())
+    td = td.total_seconds()
+    td -= globals.confirmMaybeWarningTime
 
-    @tasks.loop()
-    async def confirm_maybe_loop():
-        await helpers.confirm_maybe()
+    if td > 60:
+        @tasks.loop(seconds=td, count=2)
+        async def confirm_maybe_loop():
+            # the loop immediately runs once upon start, so wait until the second loop
+            if confirm_maybe_loop.current_loop > 0:
+                await helpers.confirm_maybe()
+        confirm_maybe_loop.start()
 
+    # confirm_maybe_loop.start()
     # build title and dynamic timestamp for embed
     title = "SvS Event"
     eventTime = f"<t:{unix_time}>"

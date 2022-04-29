@@ -2,23 +2,31 @@ import discord
 import random
 import csv
 from asyncio import TimeoutError
+from typing import Union
+import asyncio
 
 import db
 import globals
 from professionInteraction import ProfessionMenuView
-from typing import Union
 
 
 # TODO
-async def confirm_maybe(member: discord.Member) -> None:
+async def confirm_maybe() -> None:
     """
     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
     """
+    title = 'SvS Event Reminder'
+    descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
+            f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
+    embed = discord.Embed(title=title, description=descr)
 
-    # make this an embed and include a link to the event message.
-    content = f'This is a reminder that you are registered as **MAYBE** for {globals.eventInfo}\n' \
-              f'If you would like to change your status, go to {globals.eventChannel.name}.'
-    pass
+    # send embed to all maybes
+    maybeEntries = db.all_attending_of_category('status', 'MAYBE', display_name=False)
+    for entry in maybeEntries:
+        user = globals.guild.get_member(entry[0])
+        if user.dm_channel is None:
+            await user.create_dm()
+        await user.dm_channel.send(embed=embed)
 
 
 async def request_entry(member: Union[discord.Member, discord.User], event_attempt=False) -> None:

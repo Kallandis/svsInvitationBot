@@ -1,6 +1,13 @@
 https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
+- NOTE: if commands are called by people in another timezone, the event time will be constructed on the local machine
+        and timezone info will be assumed to be that of the local machine.
+
+        So, all times given to the bot will be assumed to be in PST. Not sure how to deal with this other than getting
+        people to put in times as unix times. But it's not a big deal
+
 - IMPLEMENT: edit_event()   # I have no idea what functionality this should have
+             If allow for changing time, must restart the confirm_maybe_loop() with a new value
 
 - ISSUE: $help does not work in private channel
     ->  await destination.send(page)
@@ -36,8 +43,11 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will log $bug in bugreports.log
 
-- CHANGE:    a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
-            - soln: just keep adding YES fields with overflow. also, put the fields in a quote-block
+- CHANGE:   embed FIELD stuff
+            - a field can hold a maximum of 1024 characters. Average of ~10chars per user -> maximum of 100 people
+                - soln: just keep adding YES fields with overflow
+            - put fields in a quote for separation
+            - Field title should indicate the number of people in the field
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
@@ -56,23 +66,25 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
         https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
 
 - CHANGE:   change error messages to embeds?
+            Also I think most error messages should DM the user, not be posted in main channel.
 
 - ISSUE:    if two people press an EventButton at the same time, can it break the field due to async read-write of the
             field value? I think so. get ian to test.
 
             CONFIRMED, need to implement a queue here.
 
-- IMPLEMENT:    confirm_maybe()
-                in create_event, create a loop that will only run once, X hours before the event time
-                    when it executes, DM "Maybe" reacts with a reminder
-
-                edit_event() can restart the loop with a new value, if that functionality is desired
-
 - ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
          and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
          set last_status to something.
+            do something like: if first_entry == True, check the fields to make sure you arent in it.
+
+- ISSUE:    fields can't handle multiple people with the same name... would have to get rid of the "not in fieldValues" check
 
 - CHANGE: move finalize_event, delete_event to eventInteraction.py EventButtons()
 
 - CHANGE: make csv not include certain redundant cols to make it shorter (class, unit for the single units)
             after doing so, will need to redo some alignment stuff
+
+- IMPLEMENT: add a module or fxn "reload_cache.py" which resets the python cache if the bot is restarted
+             Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
+             do things like restart the confirm_maybe() loop

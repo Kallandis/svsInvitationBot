@@ -209,6 +209,11 @@ def all_attending_of_category(category: str, value: Union[str, int], display_nam
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ? AND LOTTERY = ?"
         users = conn.execute(sql, ['YES', value])
 
+    # just used for checking maybes. Could be used for repopulating embed name fields if bot restarts.
+    elif category == 'status':
+        sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ?"
+        users = conn.execute(sql, [value])
+
     else:
         conn.close()
         return None
