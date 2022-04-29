@@ -1,5 +1,5 @@
 import discord
-from helpers import request_entry
+import helpers
 import globals
 import db
 
@@ -17,26 +17,59 @@ class EventButtonsView(discord.ui.View):
         self.parent_message = parent_message
         self.last_status = None
 
-    @discord.ui.button(label='YES', style=discord.ButtonStyle.green, custom_id='persistent_view:yes')
+    # @discord.ui.button(label='✅', style=discord.ButtonStyle.secondary, custom_id='persistent_view:yes')
+    # async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     status = 'YES'
+    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+    #     if success:
+    #         self.last_status = status
+    #
+    # @discord.ui.button(label='❔', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
+    # async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     status = 'MAYBE'
+    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+    #     if success:
+    #         self.last_status = status
+    #
+    # @discord.ui.button(label='❌', style=discord.ButtonStyle.secondary, custom_id='persistent_view:no')
+    # async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     status = 'NO'
+    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+    #     if success:
+    #         self.last_status = status
+
+    @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'YES'
         success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
         if success:
             self.last_status = status
 
-    @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.gray, custom_id='persistent_view:maybe')
+    @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
     async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'MAYBE'
         success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
         if success:
             self.last_status = status
 
-    @discord.ui.button(label='NO', style=discord.ButtonStyle.red, custom_id='persistent_view:no')
+    @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'NO'
         success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
         if success:
             self.last_status = status
+
+    # @discord.ui.button(label='SUBMIT', style=discord.ButtonStyle.success, custom_id='persistent_view:finalize', row=2)
+    # async def submit(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     user = interaction.user
+    #     if globals.adminRole in [role.name for role in user.roles]:
+    #         await helpers.delete_event(user, intent='make_csv')
+    #
+    # @discord.ui.button(label='DELETE', style=discord.ButtonStyle.danger, custom_id='persistent_view:delete', row=2)
+    # async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
+    #     user = interaction.user
+    #     if globals.adminRole in [role.name for role in user.roles]:
+    #         await helpers.delete_event(user, intent='delete')
 
 
 async def handle_interaction(last_status, status, interaction, parent_message) -> bool:
@@ -46,7 +79,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     user = interaction.user
     entry = db.get_entry(user.id)
     if not entry:
-        await request_entry(user, event_attempt=True)
+        await helpers.request_entry(user, event_attempt=True)
         return False
 
     # send ephemeral message to eventChannel

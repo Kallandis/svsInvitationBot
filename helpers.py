@@ -46,6 +46,15 @@ async def request_entry(member: Union[discord.Member, discord.User], event_attem
 
 # to be called in delete_event(), finalize_event()
 async def delete_event(user: discord.Member, intent: str) -> None:
+    """
+    Checks for confirmation with invoking user. If yes:
+    Sets eventInfo.db to default value
+    Sets everyone's status to "NO"
+    Removes interaction buttons from event message
+    If intent = 'make_csv', builds a CSV of attending users and DMs it to invoking user
+    Empties the sql_write() "buffer"
+    """
+
     if user.dm_channel is None:
         await user.create_dm()
     dmChannel = user.dm_channel

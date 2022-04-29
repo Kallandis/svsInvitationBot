@@ -42,10 +42,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
 
-- IMPLEMENT: _build_csv() should put a lock on updating the database, and any writes that go out should be rejected
-             with a response to their context indicating that the write failed
-             - I think opening a file is blocking, so this is already accomplished?
-
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
     https://www.sqlite.org/wal.html or perhaps this is a solution?

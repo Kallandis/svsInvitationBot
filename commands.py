@@ -76,7 +76,7 @@ async def create_event(ctx, *, datestring):
     embed.add_field(name=f"{'NO':<20}", value="\u200b")
 
     # create footer
-    cmdList = ['edit_event', 'delete_event', 'finalize_event', 'mail_db']
+    cmdList = ['edit_event', 'delete_event', 'finalize_event', 'download_db']
     cmdList = [globals.commandPrefix + cmd for cmd in cmdList]
     embed.set_footer(text=', '.join(cmdList))
 
@@ -182,7 +182,7 @@ async def finalize_event(ctx):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
-async def dump_db(ctx):
+async def download_db(ctx):
     """
     Sends dump of SQL database to user
     Requires ADMIN role
