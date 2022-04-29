@@ -14,7 +14,7 @@ bot = commands.Bot(command_prefix=globals.commandPrefix, intents=intents)
 globals.bot = bot
 
 import commands
-import requestEntry
+import helpers
 import db
 import tokenFile
 from eventInteraction import EventButtonsView

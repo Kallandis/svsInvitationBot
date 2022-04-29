@@ -17,8 +17,9 @@ def reset_db():
         conn.execute("""CREATE TABLE USERS (
                 discord_ID INTEGER NOT NULL PRIMARY KEY,
                 class TEXT,
-                unit TEXT,
                 level INTEGER,
+                unit TEXT,
+                march_size TEXT,
                 mm_traps TEXT,
                 skins TEXT,
                 status TEXT,

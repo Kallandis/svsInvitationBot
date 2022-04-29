@@ -28,17 +28,16 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - CHANGE:   the CSV can probably be formatted a little more conveniently. Leave out duplicate info like class, unit
             within certain categories? since they are always the same.
 
+- IDEA: could make the delete/finalize event confirmation just require a react instead of typing "confirm"
+        might avoid the rare bug where it just immediately fails?
+
 ---------PRIORITY--------------
+
 
 - IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will log $bug in bugreports.log
 
 - CHANGE:    a field can hold a maximum of 2048 characters. Average of ~10chars per user -> maximum of 200 people
-            - current soln: just don't add names if it'd go over 2048 chars (not great, expect 200-250 people)
-            - better soln: create 3 YES fields in bottom row, populate them one-by-one. maximum of ~600 people
-                MAYBE, WHITESPACE, NO fields in top row
-
-            - actually, a field can only hold 1024 characters... If don't want to do the 3 yes fields, can just do a
-            "..." at the bottom of the field. 3 yes fields will hold roughly 300 people
+            - soln: just keep adding YES fields with overflow. also, put the fields in a quote-block
 
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
@@ -46,8 +45,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: _build_csv() should put a lock on updating the database, and any writes that go out should be rejected
              with a response to their context indicating that the write failed
              - I think opening a file is blocking, so this is already accomplished?
-
-- CHANGE: no longer building teams with logic. Instead just produce filtered lists (f.x. CE-A, CE-N, CE-F)
 
 - IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
     implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
@@ -75,3 +72,11 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
                 edit_event() can restart the loop with a new value, if that functionality is desired
 
+- ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
+         and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
+         set last_status to something.
+
+- CHANGE: move finalize_event, delete_event to eventInteraction.py EventButtons()
+
+- CHANGE: make csv not include certain redundant cols to make it shorter (class, unit for the single units)
+            after doing so, will need to redo some alignment stuff

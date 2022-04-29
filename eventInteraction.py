@@ -59,7 +59,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     if last_status is None:  # this is their first response to event
         if status != 'NO':   # only DM them if their response is YES or MAYBE
             entry = list(entry)
-            entry[6] = status
+            entry[7] = status
             await dm_to_user(user, entry=entry)
 
     else:   # if this is not their first response to event, DM them with change-string instead of full embed

@@ -7,13 +7,15 @@ logger = logging.getLogger(__name__)
 
 class ProfessionMenu(discord.ui.Select):
 
-    __slots__ = ('parent_message', 'category', 'clas', 'units', 'level', 'mm_traps', 'first_entry')
+    __slots__ = ('parent_message', 'category', 'clas', 'units', 'march_size', 'level', 'mm_traps', 'first_entry')
 
-    def __init__(self, parent_message, category, clas=None, units=None, level=None, mm_traps=None, first_entry=None):
+    def __init__(self, parent_message, category,
+                 clas=None, units=None, march_size=None, level=None, mm_traps=None, first_entry=None):
         self.parent_message = parent_message
         self.category = category
         self.clas = clas
         self.units = units
+        self.march_size = march_size
         self.level = level
         self.mm_traps = mm_traps
         self.first_entry = first_entry
@@ -36,6 +38,19 @@ class ProfessionMenu(discord.ui.Select):
             ]
             max_vals = 3
             placeholder = f'Main unit & others w/ mostly purple, >= 8 perks'
+
+        elif category == 'march size':
+            options = [
+                discord.SelectOption(label='< 160'),
+                discord.SelectOption(label='160-170'),
+                discord.SelectOption(label='170-180'),
+                discord.SelectOption(label='180-190'),
+                discord.SelectOption(label='190-200'),
+                discord.SelectOption(label='200-210'),
+                discord.SelectOption(label='210-220'),
+                discord.SelectOption(label='> 220')
+            ]
+            placeholder = 'Best base march size (no skin / buffs)'
 
         elif category == "level":
             if self.clas == 'MM':
@@ -100,6 +115,9 @@ class ProfessionMenu(discord.ui.Select):
             nextCategory = "unit"
         elif self.category == "unit":
             self.units = choice
+            nextCategory = "march size"
+        elif self.category == "march size":
+            self.march_size = choice
             nextCategory = "level"
         elif self.category == "level":
             self.level = choice
@@ -107,8 +125,10 @@ class ProfessionMenu(discord.ui.Select):
         elif self.category == "mm_traps":
             self.mm_traps = choice
             nextCategory = "skins"
-        else:   # self.category == "skins"
+        elif self.category == "skins":
             nextCategory = None
+        else:  # should never be reached
+            nextCategory = 'error'
 
         if nextCategory is not None:
             # edit the interaction message with a new ProfessionMenuView view for the next category
@@ -117,8 +137,8 @@ class ProfessionMenu(discord.ui.Select):
                 content=f'You chose: {choice}',
                 view=ProfessionMenuView(
                     self.parent_message, nextCategory,
-                    clas=self.clas, units=self.units, level=self.level, mm_traps=self.mm_traps,
-                    first_entry=self.first_entry
+                    clas=self.clas, units=self.units, march_size=self.march_size, level=self.level,
+                    mm_traps=self.mm_traps, first_entry=self.first_entry
                 )
             )
         else:   # the current category is "skins"
@@ -146,7 +166,7 @@ class ProfessionMenu(discord.ui.Select):
                 # if user selected "None" in the MenuView, set skins to ''
                 skins = ''
 
-            prof_array = [self.clas, ''.join(unitChars), levelNum, self.mm_traps, skins]
+            prof_array = [self.clas, levelNum, ''.join(unitChars), self.march_size, self.mm_traps, skins]
 
             # if first-time user does not have an entry in DB, add one (happens when called through dm.request_entry())
             if self.first_entry:
@@ -158,7 +178,7 @@ class ProfessionMenu(discord.ui.Select):
 
             # else just update the user's profession
             else:
-                # need to get old DB entry to send to db.info_embed()
+                # still need to get old DB entry to send to db.info_embed()
                 old_entry = db.get_entry(interaction.user.id)
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
@@ -172,18 +192,21 @@ class ProfessionMenu(discord.ui.Select):
 
 class ProfessionMenuView(discord.ui.View):
 
-    __slots__ = ('parent_message', 'category', 'clas', 'units', 'level', 'mm_traps', 'first_entry')
+    __slots__ = ('parent_message', 'category', 'clas', 'units', 'march_size', 'level', 'mm_traps', 'first_entry')
 
-    def __init__(self, parent_message, category, clas=None, units=None, level=None, mm_traps=None, first_entry=None):
+    def __init__(self, parent_message, category,
+                 clas=None, units=None, march_size=None, level=None, mm_traps=None, first_entry=None):
         super().__init__(timeout=300)
         self.parent_message = parent_message
         self.first_entry = first_entry
 
         # Adds the dropdown to our view object.
-        self.add_item(ProfessionMenu(parent_message, category, clas=clas, units=units, level=level, mm_traps=mm_traps,
+        self.add_item(ProfessionMenu(parent_message, category,
+                                     clas=clas, units=units, march_size=march_size, level=level, mm_traps=mm_traps,
                                      first_entry=first_entry))
 
     async def on_timeout(self):
+        # have to re-fetch parent message to get its current state
         dm_channel = self.parent_message.channel
         ID = self.parent_message.id
         parent_message = await dm_channel.fetch_message(ID)

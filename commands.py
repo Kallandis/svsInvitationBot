@@ -76,7 +76,7 @@ async def create_event(ctx, *, datestring):
     embed.add_field(name=f"{'NO':<20}", value="\u200b")
 
     # create footer
-    cmdList = ['edit_event', 'delete_event', 'mail_csv', 'mail_db']
+    cmdList = ['edit_event', 'delete_event', 'finalize_event', 'mail_db']
     cmdList = [globals.commandPrefix + cmd for cmd in cmdList]
     embed.set_footer(text=', '.join(cmdList))
 
@@ -176,7 +176,7 @@ async def finalize_event(ctx):
         await ctx.send(f'ERROR: Must use command in {globals.eventChannel.mention}')
         return
 
-    await helpers._delete_event(ctx.author, intent='make_csv')
+    await helpers.delete_event(ctx.author, intent='make_csv')
 
 
 @globals.bot.command()
@@ -249,7 +249,7 @@ async def lottery(ctx) -> None:
     if not entry:
         await helpers.request_entry(member)
     else:
-        lotto = 1 - entry[7]
+        lotto = 1 - entry[-1]
         lotto_in_out = 'in to' if lotto else 'out of'
         msg = f'You have opted ' + lotto_in_out + ' the lottery\n'
         db.update_lotto(ID, lotto)

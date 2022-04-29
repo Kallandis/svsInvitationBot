@@ -22,13 +22,13 @@ async def sql_write():
 
 def add_entry(values: Union[list, tuple]) -> None:
     """
-    param [list] entry: INT, STRING, STRING, INT, STRING, STRING, STRING, INT
+    param [list] entry: INT, STRING, INT, STRING, STRING, STRING, STRING, STRING, INT
     Status defaults to 0
     Lottery defaults to 1
     Profession must be provided by User via calls of ProfessionMenuView()
     """
-    sql = "INSERT INTO USERS (discord_ID, class, unit, level, mm_traps, skins, status, lottery) " \
-          "values(?, ?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, mm_traps, skins, status, lottery) " \
+          "values(?, ?, ?, ?, ?, ?, ?, ?, ?)"
     globals.sqlEntries.append([sql, values])
 
 
@@ -73,12 +73,14 @@ def profession_dicts() -> tuple:
 
 def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     # extract values from entry
-    clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
+    # clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
+    clas, level, unit, march_size, mm_traps, skins, status, lottery = entry[1:]
 
     # format values for display
     unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
 
     units = [unitDict[char] for char in unit]
+    march_size = '\\' + march_size if '<' or '>' in march_size else march_size  # need to escape the ">" quote char
     level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
     traps = mm_traps.split(', ')
     skins = skins.split(', ')
@@ -90,15 +92,16 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     skins = '\n'.join(skins)
 
     unitTitle = 'Unit' if '\n' not in units else 'Units'
-    trapsTitle = 'Trap' if '\n' not in traps else 'Traps'
-    skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
+    # trapsTitle = 'Trap' if '\n' not in traps else 'Traps'
+    # skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # initialize arg dictionaries to be used in field creation
     class_args = {'name': 'Class', 'value': clas}
-    unit_args = {'name': unitTitle, 'value': units}
     level_args = {'name': 'Level', 'value': level}
-    traps_args = {'name': trapsTitle, 'value': traps}
-    skins_args = {'name': skinsTitle, 'value': skins}
+    unit_args = {'name': unitTitle, 'value': units}
+    march_args = {'name': 'March Size', 'value': march_size}
+    traps_args = {'name': 'Traps', 'value': traps}
+    skins_args = {'name': 'Skins', 'value': skins}
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
@@ -113,28 +116,25 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
 
     # add fields to the embed for various entry parameters
     # there are a maximum of 3 fields in a row, stretched to fill a fixed width. Add whitespace fields for alignment
-    # row 1: Class, Unit(s), Level
+    # row 1: Class, Level, Unit(s)
     embed.add_field(**class_args)
-    embed.add_field(**unit_args)
     embed.add_field(**level_args)
+    embed.add_field(**unit_args)
 
-    # row 2: Trap(s), Skin(s), lottery
+    # row 2: MarchSize, Trap(s), Skin(s), lottery
+    embed.add_field(**march_args)
     count = 0
     for argDict in [traps_args, skins_args]:
-        if argDict['value']:
+        if argDict['value']:    # if traps, skins is not empty
             embed.add_field(**argDict)
             count += 1
 
     # lottery
     embed.add_field(**lottery_args)
 
-    # add whitespace fields to align with first row
-    if count > 0:
-        for i in range(2 - count):
-            embed.add_field(**whitespace_args)
-
-    # # row 3: Lottery
-    # embed.add_field(**lottery_args)
+    # add whitespace fields to align with first row, if 2nd row only contains MarchSize & lottery
+    if count == 0:
+        embed.add_field(**whitespace_args)
 
     # set thumbnail image
     if globals.logoURL:
@@ -156,16 +156,17 @@ def update_profession(discord_id: discord.Member.id, prof_array: list) -> None:
     Should only be called if prof_array is not None
     """
 
-    sql = "UPDATE USERS SET CLASS = ?, UNIT = ?, LEVEL = ?, MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
+    sql = "UPDATE USERS SET CLASS = ?, LEVEL = ?, UNIT = ?, MARCH_SIZE = ?, " \
+          "MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
     globals.sqlEntries.append([sql, values])
 
 
 def update_lotto(discord_id: discord.Member.id, lotto: int) -> None:
     sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
-    entry = [lotto, discord_id]
+    values = [lotto, discord_id]
     # conn.execute(sql, entry)
-    globals.sqlEntries.append([sql, entry])
+    globals.sqlEntries.append([sql, values])
 
 
 def update_status(discord_id: discord.Member.id, status: str) -> None:
@@ -199,7 +200,8 @@ def all_attending_of_category(category: str, value: Union[str, int], display_nam
 
     # all (ID, prof) of class
     if category == "class":
-        sql = "SELECT DISCORD_ID, CLASS, UNIT, LEVEL, MM_TRAPS, SKINS FROM USERS WHERE STATUS = ? AND CLASS = ?"
+        sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, MM_TRAPS, SKINS " \
+              "FROM USERS WHERE STATUS = ? AND CLASS = ?"
         users = conn.execute(sql, ['YES', value])
 
     # all ID attending event who have opted in to lotto

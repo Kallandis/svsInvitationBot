@@ -66,7 +66,8 @@ async def delete_event(user: discord.Member, intent: str) -> None:
 
     # wait for a response from the user
     try:
-        reply = await globals.bot.wait_for('message', timeout=timeout, check=lambda m: m.channel == dmChannel)
+        reply = await globals.bot.wait_for('message', timeout=timeout,
+                                           check=lambda m: m.channel == dmChannel and m.author == user)
     except TimeoutError:
         edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
         embed = discord.Embed(title=f'Confirm {cmd}', description=edit)
@@ -87,7 +88,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     if intent == 'make_csv':
         eventMessageEdit = '```Sign-ups for this event are closed.```'
         csvFile = build_csv(globals.csvFileName)
-        description = f'CSV built containing all that responded "YES" to {globals.eventInfo}\n' \
+        description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
                       f'[Event Message]({globals.eventMessage.jump_url})'
     else:
         eventMessageEdit = '```This event was deleted with $delete_event.```'
@@ -121,36 +122,62 @@ def build_csv(filename: str) -> discord.File:
     random.shuffle(lottoEntries)
     lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
     # get just the name
-    lottoWinners = [winner[0] for winner in lottoWinners]
+    # lottoWinners = [winner[0] for winner in lottoWinners]
 
+    # get class arrays
     ce = db.all_attending_of_category('class', 'CE')
     mm = db.all_attending_of_category('class', 'MM')
+    # name, class, level, unit, march_size, traps, skins
+    nameIndex = 0
+    classIndex = 1
+    levelIndex = 2
+    unitIndex = 3
+    marchIndex = 4
+    trapsIndex = 5
+    skinsIndex = 6
+
+    # to be used as a key for sorting by march size
+    def sort_march(entry):
+        msize = entry[marchIndex]
+        # msize takes the forms {< 160, 160-170, ... , 210-220, > 220}
+        if '<' or '>' in msize:
+            # strip the < or >
+            msize = msize[-3:]
+        else:
+            # take the bottom of the range and add 1 so it is not equal to smallest edge case
+            msize = msize[:3] + 1
+        return int(msize)
 
     # entries with more than one unit type
     multiUnitArrays = [
-        filter(lambda x: len(x[2]) > 1, ce),
-        filter(lambda x: len(x[2]) > 1, mm)
+        filter(lambda x: len(x[unitIndex]) > 1, ce),
+        filter(lambda x: len(x[unitIndex]) > 1, mm)
     ]
 
-    # sort each by number of units, then by level
-    # have to do level first
-    multiUnitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in multiUnitArrays]
+    # sort each array in multiUnitArrays by number of units, then by level, then by march size
+    # must first sort by march size
+    multiUnitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in multiUnitArrays]
+    # then level
+    multiUnitArrays = [sorted(subArray, key=lambda x: x[levelIndex], reverse=True) for subArray in multiUnitArrays]
     # then final sort by number of units
-    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[2]), reverse=True) for subArray in multiUnitArrays]
+    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitIndex]), reverse=True) for subArray in multiUnitArrays]
 
     #
     # split the single-unit entries of each class into 3 arrays, one for each unit type
     unitArrays = [
-        filter(lambda x: x[2] == 'A', ce),
-        filter(lambda x: x[2] == 'N', ce),
-        filter(lambda x: x[2] == 'F', ce),
-        filter(lambda x: x[2] == 'A', mm),
-        filter(lambda x: x[2] == 'N', mm),
-        filter(lambda x: x[2] == 'F', mm)
+        filter(lambda x: x[unitIndex] == 'A', ce),
+        filter(lambda x: x[unitIndex] == 'N', ce),
+        filter(lambda x: x[unitIndex] == 'F', ce),
+        filter(lambda x: x[unitIndex] == 'A', mm),
+        filter(lambda x: x[unitIndex] == 'N', mm),
+        filter(lambda x: x[unitIndex] == 'F', mm)
     ]
 
-    # sort the unit arrays by highest level
-    unitArrays = [sorted(subArray, key=lambda x: x[3], reverse=True) for subArray in unitArrays]
+    # sort the unit arrays by level, then by march size
+    # must first sort by march size
+    unitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in unitArrays]
+    # then level
+    unitArrays = [sorted(subArray, key=lambda x: x[levelIndex], reverse=True) for subArray in unitArrays]
 
     #
     # convert data into human-readable text
@@ -166,17 +193,21 @@ def build_csv(filename: str) -> discord.File:
             # remove the traps entry from CE
             if cls == 'CE':
                 newEntry = (
-                    *entry_[:3],
-                    ceLevelDict[entry_[3]],
-                    entry_[5].replace(', ', ' ')
+                    *entry_[:levelIndex],
+                    ceLevelDict[entry_[levelIndex]],
+                    entry_[unitIndex],
+                    entry_[marchIndex],
+                    entry_[skinsIndex].replace(', ', ' ')
                 )
             else:
                 # for MM, put the traps entry at the end so it does not conflict with CE entries in same col
                 newEntry = (
-                    *entry_[:3],
-                    mmLevelDict[entry_[3]],
-                    entry_[5].replace(', ', ' '),
-                    ' '.join(map(mmTrapsDict.get, entry_[4].split(', '))),
+                    *entry_[:levelIndex],
+                    mmLevelDict[entry_[levelIndex]],
+                    entry_[unitIndex],
+                    entry_[marchIndex],
+                    entry_[skinsIndex].replace(', ', ' '),
+                    ' '.join(map(mmTrapsDict.get, entry_[trapsIndex].split(', '))),
                 )
             return newEntry
 
@@ -185,7 +216,7 @@ def build_csv(filename: str) -> discord.File:
                 # skip sub-array if there are no entries of this type
                 # e.g. nobody signed up as 'A', no multi-unit entries of class 'mm', etc
                 continue
-            class_ = array[i][0][1]
+            class_ = array[i][0][classIndex]
             for j in range(len(array[i])):
                 entry = array[i][j]
                 entry = parse_entry(entry, class_)
@@ -209,6 +240,7 @@ def build_csv(filename: str) -> discord.File:
 
     combinedMultiArray = []
     for i in range(len(multiUnitArrays[0])):
+        # combine tuples from CE, MM into one long tuple for CSV row write
         combinedEntry = multiUnitArrays[0][i] + ('', '',) + multiUnitArrays[1][i]
         combinedMultiArray.append(combinedEntry)
 
@@ -228,7 +260,7 @@ def build_csv(filename: str) -> discord.File:
         if len(mmSingles[i]) < mmMax:
             mmSingles[i].extend([('', '', '', '', '', '')] * (mmMax - len(mmSingles[i])))
 
-    # combine them
+    # combine tuples from CE {A, N, F}, MM {A, N, F} into one long tuple for CSV row write
     combined_ceSingles = []
     combined_mmSingles = []
     for i in range(ceMax):
@@ -243,9 +275,11 @@ def build_csv(filename: str) -> discord.File:
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-        colTitles = ['Name', 'Class', 'Units', 'Level', 'Skins']
+        colTitles = ['Name', 'Class', 'Level', 'Units', 'March Size', 'Skins']
+        ceRowLength = 6
+        mmRowLength = 7
         # write the multi-unit entries as parallel columns of CE and MM
-        writer.writerow(['CE multi units', *[''] * 4, '', '', 'MM multi units', *[''] * 12,
+        writer.writerow(['CE multi units', *[''] * (ceRowLength - 1), '', '', 'MM multi units', *[''] * 11,
                          'Sorted by number of units followed by level'])
         writer.writerow([*colTitles, '', '', *colTitles, 'Traps'])
         writer.writerows(combinedMultiArray)
@@ -254,7 +288,10 @@ def build_csv(filename: str) -> discord.File:
         writer.writerows([''] * 5)
 
         # write the single-unit entries as parallel columns of A, N, F, in groupings of class, ordered by level
-        writer.writerow(['CE single units', *[''] * 19, 'Grouped by unit type - sorted by level'])
+        colTitles[3] = 'Unit'
+
+        # first do CE entries
+        writer.writerow(['CE single units', *[''] * 20, 'Grouped by unit type - sorted by level'])
         writer.writerow([*colTitles, '', '', *colTitles, '', '', *colTitles])
         writer.writerows(combined_ceSingles)
 
@@ -271,7 +308,6 @@ def build_csv(filename: str) -> discord.File:
 
         # lotto winners
         writer.writerow(['Lottery Winners'])
-        writer.writerow([''])
         writer.writerows(lottoWinners)
 
     eventCSV = discord.File(filename)
