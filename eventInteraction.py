@@ -3,62 +3,55 @@ import helpers
 import globals
 import db
 
-
 import logging
 logger = logging.getLogger(__name__)
+
+import asyncio
+lock = asyncio.Lock()
 
 
 class EventButtonsView(discord.ui.View):
 
-    __slots__ = ('parent_message', 'last_status')
+    __slots__ = ('parent_message', 'last_statuses')
 
     def __init__(self, parent_message: discord.Message):
         super().__init__(timeout=None)
         self.parent_message = parent_message
-        self.last_status = None
-
-    # @discord.ui.button(label='✅', style=discord.ButtonStyle.secondary, custom_id='persistent_view:yes')
-    # async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     status = 'YES'
-    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
-    #     if success:
-    #         self.last_status = status
-    #
-    # @discord.ui.button(label='❔', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
-    # async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     status = 'MAYBE'
-    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
-    #     if success:
-    #         self.last_status = status
-    #
-    # @discord.ui.button(label='❌', style=discord.ButtonStyle.secondary, custom_id='persistent_view:no')
-    # async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     status = 'NO'
-    #     success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
-    #     if success:
-    #         self.last_status = status
+        self.last_statuses = {}
 
     @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'YES'
-        success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+
+        # have to make this mutex to avoid r/w problem with editing event message's embed fields
+        async with lock:
+            # get the last status of the user, defaults to None
+            last_status = self.last_statuses.get(interaction.user.id, None)
+            # handle interaction
+            success = await handle_interaction(last_status, status, interaction, self.parent_message)
         if success:
-            self.last_status = status
+            # if field was updated, add/edit key-value pair of current status, to be used if status is changed
+            self.last_statuses[interaction.user.id] = status
 
     @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
     async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'MAYBE'
-        success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+        async with lock:
+            last_status = self.last_statuses.get(interaction.user.id, None)
+            success = await handle_interaction(last_status, status, interaction, self.parent_message)
         if success:
-            self.last_status = status
+            self.last_statuses[interaction.user.id] = status
 
     @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'NO'
-        success = await handle_interaction(self.last_status, status, interaction, self.parent_message)
+        async with lock:
+            last_status = self.last_statuses.get(interaction.user.id, None)
+            success = await handle_interaction(last_status, status, interaction, self.parent_message)
         if success:
-            self.last_status = status
+            self.last_statuses[interaction.user.id] = status
 
+    # # buttons for finalizing and deleting event
     # @discord.ui.button(label='SUBMIT', style=discord.ButtonStyle.success, custom_id='persistent_view:finalize', row=2)
     # async def submit(self, interaction: discord.Interaction, button: discord.ui.Button):
     #     user = interaction.user
@@ -85,7 +78,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     # send ephemeral message to eventChannel
     await interaction.response.send_message(f'Registered as **{status}** for {globals.eventInfo}.', ephemeral=True)
     # update the event field, removing user's name from the previous field they were in if it exists
-    await update_event_field(parent_message, user.display_name, status, last_status)
+    await update_event_field(parent_message, user.display_name, status, remove_status=last_status)
     # update the database
     db.update_status(user.id, status)
 
@@ -103,7 +96,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
 
 # do I need to worry about people pressing buttons near-simultaneously? ideally calls to this should be queued to
 # avoid reader-writer problem. ask in discord?
-async def update_event_field(message: discord.Message, name: str, status: str, remove_status: str) -> None:
+async def update_event_field(message: discord.Message, name: str, status: str, remove_status=None) -> None:
     embed = message.embeds[0]
     fields = embed.fields
 

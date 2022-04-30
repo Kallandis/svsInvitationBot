@@ -45,7 +45,6 @@ async def create_event(ctx, *, datestring):
         year += 2000
 
     # TODO: use discord time function instead? not sure about timezones
-    # TODO: Verify that the event is in the future
     # convert MM/DD/YY to unix time
     date_time = datetime.datetime(year, month, day, 11, 0)
     # date_time = datetime.datetime(year, month, day, 0, 28)
@@ -53,12 +52,12 @@ async def create_event(ctx, *, datestring):
 
     # start loop that will call confirm_maybe()
 
-    # TODO: calculate time in seconds until event, then subtract globals.maybe
     # get time until event
     td = datetime.timedelta(seconds=unix_time - time.time())
     td = td.total_seconds()
     td -= globals.confirmMaybeWarningTime
 
+    # TODO: make sure this actually calls confirm_maybe() only once
     if td > 60:
         @tasks.loop(seconds=td, count=2)
         async def confirm_maybe_loop():
