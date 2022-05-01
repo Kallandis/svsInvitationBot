@@ -43,9 +43,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 - should I be explicitly deleting old instances of EventButtons() once the event closes?
                 - should I be explicitly deleting instances of ProfessionMenuView()?
 
-- CHANGE:   sqlite3 Row objects can be used like a dictionary to retrieve values.
-            Move code over to this as it's more readable and robust
-
 
 ---------PRIORITY--------------
 

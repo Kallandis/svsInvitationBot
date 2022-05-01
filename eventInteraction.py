@@ -99,8 +99,27 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
 async def update_event_field(message: discord.Message, name: str, status: str, remove_status=None) -> None:
     embed = message.embeds[0]
     fields = embed.fields
+    titles = [field.name for field in fields]
+    maybeIndex = titles.index('MAYBE')
+    noIndex = titles.index('NO')
+    rangeDict = {
+        'YES':   [0, maybeIndex],
+        'MAYBE': [maybeIndex, noIndex],
+        'NO':    [noIndex, len(titles)]
+    }
 
-    indexDict = {"YES": 0, "MAYBE": 1, "NO": 2}
+    # first remove/add vals, then resolve empty/new fields to avoid indexing errors
+
+    # add status to field
+    range_ = rangeDict[status]
+    statusFieldVal = ''
+    for i in range(*range_):
+        statusFieldVal += fields[i].value
+    statusFieldVal += name + '\n'
+
+
+
+
     fieldIndex = indexDict[status]
     fieldName = fields[fieldIndex].name
     fieldValue = fields[fieldIndex].value

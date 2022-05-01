@@ -10,16 +10,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@loop(seconds=5, reconnect=True)
-async def sql_write():
-    with sql3.connect('userHistory.db') as conn:
-        for entry in globals.sqlEntries:
-            try:
-                conn.execute(entry[0], entry[1])
-            except:
-                print(f'Failed to write entry: {entry}')
-
-    globals.sqlEntries = []
+# @loop(seconds=5, reconnect=True)
+# async def sql_write():
+#     with sql3.connect('userHistory.db') as conn:
+#         for entry in globals.sqlEntries:
+#             try:
+#                 conn.execute(entry[0], entry[1])
+#             except:
+#                 print(f'Failed to write entry: {entry}')
+#
+#     globals.sqlEntries = []
 
 
 async def add_entry(values: Union[list, tuple]) -> None:
@@ -65,16 +65,12 @@ async def update_event(title: str, time: str, message_id: discord.Message.id, ch
 
 async def get_event() -> tuple[str, str, int, int]:
     sql = "SELECT * FROM EVENT"
-    # with sql3.connect('eventInfo.db') as conn:
-    #     eventTitle, eventTime, message_id, channel_id = list(conn.execute(sql))[0]
-
     async with aiosqlite.connect('eventInfo.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql)
             entry = await cursor.fetchone()
 
     return entry
-    # return eventTitle, eventTime, message_id, channel_id
 
 
 def profession_dicts() -> tuple:
@@ -175,7 +171,6 @@ async def update_profession(discord_id: discord.Member.id, prof_array: list) -> 
     sql = "UPDATE USERS SET CLASS = ?, LEVEL = ?, UNIT = ?, MARCH_SIZE = ?, " \
           "MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
-    # globals.sqlEntries.append([sql, values])
 
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
@@ -186,8 +181,6 @@ async def update_profession(discord_id: discord.Member.id, prof_array: list) -> 
 async def update_lotto(discord_id: discord.Member.id, lotto: int) -> None:
     sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
     values = [lotto, discord_id]
-    # conn.execute(sql, entry)
-    # globals.sqlEntries.append([sql, values])
 
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
@@ -205,7 +198,6 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
 
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
     values = [status, discord_id]
-    # globals.sqlEntries.append([sql, entry])
 
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
@@ -217,9 +209,7 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
 async def reset_status() -> None:
     sql = "UPDATE USERS SET STATUS = ?"
     val = ["NO"]
-    # globals.sqlEntries = []
-    # with sql3.connect('userHistory.db') as conn:
-    #     conn.execute(sql, [val])
+
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, val)
@@ -231,26 +221,21 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
     return a list of all user tuples that satisfy a condition
     """
 
-    # conn = sql3.connect('userHistory.db')
-
     # all (ID, prof) of class
     if category == "class":
         sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, MM_TRAPS, SKINS " \
               "FROM USERS WHERE STATUS = ? AND CLASS = ?"
         values = ['YES', value]
-        # users = conn.execute(sql, ['YES', value])
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ? AND LOTTERY = ?"
         values = ['YES', value]
-        # users = conn.execute(sql, ['YES', value])
 
     # just used for checking maybes. Could be used for repopulating embed name fields if bot restarts.
     elif category == 'status':
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ?"
         values = [value]
-        # users = conn.execute(sql, [value])
 
     else:
         logger.error(f"CATEGORY: {category} NOT RECOGNIZED")
@@ -261,18 +246,8 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
             await cursor.execute(sql, *values)
             entries = await cursor.fetchall()
 
-    # entries = list(entries)
-
     if display_name:
         entries = [(globals.guild.get_member(entry[0]).display_name, *entry[1:]) for entry in entries]
-
-    # if display_name:
-    #     # convert discord ID to display names
-    #     # I tested and this is slightly faster than using a map
-    #     newUsers = []
-    #     for entry in entries:
-    #         newUsers.append((globals.guild.get_member(entry[0]).display_name, *entry[1:]))
-    #     users = newUsers
 
     return entries    # list of user tuples
 
