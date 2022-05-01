@@ -97,9 +97,13 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
 # do I need to worry about people pressing buttons near-simultaneously? ideally calls to this should be queued to
 # avoid reader-writer problem. ask in discord?
 async def update_event_field(message: discord.Message, name: str, status: str, remove_status=None) -> None:
+    # updates the embed fields to show all attendees.
+    # first remove/add vals, then resolve empty/new fields to avoid indexing errors
     embed = message.embeds[0]
     fields = embed.fields
-    titles = [field.name for field in fields]
+    titles = [field.name[:field.name.index('[')].strip() for field in fields]
+    print(titles)
+
     maybeIndex = titles.index('MAYBE')
     noIndex = titles.index('NO')
     rangeDict = {
@@ -108,38 +112,66 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
         'NO':    [noIndex, len(titles)]
     }
 
-    # first remove/add vals, then resolve empty/new fields to avoid indexing errors
+    def update_fields(field_range: list[int], status, add=True):
 
-    # add status to field
-    range_ = rangeDict[status]
-    statusFieldVal = ''
-    for i in range(*range_):
-        statusFieldVal += fields[i].value
-    statusFieldVal += name + '\n'
+        # get the sum of all of the field-vals associated with "status". Add or remove name from that sum
+        statusNames = ''
+        for i in range(*field_range):
+            # strip the leading characters from field value
+            statusNames += fields[i].value.replace('> \u200b', '')
+        if add:
+            statusNames += f'{name}\n'
+        else:
+            statusNames = statusNames.replace(f'{name}\n', '')
 
+        statusCount = statusNames.count('\n')   # number of names is equal to number of '\n' in string
 
+        fieldVals = []
+        # loop through the string of '\n'-separated names, building a field-value string ~1024 chars at a time
+        while len('> \u200b' + statusNames) > 1024:
+            # get the first 1021 chars to accommodate the leading '> \u200b' which takes 3 chars
+            temp = statusNames[:1021]
+            # reverse the string to get the index of the last '\n', which denotes the last complete name
+            lastNewlineInd = -1 * temp[::-1].index('\n')
+            # add a field-value string to the list, to be made into a field later
+            fieldVals.append('> \u200b' + temp[:lastNewlineInd])
+            # slice out the remaining names for future loops
+            statusNames = statusNames[lastNewlineInd:]
 
+        if statusNames:
+            # add the last [0, 1024] chars as a field-value
+            fieldVals.append('> \u200b' + statusNames)
 
-    fieldIndex = indexDict[status]
-    fieldName = fields[fieldIndex].name
-    fieldValue = fields[fieldIndex].value
-    fieldValues = fieldValue.split('\n')
+        elif len(fieldVals) < (field_range[1] - field_range[0]):
+            # if a field with only one entry had its value removed, the above if would not be entered.
+            # add a placeholder quote
+            fieldVals.append('> \u200b')
 
-    # if adding name would not exceed 1024 (max chars in field value)
-    if len(fieldValue) + len(name) + 1 < 1024:
-        fieldValues.append(name)
-        fieldValue = '\n'.join(fieldValues)     # fields hold a string, so make a '\n'-separated string -> column
-        embed.set_field_at(fieldIndex, name=fieldName, value=fieldValue)
+        for addInd in range(*field_range):
+            # for each field associated with status, set its value to one of the field-val strings
+            title = (status + f'  [{statusCount}]') if addInd == field_range[0] else '\u200b'
+            embed.set_field_at(addInd, name=title, value=fieldVals.pop(0))
 
-    # remove from old field
+        if fieldVals:
+            # reached when number of field-val strings != num of fields associated with status
+            # only happens if the most recent entry caused the old field-val to overflow to a new field
+
+            # add a field to the embed to hold the new entry
+            # docs say "insert field before a specified index. I hope that it doesn't actually do that...
+            embed.insert_field_at(field_range[1], name='\u200b', value=fieldVals.pop())
+
+    # remove name
     if remove_status is not None:
-        oldFieldIndex = indexDict[remove_status]
-        oldFieldName = fields[oldFieldIndex].name
-        oldFieldValue = fields[oldFieldIndex].value
-        oldFieldValues = oldFieldValue.split('\n')
-        oldFieldValues.remove(name)
-        oldFieldValue = '\n'.join(oldFieldValues)
-        embed.set_field_at(oldFieldIndex, name=oldFieldName, value=oldFieldValue)
+        # this can cause an overflow-field to have no names. Could technically remove the field, but it isn't worth
+        # the hassle to deal with something that is not a real issue (realistically, only 'YES' will have overflow, and
+        # the incoming flux of names should be positive on average). The case where the only entry gets removed is
+        # handled without error, in update_fields(), but the empty field will remain with '> ' as its fieldValue
+        remRange = rangeDict[remove_status]
+        update_fields(remRange, remove_status, add=False)
+
+    # add name
+    addRange = rangeDict[status]
+    update_fields(addRange, status, add=True)
 
     await message.edit(embed=embed)
 

@@ -82,19 +82,20 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     prompt = await dmChannel.send(embed=embed)
 
     # wait for a response from the user
-    try:
-        reply = await globals.bot.wait_for('message', timeout=timeout,
-                                           check=lambda m: m.channel == dmChannel and m.author == user)
-    except TimeoutError:
-        edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
-        embed = discord.Embed(title=f'Confirm {cmd}', description=edit)
-        # await prompt.edit(content=edit)
-        await prompt.edit(embed=embed)
-        return
+    # try:
+    #     reply = await globals.bot.wait_for('message', timeout=timeout,
+    #                                        check=lambda m: m.channel == dmChannel and m.author == user)
+    # except TimeoutError:
+    #     edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
+    #     embed = discord.Embed(title=f'Confirm {cmd}', description=edit)
+    #     # await prompt.edit(content=edit)
+    #     await prompt.edit(embed=embed)
+    #     return
 
     actionDict = {'delete': 'Delete event', 'make_csv': 'Make CSV'}
     # check if they responded with "confirm"
-    if reply.content.lower() != 'confirm':
+    if False:
+    # if reply.content.lower() != 'confirm':
         edit = f'[Event Message]({globals.eventMessage.jump_url})'
         embed = discord.Embed(title=f'{cmd} Failed', description=edit)
         # await prompt.edit(content=edit)

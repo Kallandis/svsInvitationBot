@@ -79,9 +79,9 @@ async def create_event(ctx, *, datestring):
 
     # create embed and add fields
     embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_red())
-    embed.add_field(name=f"{'YES':<20}", value="\u200b")
-    embed.add_field(name=f"{'MAYBE':<20}", value="\u200b")
-    embed.add_field(name=f"{'NO':<20}", value="\u200b")
+    embed.add_field(name="YES  [0]", value="> \u200b")
+    embed.add_field(name="MAYBE  [0]", value="> \u200b")
+    embed.add_field(name="NO  [0]", value="> \u200b")
 
     # create footer
     cmdList = ['edit_event', 'delete_event', 'finalize_event', 'download_db']
