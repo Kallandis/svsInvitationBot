@@ -43,7 +43,7 @@ async def on_ready():
         await globals.eventMessage.edit(view=view)
 
     # start the sql_write loop that executes sql writes every # seconds
-    db.sql_write.start()
+    # db.sql_write.start()
 
 if __name__ == "__main__":
     bot.run(tokenFile.token)

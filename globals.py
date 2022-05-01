@@ -7,7 +7,7 @@ eventInfo = ''
 eventMessage = None
 eventChannel = None
 
-sqlEntries = []     # exhausted in db.sql_write() loop
+# sqlEntries = []     # exhausted in db.sql_write() loop
 
 #
 #

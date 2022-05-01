@@ -42,6 +42,13 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
              database (do some error checking stuff, only update the memory copy if database write is successful)
                 - on_ready() should repopulate the memory copy of database (or reload_memory.py if I implement that)
 
+- IDEA:     do I have to consider memory "leaks"? examples:
+                - should I be explicitly deleting old instances of EventButtons() once the event closes?
+                - should I be explicitly deleting instances of ProfessionMenuView()?
+
+- CHANGE:   sqlite3 Row objects can be used like a dictionary to retrieve values.
+            Move code over to this as it's more readable and robust
+
 
 ---------PRIORITY--------------
 
@@ -57,18 +64,10 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
 
-- IMPLEMENT: https://codezup.com/python-program-reader-writer-problem-mutex/
-    implement thread-queueing for sql writes (way better than current "buffer" solution lmao)
-    https://www.sqlite.org/wal.html or perhaps this is a solution?
-    https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor or maybe this?
-    *** https://pypi.org/project/aiosqlite/     aiosqlite?
-        "aiosqlite allows interaction with SQLite databases on the main AsyncIO event loop without blocking execution of
-         other coroutines while waiting for queries or data fetches. It does this by using a single, shared thread per
-         connection. This thread executes all actions within a shared request queue to prevent overlapping actions."
-
-    https://github.com/Rapptz/asqlite
-        Rapptz version of aiosqlite, so I'll use it bc it's rapptz
-        https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
+- IMPLEMENT: convert sqlite to asqlite
+             https://github.com/Rapptz/asqlite
+                 Rapptz version of aiosqlite, so I'll use it bc it's rapptz
+                 https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
 
 - CHANGE:   change error messages to embeds?
             Also I think most error messages should DM the user, not be posted in main channel.
