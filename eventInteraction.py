@@ -70,7 +70,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
         return False
 
     user = interaction.user
-    entry = db.get_entry(user.id)
+    entry = await db.get_entry(user.id)
     if not entry:
         await helpers.request_entry(user, event_attempt=True)
         return False
@@ -80,7 +80,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     # update the event field, removing user's name from the previous field they were in if it exists
     await update_event_field(parent_message, user.display_name, status, remove_status=last_status)
     # update the database
-    db.update_status(user.id, status)
+    await db.update_status(user.id, status)
 
     if last_status is None:  # this is their first response to event
         if status != 'NO':   # only DM them if their response is YES or MAYBE

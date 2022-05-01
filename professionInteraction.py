@@ -173,18 +173,18 @@ class ProfessionMenu(discord.ui.Select):
                 # set status to "NO", lottery to 1 (default vals)
                 entry = [interaction.user.id, *prof_array, "NO", 1]
 
-                db.add_entry(entry)
+                await db.add_entry(entry)
                 embed = db.info_embed(entry, descr='You have been added to the database.\n')
 
             # else just update the user's profession
             else:
                 # still need to get old DB entry to send to db.info_embed()
-                old_entry = db.get_entry(interaction.user.id)
+                old_entry = await db.get_entry(interaction.user.id)
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
 
                 embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
-                db.update_profession(interaction.user.id, prof_array)
+                await db.update_profession(interaction.user.id, prof_array)
 
             # send user's selection as an info-embed, remove the view
             await interaction.response.edit_message(content='', embed=embed, view=None)

@@ -108,7 +108,7 @@ async def create_event(ctx, *, datestring):
     globals.eventChannel = ctx.channel
 
     # store event data in eventInfo.db
-    db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
+    await db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
 
 
 @globals.bot.command(usage="pass")
@@ -204,7 +204,7 @@ async def download_db(ctx):
         await ctx.author.create_dm()
     dmChannel = ctx.author.dm_channel
 
-    dump = db.dump_db('svs_userHistory_dump.sql')
+    dump = await db.dump_db('svs_userHistory_dump.sql')
     await dmChannel.send("dump of userHistory.db database", file=dump)
 
 
@@ -230,7 +230,7 @@ async def prof(ctx, *, intent=None) -> None:
         await ctx.send(msg)
         return
 
-    entry = db.get_entry(ID)
+    entry = await db.get_entry(ID)
     if not entry:   # check if user has been registered in DB. if not, register them
         await helpers.request_entry(member)
 
@@ -252,7 +252,7 @@ async def lottery(ctx) -> None:
     """
     member = ctx.author
     ID = member.id
-    entry = db.get_entry(ID)
+    entry = await db.get_entry(ID)
 
     if not entry:
         await helpers.request_entry(member)
@@ -260,7 +260,7 @@ async def lottery(ctx) -> None:
         lotto = 1 - entry[-1]
         lotto_in_out = 'in to' if lotto else 'out of'
         msg = f'You have opted ' + lotto_in_out + ' the lottery\n'
-        db.update_lotto(ID, lotto)
+        await db.update_lotto(ID, lotto)
         # await ctx.send('```' + msg + '```')
         # code blocks look nice, but they break time and message-link formatting. So don't use for consistency
         await ctx.send(msg)

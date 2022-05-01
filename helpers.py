@@ -21,7 +21,7 @@ async def confirm_maybe() -> None:
     embed = discord.Embed(title=title, description=descr)
 
     # send embed to all maybes
-    maybeEntries = db.all_attending_of_category('status', 'MAYBE', display_name=False)
+    maybeEntries = await db.all_attending_of_category('status', 'MAYBE', display_name=False)
     for entry in maybeEntries:
         user = globals.guild.get_member(entry[0])
         if user.dm_channel is None:
@@ -125,25 +125,25 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     globals.eventChannel = None
 
     # reset database
-    db.update_event('placeholder', 'placeholder', 0, 0)
-    db.reset_status()
+    await db.update_event('placeholder', 'placeholder', 0, 0)
+    await db.reset_status()
 
 
-def build_csv(filename: str) -> discord.File:
+async def build_csv(filename: str) -> discord.File:
     """
     parses the user database into csv subcategories
     """
 
     # select lotto winners
-    lottoEntries = db.all_attending_of_category('lotto', 1)
+    lottoEntries = await db.all_attending_of_category('lotto', 1)
     random.shuffle(lottoEntries)
     lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
     # get just the name
     # lottoWinners = [winner[0] for winner in lottoWinners]
 
     # get class arrays
-    ce = db.all_attending_of_category('class', 'CE')
-    mm = db.all_attending_of_category('class', 'MM')
+    ce = await db.all_attending_of_category('class', 'CE')
+    mm = await db.all_attending_of_category('class', 'MM')
     # name, class, level, unit, march_size, traps, skins
     nameIndex = 0
     classIndex = 1

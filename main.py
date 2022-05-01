@@ -31,7 +31,7 @@ async def on_ready():
         globals.mainChannels.append(bot.get_channel(_id))
 
     # populate the global event vars if bot is restarted while event is already active
-    eventTitle, eventTime, eventMessageID, eventChannelID = db.get_event()
+    eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
     if eventMessageID:
         globals.eventInfo = eventTitle + ' @ ' + eventTime
         # globals.eventMessageID = eventMessageID
