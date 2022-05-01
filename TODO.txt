@@ -19,9 +19,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - CHANGE:   move the user-defined global variables into a different file (config.txt)
             then populate those user-defined global vars in on_ready()
 
-- CHANGE: let $create_event specify what time the event will be at, and also the title of the event
-          Might have to consider timezones here.
-
 - IMPLEMENT: get a profile pic for the bot
 
 - CHANGE:   DEPRECATED FOR NOW (was not received well)
@@ -64,11 +61,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
              (and make it send to DM)
 
-- IMPLEMENT: convert sqlite to asqlite
-             https://github.com/Rapptz/asqlite
-                 Rapptz version of aiosqlite, so I'll use it bc it's rapptz
-                 https://discord.com/channels/336642139381301249/559455534965850142/881307252974321675
-
 - CHANGE:   change error messages to embeds?
             Also I think most error messages should DM the user, not be posted in main channel.
 
@@ -83,3 +75,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: add a module or fxn "reload_memory.py" which resets the python cache if the bot is restarted
              Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
              do things like restart the confirm_maybe() loop
+
+- CHANGE: let $create_event specify what time the event will be at, and also the title of the event
+          Might have to consider timezones here.

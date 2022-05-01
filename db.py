@@ -222,7 +222,7 @@ async def reset_status() -> None:
     #     conn.execute(sql, [val])
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
-            await cursor.execute(sql, [val])
+            await cursor.execute(sql, val)
             await conn.commit()
 
 

@@ -108,7 +108,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
         description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
                       f'[Event Message]({globals.eventMessage.jump_url})'
     else:
-        eventMessageEdit = '```This event was deleted with $delete_event.```'
+        eventMessageEdit = f'```This event was deleted with {globals.commandPrefix}delete_event.```'
         description = f'Deleted {globals.eventInfo}\n' \
                       f'[Event Message]({globals.eventMessage.jump_url})'
         csvFile = None
