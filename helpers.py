@@ -82,41 +82,43 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     prompt = await dmChannel.send(embed=embed)
 
     # wait for a response from the user
-    # try:
-    #     reply = await globals.bot.wait_for('message', timeout=timeout,
-    #                                        check=lambda m: m.channel == dmChannel and m.author == user)
-    # except TimeoutError:
-    #     edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
-    #     embed = discord.Embed(title=f'Confirm {cmd}', description=edit)
-    #     # await prompt.edit(content=edit)
-    #     await prompt.edit(embed=embed)
-    #     return
-
-    actionDict = {'delete': 'Delete event', 'make_csv': 'Make CSV'}
-    # check if they responded with "confirm"
-    if False:
-    # if reply.content.lower() != 'confirm':
-        edit = f'[Event Message]({globals.eventMessage.jump_url})'
-        embed = discord.Embed(title=f'{cmd} Failed', description=edit)
+    try:
+        reply = await globals.bot.wait_for('message', timeout=timeout,
+                                           check=lambda m: m.channel == dmChannel and m.author == user)
+    except TimeoutError:
+        edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
+        embed = discord.Embed(title=f'{cmd} Timeout', description=edit)
         # await prompt.edit(content=edit)
         await prompt.edit(embed=embed)
         return
 
-    title = f'{cmd} Success'
-    if intent == 'make_csv':
-        eventMessageEdit = '```Sign-ups for this event are closed.```'
-        csvFile = build_csv(globals.csvFileName)
-        description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
-                      f'[Event Message]({globals.eventMessage.jump_url})'
-    else:
-        eventMessageEdit = f'```This event was deleted with {globals.commandPrefix}delete_event.```'
-        description = f'Deleted {globals.eventInfo}\n' \
-                      f'[Event Message]({globals.eventMessage.jump_url})'
-        csvFile = None
+    # check if reply was not "confirm"
+    if reply.content.lower() != 'confirm':
+        edit = f'[Event Message]({globals.eventMessage.jump_url})'
+        embed = discord.Embed(title=f'{cmd} Failure', description=edit)
+        await prompt.edit(embed=embed)
+        return
 
-    # remove the EventButtons view, put some text above the embed indicating it's closed
+    else:
+        # reply was "confirm"
+        title = f'{cmd} Success'
+        if intent == 'make_csv':
+            eventMessageEdit = '```Sign-ups for this event are closed.```'
+            # get the CSV file object
+            csvFile = build_csv(globals.csvFileName)
+            description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
+                          f'[Event Message]({globals.eventMessage.jump_url})'
+        else:
+            # intent = 'delete'
+            eventMessageEdit = f'```This event was deleted with {globals.commandPrefix}delete_event.```'
+            description = f'Deleted {globals.eventInfo}\n' \
+                          f'[Event Message]({globals.eventMessage.jump_url})'
+            csvFile = None
+
+    # remove the EventButtons view, put some text above the event embed indicating it's closed / deleted
     await globals.eventMessage.edit(content=eventMessageEdit, view=None)
     embed = discord.Embed(title=title, description=description)
+    # if csvFile is not None, attach it to the message edit
     kwargs = {'embed': embed, 'attachments': [csvFile]} if csvFile else {'embed': embed}
     await prompt.edit(**kwargs)
 

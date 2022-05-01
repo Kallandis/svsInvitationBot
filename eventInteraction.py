@@ -83,26 +83,25 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     await db.update_status(user.id, status)
 
     if last_status is None:  # this is their first response to event
+
         if status != 'NO':   # only DM them if their response is YES or MAYBE
             entry = list(entry)
             entry[7] = status
             await dm_to_user(user, entry=entry)
 
-    else:   # if this is not their first response to event, DM them with change-string instead of full embed
+    else:
+        # if this is not their first response to event, DM them with change-string instead of full embed
         await dm_to_user(user, new_status=status, last_status=last_status)
 
     return True
 
 
-# do I need to worry about people pressing buttons near-simultaneously? ideally calls to this should be queued to
-# avoid reader-writer problem. ask in discord?
 async def update_event_field(message: discord.Message, name: str, status: str, remove_status=None) -> None:
     # updates the embed fields to show all attendees.
     # first remove/add vals, then resolve empty/new fields to avoid indexing errors
     embed = message.embeds[0]
     fields = embed.fields
-    titles = [field.name[:field.name.index('[')].strip() for field in fields]
-    print(titles)
+    titles = [field.name[:field.name.index('[')].strip() if '[' in field.name else field.name for field in fields]
 
     maybeIndex = titles.index('MAYBE')
     noIndex = titles.index('NO')
@@ -112,13 +111,20 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
         'NO':    [noIndex, len(titles)]
     }
 
-    def update_fields(field_range: list[int], status, add=True):
+    def update_fields(field_range: list[int], name, status, add=True):
+        # start all fields with a quote block, whitespace char to turn '>>> ' into a quote block even if field is empty
+        fieldPrefix = '>>> \u200b'
+
+        if len(name) > 10:
+            # truncate names to 10 letters
+            name = name[:8] + '..'
 
         # get the sum of all of the field-vals associated with "status". Add or remove name from that sum
         statusNames = ''
         for i in range(*field_range):
-            # strip the leading characters from field value
-            statusNames += fields[i].value.replace('> \u200b', '')
+            # get all field-values associated with status without their prefixes (raw status name data)
+            statusNames += fields[i].value.replace(fieldPrefix, '')
+
         if add:
             statusNames += f'{name}\n'
         else:
@@ -128,24 +134,25 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
 
         fieldVals = []
         # loop through the string of '\n'-separated names, building a field-value string ~1024 chars at a time
-        while len('> \u200b' + statusNames) > 1024:
-            # get the first 1021 chars to accommodate the leading '> \u200b' which takes 3 chars
-            temp = statusNames[:1021]
+        while len(fieldPrefix + statusNames) > 1024:
+            # get the first 1019 chars to accommodate the leading '> \u200b' which takes 3 chars
+            temp = statusNames[:(1024 - len(fieldPrefix))]
             # reverse the string to get the index of the last '\n', which denotes the last complete name
             lastNewlineInd = -1 * temp[::-1].index('\n')
             # add a field-value string to the list, to be made into a field later
-            fieldVals.append('> \u200b' + temp[:lastNewlineInd])
+            fieldVals.append(fieldPrefix + temp[:lastNewlineInd])
             # slice out the remaining names for future loops
-            statusNames = statusNames[lastNewlineInd:]
+            # statusNames = statusNames[lastNewlineInd:]
+            statusNames = temp[lastNewlineInd:] + statusNames[(1024 - len(fieldPrefix)):]
 
         if statusNames:
-            # add the last [0, 1024] chars as a field-value
-            fieldVals.append('> \u200b' + statusNames)
+            # add the last (0, 1024 - len(fieldPrefix)] chars as a field-value
+            fieldVals.append(fieldPrefix + statusNames)
 
         elif len(fieldVals) < (field_range[1] - field_range[0]):
             # if a field with only one entry had its value removed, the above if would not be entered.
-            # add a placeholder quote
-            fieldVals.append('> \u200b')
+            # add a placeholder field-value
+            fieldVals.append(fieldPrefix)
 
         for addInd in range(*field_range):
             # for each field associated with status, set its value to one of the field-val strings
@@ -165,13 +172,13 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
         # this can cause an overflow-field to have no names. Could technically remove the field, but it isn't worth
         # the hassle to deal with something that is not a real issue (realistically, only 'YES' will have overflow, and
         # the incoming flux of names should be positive on average). The case where the only entry gets removed is
-        # handled without error, in update_fields(), but the empty field will remain with '> ' as its fieldValue
+        # handled without error, in update_fields(), but the empty field will remain with '>>> \u200b' as its fieldValue
         remRange = rangeDict[remove_status]
-        update_fields(remRange, remove_status, add=False)
+        update_fields(remRange, name, remove_status, add=False)
 
     # add name
     addRange = rangeDict[status]
-    update_fields(addRange, status, add=True)
+    update_fields(addRange, name, status, add=True)
 
     await message.edit(embed=embed)
 
