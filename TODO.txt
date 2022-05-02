@@ -48,8 +48,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will log $bug in bugreports.log
 
-- CHANGE:   change error messages to embeds?
-            Also I think most error messages should DM the user, not be posted in main channel.
+- IMPLEMENT: add a short user-specific cooldown to all commands (e.g. 2 in 5 seconds would be nice)
 
 - CHANGE: make csv not include certain redundant cols to make it shorter (class, unit for the single units)
             after doing so, will need to redo some alignment stuff
@@ -63,5 +62,11 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
              set last_status to something.
                     do something like: if first_entry == True, check the fields to make sure you arent in it.
 
+- IMPLEMENT: setup(bot) function to add cogs to the bot and maybe other stuff too
+                should do a lot of this before bot.run()
+
+- CHANGE:   Make on_command_error() send error messages as embeds to ctx
+
 - IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
-             (and make it send to DM)
+             - make it send to DM
+             - if invoking message in guild channel, delete the message

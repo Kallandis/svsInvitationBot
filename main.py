@@ -2,6 +2,9 @@ import discord  # development branch 2.0.0a to be able to use Views, Interaction
 from discord.ext import commands
 import logging
 import globals
+import sys
+
+import tokenFile
 
 logging.basicConfig(filename='bot.log', level=logging.INFO,
                     format='%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',
@@ -10,14 +13,29 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
 
 # create the bot
 intents = discord.Intents(messages=True, members=True, guilds=True, message_content=True)
-bot = commands.Bot(command_prefix=globals.commandPrefix, intents=intents)
+bot = commands.Bot(command_prefix=globals.commandPrefix,
+                   intents=intents,
+                   description='Manages event attendance and user history')
+
+
 globals.bot = bot
 
-import commands
+import help
+import my_commands
 import helpers
 import db
-import tokenFile
 from eventInteraction import EventButtonsView
+
+
+def setup():
+    pass
+
+
+def reload():
+    # repopulate global variables to restore bot's state if bot restarts
+    # most importantly, must restore EventButtonsView.last_statuses, to make the event embed not think everyone is new
+    # that should be just a simple loop through the database
+    pass
 
 
 @bot.event
@@ -25,10 +43,29 @@ async def on_ready():
     print(f'{bot.user.name} connected!')
     print(f'discord.py version = {discord.__version__}')
 
-    # populate guild variables
+    # populate global guild-related variables
+
+    # guild
     globals.guild = bot.get_guild(globals.guildID)
+    if globals.guild is None:
+        error = 'Failed to acquire server.'
+        logging.error(error)
+        sys.exit(error)
+
+    # channels
     for _id in globals.mainChannelIDs:
         globals.mainChannels.append(bot.get_channel(_id))
+    if not all(globals.mainChannels):
+        error = 'Failed to acquire at least one channel in server.'
+        logging.error(error)
+        sys.exit(error)
+
+    # admin role
+    globals.adminRole = globals.guild.get_role(globals.adminRoleID)
+    if globals.adminRole is None:
+        error = f'Failed to acquire admin-role for bot commands with ID: {globals.adminRoleID}.'
+        logging.error(error)
+        sys.exit(error)
 
     # populate the global event vars if bot is restarted while event is already active
     eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
@@ -42,8 +79,12 @@ async def on_ready():
         view = EventButtonsView(globals.eventMessage)
         await globals.eventMessage.edit(view=view)
 
-    # start the sql_write loop that executes sql writes every # seconds
-    # db.sql_write.start()
+    # add cogs
+    await bot.add_cog(my_commands.DM(bot))
+    await bot.add_cog(my_commands.Event(bot))
+    await bot.add_cog(my_commands.Misc(bot))
+    await bot.add_cog(help.Help(bot))
+
 
 if __name__ == "__main__":
     bot.run(tokenFile.token)

@@ -154,8 +154,8 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
 
     # DM command information
     _ = globals.commandPrefix
-    embed.set_footer(text=f"{_}prof to edit profession  |  {_}prof ? to show profession  |  "
-                          f"{_}lottery to toggle lottery participation")
+    embed.set_footer(text=f"{_}prof <change / show>   |   {_}lottery")
+    embed.timestamp = discord.utils.utcnow()
 
     # return file, embed
     return embed
