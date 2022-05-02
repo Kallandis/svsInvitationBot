@@ -10,7 +10,12 @@ import globals
 from professionInteraction import ProfessionMenuView
 
 
-# TODO
+async def dm_error(ctx, error, arg=None):
+    user = ctx.author
+    if user.dm_channel is None:
+        await user.create_dm
+
+
 async def confirm_maybe() -> None:
     """
     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.

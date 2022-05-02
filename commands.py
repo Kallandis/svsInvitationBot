@@ -4,7 +4,7 @@ import globals
 import db
 import time
 import datetime
-import asyncio
+import traceback
 
 from eventInteraction import EventButtonsView
 from professionInteraction import ProfessionMenuView
@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(logging.ERROR)
 
 
-@globals.bot.command(usage="MM/DD/YY")
+@globals.bot.command(usage="[YY/MM/DD] [HH (24hr)] [TITLE] [DESCRIPTION]")
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
 @commands.max_concurrency(1)
-async def create_event(ctx, *, datestring):
+async def create_event(ctx, datestring, hour: int, title, descr):
     """
-    Creates event for the specified date at 11:00AM PST
+    Creates event with title & description for specified date & time in PST
     Requires ADMIN Role
     """
     # check if channel is in mainChannels
@@ -38,47 +38,56 @@ async def create_event(ctx, *, datestring):
                            f'$delete_event to delete the active event.```')
         return
 
-    # parse MM/DD/YY from command input
-    arg = [int(x) for x in datestring.split('/')]
-    month, day, year = arg
-    if year < 2000:
-        year += 2000
+    # parse YY/MM/DD from command input
+    try:
+        year, month, day = [int(x) for x in datestring.split('/')]
+        if year < 2000:
+            year += 2000
+        # convert to unix time
+        date_time = datetime.datetime(year, month, day, hour, 0)
+        unix_time = int(time.mktime(date_time.timetuple()))
 
-    # TODO: use discord time function instead? not sure about timezones
-    # convert MM/DD/YY to unix time
-    date_time = datetime.datetime(year, month, day, 11, 0)
-    # date_time = datetime.datetime(year, month, day, 0, 28)
-    unix_time = int(time.mktime(date_time.timetuple()))
+        # get time until event
+        td = datetime.timedelta(seconds=unix_time - time.time())
+        td = td.total_seconds()
+        td -= (globals.confirmMaybeWarningTimeHours * 60 * 60)
 
-    # start loop that will call confirm_maybe()
+    except ValueError:
+        error = 'Date or time entered incorrectly. Format: [YY/MM/DD] [HH (24hr format)]'
+        # await helpers.dm_error(ctx, error, datestring)
+        logger.error(error)
+        return
 
-    # get time until event
-    td = datetime.timedelta(seconds=unix_time - time.time())
-    td = td.total_seconds()
-    td -= globals.confirmMaybeWarningTime
+    if len(title) > 256:
+        error = 'Title over 256 characters'
+        # await helpers.dm_error(ctx, error)
+        logger.error(error)
+        return
 
     # TODO: make sure this actually calls confirm_maybe() only once
-    if td > 60:
+    # confirm maybe will only be called if it is at least 2 days in the future
+    if td > 60 * 60 * 24 * 2:
         @tasks.loop(seconds=td, count=2)
         async def confirm_maybe_loop():
             # the loop immediately runs once upon start, so wait until the second loop
             if confirm_maybe_loop.current_loop > 0:
                 await helpers.confirm_maybe()
         confirm_maybe_loop.start()
+        logger.info('Confirm_maybe_loop() started')
 
-    # confirm_maybe_loop.start()
     # build title and dynamic timestamp for embed
-    title = "SvS Event"
+    # title = "SvS Event"
     eventTime = f"<t:{unix_time}>"
 
     # and then format them up a bit
     eventInfo = title + ' @ ' + eventTime
-    descr = '@ ' + eventTime + '\n\n'
-    descr += "It's an SvS Event"
+    description = '@ ' + eventTime + '\n\n'
+    # descr += "It's an SvS Event"
+    description += descr
     descr += '\n\u200b'
 
     # create embed and add fields
-    embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_red())
+    embed = discord.Embed(title=title, description=description, color=discord.Color.dark_red())
     embed.add_field(name="YES  [0]", value=">>> \u200b")
     embed.add_field(name="MAYBE  [0]", value=">>> \u200b")
     embed.add_field(name="NO  [0]", value=">>> \u200b")
@@ -103,7 +112,6 @@ async def create_event(ctx, *, datestring):
 
     # set globals to reduce DB accessing
     globals.eventInfo = eventInfo
-    # globals.eventMessageID = eventMessage.id
     globals.eventMessage = eventMessage
     globals.eventChannel = ctx.channel
 
@@ -190,6 +198,7 @@ async def finalize_event(ctx):
 @globals.bot.command()
 @commands.has_role(globals.adminRole)
 @commands.guild_only()
+@commands.max_concurrency(1)
 async def download_db(ctx):
     """
     Sends dump of SQL database to user
@@ -261,39 +270,47 @@ async def lottery(ctx) -> None:
         lotto_in_out = 'in to' if lotto else 'out of'
         msg = f'You have opted ' + lotto_in_out + ' the lottery\n'
         await db.update_lotto(ID, lotto)
-        # await ctx.send('```' + msg + '```')
-        # code blocks look nice, but they break time and message-link formatting. So don't use for consistency
         await ctx.send(msg)
 
 
-# @globals.bot.event
-# async def on_command_error(ctx, error):
-#     logger.error(str(error))
-#
-#     # command has local error handler
-#     if hasattr(ctx.command, 'on_error'):
-#         return
-#
-#     # generic error handling
-#     errmsg = f"{ctx.command} ERROR: "
-#     if isinstance(error, commands.CheckFailure):
-#         errmsg += str(error) + '\n'
-#     elif isinstance(error, commands.MissingRequiredArgument):
-#         errmsg += "Missing argument.\n"
-#     elif isinstance(error, commands.NoPrivateMessage):
-#         errmsg += "Command does not work in DM.\n"
-#     elif isinstance(error, commands.BotMissingRole):
-#         errmsg += "Bot lacks required role for this command.\n"
-#     elif isinstance(error, commands.BotMissingPermissions):
-#         errmsg += "Bot lacks required permissions for this command.\n"
-#     elif isinstance(error, commands.MissingRole):
-#         errmsg += "User lacks required role for this command.\n"
-#     elif isinstance(error, commands.MissingPermissions):
-#         errmsg += "User lacks required permissions for this command.\n"
-#     else:
-#         errmsg += 'Unknown error.\n'
-#         print('Ignoring exception in command {}:'.format(ctx.command))
-#         print(error.__traceback__)
-#
-#     errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
-#     await ctx.send(f'```{errmsg}```')
+@globals.bot.event
+async def on_command_error(ctx, error):
+    logger.error(f'{ctx.command} ERROR: {str(error)}')
+    print(str(error))
+
+    # command has local error handler
+    if hasattr(ctx.command, 'on_error'):
+        return
+
+    # generic error handling
+    errmsg = f"{globals.commandPrefix}{ctx.command} ERROR: "
+    if isinstance(error, commands.CheckFailure):
+        errmsg += str(error) + '\n'
+    elif isinstance(error, commands.MissingRequiredArgument):
+        errmsg += "Missing argument.\n"
+    elif isinstance(error, commands.TooManyArguments):
+        errmsg += "Too many arguments.\n"
+    elif isinstance(error, commands.BadArgument):
+        errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
+    elif isinstance(error, commands.NoPrivateMessage):
+        errmsg += "Command does not work in DM.\n"
+    elif isinstance(error, commands.PrivateMessageOnly):
+        errmsg += "Command only works in DM.\n"
+    elif isinstance(error, commands.BotMissingRole):
+        errmsg += "Bot lacks required role for this command.\n"
+    elif isinstance(error, commands.BotMissingPermissions):
+        errmsg += "Bot lacks required permissions for this command.\n"
+    elif isinstance(error, commands.MissingRole):
+        errmsg += "User lacks required role for this command.\n"
+    elif isinstance(error, commands.MissingPermissions):
+        errmsg += "User lacks required permissions for this command.\n"
+    elif isinstance(error, commands.CommandNotFound):
+        errmsg += "Command does not exist.\n"
+    else:
+        errmsg += f'Error not handled.\n'
+        # should probably do a bit more here but idk
+        print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
+
+    # errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
+    errmsg += f'Usage: {globals.commandPrefix}{ctx.command} {ctx.command.usage}'
+    await ctx.send(f'```{errmsg}```')
