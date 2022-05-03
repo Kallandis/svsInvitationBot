@@ -19,12 +19,13 @@ class Event(commands.Cog):
         self.bot = bot
 
     async def cog_check(self, ctx) -> bool:
+        print(f'{globals.eventChannel = }')
         if ctx.channel.id not in globals.mainChannelIDs:
             raise commands.CheckFailure('Command used outside of allowed channels.')
         if ctx.author not in globals.adminRole.members:
-            raise commands.MissingRole(f'User does not have required role \"{globals.adminRole.name}\".')
+            raise commands.MissingRole(globals.adminRole.name)
         if globals.eventChannel is not None:
-            # special cases for $create
+            # special cases for $create when there is an active event
             if ctx.command.name == 'create':
                 if ctx.channel != globals.eventChannel:
                     raise commands.CheckFailure(f'An event is already active in {globals.eventChannel.mention}. Only '
@@ -32,13 +33,13 @@ class Event(commands.Cog):
                 elif ctx.channel == globals.eventChannel:
                     raise commands.CheckFailure(f'An event is already active in this channel. {ctx.clean_prefix}delete '
                                                 f'to delete the active event.')
+            # other commands just need to be in the active event channel
+            elif ctx.channel != globals.eventChannel:
+                raise commands.CheckFailure(f'Must use command in {globals.eventChannel.mention}.')
 
-            # other commands just need to be in the active event channel if it exists
-            else:
-                if globals.eventChannel is None:
-                    raise commands.CheckFailure('No active event.')
-                elif ctx.channel != globals.eventChannel:
-                    raise commands.CheckFailure(f'Must use command in {globals.eventChannel.mention}.')
+        # if there is not an active event, all commands except $create should error
+        elif globals.eventChannel is None and ctx.command.name != 'create':
+            raise commands.CheckFailure('No active event.')
 
         return True
 
@@ -261,41 +262,47 @@ class Misc(commands.Cog):
 @globals.bot.event
 async def on_command_error(ctx, error):
     logger.error(f'{ctx.command} ERROR: {str(error)}')
-    print(str(error))
+    print('errstring: ' + str(error))
 
     # command has local error handler
     if hasattr(ctx.command, 'on_error'):
         return
 
     # generic error handling
-    errmsg = f"{ctx.clean_prefix}{ctx.command} ERROR: "
-    if isinstance(error, commands.CheckFailure):
-        errmsg += str(error) + '\n'
-    elif isinstance(error, commands.MissingRequiredArgument):
-        errmsg += "Missing argument.\n"
-    elif isinstance(error, commands.TooManyArguments):
-        errmsg += "Too many arguments.\n"
-    elif isinstance(error, commands.BadArgument):
-        errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
-    elif isinstance(error, commands.NoPrivateMessage):
-        errmsg += "Command does not work in DM.\n"
-    elif isinstance(error, commands.PrivateMessageOnly):
-        errmsg += "Command only works in DM.\n"
-    elif isinstance(error, commands.BotMissingRole):
-        errmsg += "Bot lacks required role for this command.\n"
-    elif isinstance(error, commands.BotMissingPermissions):
-        errmsg += "Bot lacks required permissions for this command.\n"
-    elif isinstance(error, commands.MissingRole):
-        errmsg += "User lacks required role for this command.\n"
-    elif isinstance(error, commands.MissingPermissions):
-        errmsg += "User lacks required permissions for this command.\n"
-    elif isinstance(error, commands.CommandNotFound):
-        errmsg += "Command does not exist.\n"
-    else:
-        errmsg += f'Error not handled.\n'
-        # should probably do a bit more here but idk
-        print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
+    title = f"{ctx.clean_prefix}{ctx.command} Error"
+    errmsg = str(error) + '\n'
+    # errmsg = ''
+    # if isinstance(error, commands.CheckFailure):
+    #     errmsg += str(error) + '\n'
+    # elif isinstance(error, commands.MissingRequiredArgument):
+    #     errmsg += "Missing argument.\n"
+    # elif isinstance(error, commands.TooManyArguments):
+    #     errmsg += "Too many arguments.\n"
+    # elif isinstance(error, commands.BadArgument):
+    #     errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
+    # elif isinstance(error, commands.NoPrivateMessage):
+    #     errmsg += "Command does not work in DM.\n"
+    # elif isinstance(error, commands.PrivateMessageOnly):
+    #     errmsg += "Command only works in DM.\n"
+    # elif isinstance(error, commands.BotMissingRole):
+    #     errmsg += "Bot lacks required role for this command.\n"
+    # elif isinstance(error, commands.BotMissingPermissions):
+    #     errmsg += "Bot lacks required permissions for this command.\n"
+    # elif isinstance(error, commands.MissingRole):
+    #     errmsg += "User lacks required role for this command.\n"
+    # elif isinstance(error, commands.MissingPermissions):
+    #     errmsg += "User lacks required permissions for this command.\n"
+    # elif isinstance(error, commands.CommandNotFound):
+    #     errmsg += "Command does not exist.\n"
+    # else:
+    #     should probably do a bit more here but idk
+    #     print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
+    #     errmsg += f'Error not handled.\n'
 
-    # errmsg += f"$help {ctx.command} for specific info. $help for list of commands."
-    errmsg += f'Usage: {globals.commandPrefix}{ctx.command} {ctx.command.usage}'
-    await ctx.send(f'```{errmsg}```')
+    if ctx.command.usage is not None:
+        errmsg += f'\u200b\nUsage: {globals.commandPrefix}{ctx.command} {ctx.command.usage}'
+    # await ctx.send(f'```{errmsg}```')
+
+    embed = discord.Embed(title=title, description=errmsg)
+    embed.set_footer(text=f"$help {ctx.command} for more info. $help for list of commands.")
+    await ctx.send(embed=embed)
