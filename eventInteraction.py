@@ -193,16 +193,13 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
 
 
 async def dm_to_user(user, entry=None, new_status=None, last_status=None) -> None:
-    if user.dm_channel is None:
-        await user.create_dm()
-    dmChannel = user.dm_channel
 
     # send user an info embed
     if entry is not None:
         embed = db.info_embed(entry)
-        await dmChannel.send(embed=embed)
+        await user.send(embed=embed)
 
     # send a small text message to ACK change
     elif new_status is not None:
-        await dmChannel.send(f'Your status has been changed from '
+        await user.send(f'Your status has been changed from '
                              f'**{last_status}** to **{new_status}** for {globals.eventInfo}')

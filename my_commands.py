@@ -271,12 +271,8 @@ class Misc(commands.Cog):
         Requires ADMIN role
         """
 
-        if ctx.author.dm_channel is None:
-            await ctx.author.create_dm()
-        dmChannel = ctx.author.dm_channel
-
         dump = await db.dump_db('svs_userHistory_dump.sql')
-        await dmChannel.send("dump of userHistory.db database", file=dump)
+        await ctx.author.send("dump of userHistory.db database", file=dump)
 
 
 @globals.bot.event

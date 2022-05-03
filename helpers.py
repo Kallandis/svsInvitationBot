@@ -10,17 +10,12 @@ import globals
 from professionInteraction import ProfessionMenuView
 
 
-async def dm_error(ctx, error, arg=None):
-    user = ctx.author
-    if user.dm_channel is None:
-        await user.create_dm
-
-
 async def confirm_maybe() -> None:
     """
     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
+    X = globals.confirmMaybeWarningTimeHours
     """
-    title = 'SvS Event Reminder'
+    title = 'Event Reminder'
     descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
             f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
     embed = discord.Embed(title=title, description=descr)
@@ -29,20 +24,14 @@ async def confirm_maybe() -> None:
     maybeEntries = await db.all_attending_of_category('status', 'MAYBE', display_name=False)
     for entry in maybeEntries:
         user = globals.guild.get_member(entry[0])
-        if user.dm_channel is None:
-            await user.create_dm()
-        await user.dm_channel.send(embed=embed)
+        await user.send(embed=embed)
 
 
-async def request_entry(member: Union[discord.Member, discord.User], event_attempt=False) -> None:
+async def request_entry(user: Union[discord.Member, discord.User], event_attempt=False) -> None:
     """
     Prompt unregistered user to provide data entry for SQL database.
     Called when user reacts to an event or uses DM command $lotto or $prof before being added to DB
     """
-
-    if member.dm_channel is None:
-        await member.create_dm()
-    dmChannel = member.dm_channel
 
     if event_attempt:
         cont = "Your event registration because you are not in the database.\n" \
@@ -51,7 +40,7 @@ async def request_entry(member: Union[discord.Member, discord.User], event_attem
         cont = "You do not have an existing entry in the database. Please enter profession.\n"
     cont += "Menu will disappear in 5 minutes."
 
-    msg = await dmChannel.send(content=cont)
+    msg = await user.send(content=cont)
     # DB will be updated following user interaction with ProfessionMenu
     view = ProfessionMenuView(msg, 'class', first_entry=True)
     await msg.edit(view=view)
