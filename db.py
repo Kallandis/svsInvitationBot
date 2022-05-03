@@ -92,7 +92,8 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
 
     units = [unitDict[char] for char in unit]
-    march_size = ('\\' + march_size) if '<' or '>' in march_size else march_size  # need to escape the ">" quote char
+    # need to escape the ">" quote char
+    march_size = ('\\' + march_size) if '<' in march_size or '>' in march_size else march_size
     level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
     traps = mm_traps.split(', ')
     skins = skins.split(', ')

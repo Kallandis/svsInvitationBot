@@ -165,13 +165,13 @@ async def build_csv(filename: str) -> discord.File:
     def sort_march(entry):
         msize = entry[marchIndex]
         # msize takes the forms {< 160, 160-170, ... , 210-220, > 220}
-        if '<' or '>' in msize:
+        if '<' in msize or '>' in msize:
             # strip the < or >
-            msize = msize[-3:]
+            msize = int(msize.strip('>< '))
         else:
-            # take the bottom of the range and add 1 so it is not equal to smallest edge case
-            msize = msize[:3] + 1
-        return int(msize)
+            # take the bottom of the range and add 5 to represent median and avoid equality with smallest edge case
+            msize = int(msize.split('-')[0]) + 5
+        return msize
 
     # entries with more than one unit type
     multiUnitArrays = [

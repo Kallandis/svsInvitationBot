@@ -174,7 +174,7 @@ class ProfessionMenu(discord.ui.Select):
                 entry = [interaction.user.id, *prof_array, "NO", 1]
 
                 await db.add_entry(entry)
-                embed = db.info_embed(entry, descr='You have been added to the database.\n')
+                embed = db.info_embed(entry, descr='You have been added to the database.\n\u200b\n')
 
             # else just update the user's profession
             else:
@@ -183,7 +183,7 @@ class ProfessionMenu(discord.ui.Select):
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
 
-                embed = db.info_embed(new_entry, descr='Successfully edited profession.\n')
+                embed = db.info_embed(new_entry, descr='Successfully edited profession.\n\u200b\n')
                 await db.update_profession(interaction.user.id, prof_array)
 
             # send user's selection as an info-embed, remove the view
