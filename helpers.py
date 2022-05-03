@@ -99,7 +99,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
-            csvFile = await build_csv(globals.csvFileName, status='YES')
+            csvFile = await build_csv(globals.csvFileName, status='YES', finalize=True)
             description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
         else:
@@ -167,7 +167,6 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
     def sort_alliance(entry):
         alliance = entry[allianceIndex]
         return allyDict[alliance]
-
 
     # entries with more than one unit type
     multiUnitArrays = [
@@ -311,7 +310,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
         mmRowLength = 8
         # write the multi-unit entries as parallel columns of CE and MM
         writer.writerow(['CE multi units', *[''] * (ceRowLength - 1), '', '', 'MM multi units', *[''] * 16,
-                         'Sorted by number of units followed by level'])
+                         'Sorted by number of units then level then march size then alliance'])
         writer.writerow([*ceColTitles, '', '', *mmColTitles])
         writer.writerows(combinedMultiArray)
 
@@ -323,7 +322,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
         mmColTitles[3] = 'Unit'
 
         # first do CE entries
-        writer.writerow(['CE single units', *[''] * 25, 'Grouped by unit type - sorted by level'])
+        writer.writerow(['CE single units', *[''] * 25, 'Grouped by unit type - sorted by level then march size then alliance'])
         writer.writerow([*ceColTitles, '', '', *ceColTitles, '', '', *ceColTitles])
         writer.writerows(combined_ceSingles)
 
@@ -331,7 +330,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
         writer.writerows([''] * 5)
 
         # do again for MM
-        writer.writerow(['MM single units'])
+        writer.writerow(['MM single units', *[''] * 25, 'Grouped by unit type - sorted by level then march size then alliance'])
         writer.writerow([*mmColTitles, '', *mmColTitles, '', *mmColTitles])
         writer.writerows(combined_mmSingles)
 

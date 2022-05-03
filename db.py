@@ -1,6 +1,5 @@
 import globals
 import discord
-from discord.ext.tasks import loop
 from typing import Union, Optional
 
 # import asqlite
@@ -213,7 +212,6 @@ async def all_of_category(category: str, value: Union[str, int], status='YES',
     """
     return a list of all user tuples that satisfy a condition
     """
-
     # all (ID, prof) of class
     if category == "class":
         sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, ALLIANCE, MM_TRAPS, SKINS " \

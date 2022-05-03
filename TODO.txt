@@ -69,3 +69,7 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                   in db.info_embed() for user convenience.
 
 - IMPLEMENT: fxn for downloading CSV of all people in the database. move download_db to dump_db
+
+- ISSUE:    '$get_csv all' is not working - sends '*' to status, but I think the sql statement doesn't recognize it.
+            Need to test with asyncio_test.py
+            soln could be to recognize status = 'YES', status='NO', status='MAYBE'

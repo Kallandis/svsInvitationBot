@@ -283,13 +283,13 @@ class Misc(commands.Cog):
                       usage='<all/attending>')
     @commands.has_role(globals.adminRole)
     @commands.max_concurrency(1)
-    async def get_csv(self, ctx, status_to_get):
-        if status_to_get not in ['all', 'attending']:
+    async def get_csv(self, ctx, arg):
+        if arg not in ['all', 'attending']:
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
         statusDict = {'all': '*', 'attending': 'YES'}
-        status_to_get = statusDict[status_to_get]
+        status_to_get = statusDict[arg]
         csvFile = await helpers.build_csv(globals.csvFileName, status=status_to_get)
-        await ctx.author.send(csvFile)
+        await ctx.author.send(f'CSV with {arg} user-entries', file=csvFile)
 
     @commands.command(help='Sends the user a dump of the SQL database.\n'
                            f'Requires role \'{globals.adminRole}\'.')
@@ -300,7 +300,6 @@ class Misc(commands.Cog):
         Sends dump of SQL database to user
         Requires ADMIN role
         """
-
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
 

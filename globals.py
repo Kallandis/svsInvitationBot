@@ -1,11 +1,14 @@
+# stores bot object and guild information
 bot = None
 guild = None
 mainChannels = []
 
+# stores event information
 eventInfo = ''
 eventMessage = None
 eventChannel = None
 
+# needed for sending bug reports to my private server
 bugReportChannel = None
 bugReportChannelID = 970947508903759902
 #
