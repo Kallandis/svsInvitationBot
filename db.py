@@ -244,7 +244,7 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
 
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
-            await cursor.execute(sql, *values)
+            await cursor.execute(sql, values)
             entries = await cursor.fetchall()
 
     if display_name:

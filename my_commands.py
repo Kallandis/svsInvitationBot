@@ -337,7 +337,7 @@ async def on_command_error(ctx, error):
     else:
         # should probably do a bit more here but idk
         print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
-        errmsg += f'Unknown.\n'
+        errmsg += f'Unknown.\nPossible bug, please report with {globals.commandPrefix}bug.'
 
     userInput = '\"' + ctx.message.content + '\"'
     if len(userInput) > 100:
