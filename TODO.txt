@@ -47,17 +47,10 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 ---------PRIORITY--------------
 
-
-- IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will send a bug report to discord channel in my
-                private server? can also log it in a file if desired.
-
 - ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
          and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
          set last_status to something.
             do something like: if first_entry == True, check the fields to make sure you arent in it.
-
-- CHANGE: make csv not include certain redundant cols to make it shorter (class, unit for the single units)
-            after doing so, will need to redo some alignment stuff
 
 - IMPLEMENT: add a module or fxn "reload_memory.py" which resets the python cache if the bot is restarted
              Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
@@ -66,3 +59,11 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: add some cooldowns to commands to prevent spam
                 - most of them should be pretty minor
                 - except for $bug, which should be like 5 minutes
+
+- CHANGE:   CSV formatting changes - depends on what the organizers want
+            - remove certain redundant cols to make it more compact. F.X., when entries are grouped by unit and class,
+                don't need to include the unit and class in that entry.
+
+            - display march size as median instead of range?
+                - if doing this, it would be best to just store it as that in the DB. Could still write the range
+                  in db.info_embed() for user convenience.
