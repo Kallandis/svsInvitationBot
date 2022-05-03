@@ -1,5 +1,6 @@
 bot = None
 guild = None
+adminRole = None
 mainChannels = []
 
 eventInfo = ''
@@ -23,7 +24,8 @@ mainChannelIDs = [964654664677212220]  # svsBotTestServer/botchannel
 commandPrefix = '$'
 
 # name of the role that allows usage of event-related commands in the mainChannel
-adminRole = 'evan'
+# adminRole = 'evan'
+adminRoleID = 964625061023735848
 
 # url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
 # thumbnail with the embeds
