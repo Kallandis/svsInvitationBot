@@ -10,18 +10,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# @loop(seconds=5, reconnect=True)
-# async def sql_write():
-#     with sql3.connect('userHistory.db') as conn:
-#         for entry in globals.sqlEntries:
-#             try:
-#                 conn.execute(entry[0], entry[1])
-#             except:
-#                 print(f'Failed to write entry: {entry}')
-#
-#     globals.sqlEntries = []
-
-
 async def add_entry(values: Union[list, tuple]) -> None:
     """
     param [list] entry: INT, STRING, INT, STRING, STRING, STRING, STRING, STRING, INT
@@ -29,8 +17,8 @@ async def add_entry(values: Union[list, tuple]) -> None:
     Lottery defaults to 1
     Profession must be provided by User via calls of ProfessionMenuView()
     """
-    sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, mm_traps, skins, status, lottery) " \
-          "values(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, alliance, mm_traps, skins, status, lottery) "\
+          "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
@@ -86,7 +74,7 @@ def profession_dicts() -> tuple:
 def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     # extract values from entry
     # clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
-    clas, level, unit, march_size, mm_traps, skins, status, lottery = entry[1:]
+    clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:]
 
     # format values for display
     unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
@@ -113,6 +101,7 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     level_args = {'name': 'Level', 'value': level}
     unit_args = {'name': unitTitle, 'value': units}
     march_args = {'name': 'March Size', 'value': march_size}
+    alliance_args = {'name': 'Alliance', 'value': alliance}
     traps_args = {'name': 'Traps', 'value': traps}
     skins_args = {'name': 'Skins', 'value': skins}
     lottery_args = {'name': 'Lottery', 'value': lottery}
@@ -134,19 +123,21 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     embed.add_field(**level_args)
     embed.add_field(**unit_args)
 
-    # row 2: MarchSize, Trap(s), Skin(s), lottery
+    # row 2-3: MarchSize, Alliance, Trap(s), Skin(s), Lottery
     embed.add_field(**march_args)
+    embed.add_field(**alliance_args)
     count = 0
     for argDict in [traps_args, skins_args]:
-        if argDict['value']:    # if traps, skins is not empty
+        if argDict['value']:    # if traps or skins is not empty
             embed.add_field(**argDict)
             count += 1
 
     # lottery
     embed.add_field(**lottery_args)
 
-    # add whitespace fields to align with first row, if 2nd row only contains MarchSize & lottery
-    if count == 0:
+    # add whitespace fields to align 3rd row with 2nd row, if 3rd row has skins & lottery
+    # this happens if the entry has a value for both traps and skins
+    if count == 2:
         embed.add_field(**whitespace_args)
 
     # set thumbnail image
@@ -169,7 +160,7 @@ async def update_profession(discord_id: discord.Member.id, prof_array: list) -> 
     Should only be called if prof_array is not None
     """
 
-    sql = "UPDATE USERS SET CLASS = ?, LEVEL = ?, UNIT = ?, MARCH_SIZE = ?, " \
+    sql = "UPDATE USERS SET CLASS = ?, LEVEL = ?, UNIT = ?, MARCH_SIZE = ?, ALLIANCE = ?, " \
           "MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
 
@@ -195,6 +186,7 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
     """
     # shouldn't need to check on event status as they can only update if there is an active event. But do it anyways
     if globals.eventMessage is None:
+        logger.debug('update_status called when globals.eventMessage was \'None\'')
         return
 
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
@@ -224,7 +216,7 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
 
     # all (ID, prof) of class
     if category == "class":
-        sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, MM_TRAPS, SKINS " \
+        sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, ALLIANCE, MM_TRAPS, SKINS " \
               "FROM USERS WHERE STATUS = ? AND CLASS = ?"
         values = ['YES', value]
 
@@ -239,7 +231,7 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
         values = [value]
 
     else:
-        logger.error(f"CATEGORY: {category} NOT RECOGNIZED")
+        logger.debug(f"CATEGORY: {category} NOT RECOGNIZED")
         return
 
     async with aiosqlite.connect('userHistory.db') as conn:

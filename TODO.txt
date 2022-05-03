@@ -67,3 +67,5 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
             - display march size as median instead of range?
                 - if doing this, it would be best to just store it as that in the DB. Could still write the range
                   in db.info_embed() for user convenience.
+
+- IMPLEMENT: fxn for downloading CSV of all people in the database. move download_db to dump_db

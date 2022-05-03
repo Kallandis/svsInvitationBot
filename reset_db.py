@@ -23,6 +23,7 @@ async def reset_db():
                     level INTEGER,
                     unit TEXT,
                     march_size TEXT,
+                    alliance TEXT,
                     mm_traps TEXT,
                     skins TEXT,
                     status TEXT,

@@ -85,25 +85,21 @@ class Event(commands.Cog):
         # catch errors in parsing input into datetime object
         except ValueError:
             error = 'Date or time entered incorrectly.'
-            logger.error(error)
             raise commands.CheckFailure(error)
 
         # event must be at least 10 minutes in the future
         if timeUntilEvent.total_seconds() < 10 * 60:
             error = 'Event less than 10 minutes in the future.'
-            logger.error(error)
             raise commands.CheckFailure(error)
 
         # title is limited to 256 chars
         if len(title) > 256:
             error = 'Title over 256 characters.'
-            logger.error(error)
             raise commands.CheckFailure(error)
 
         # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
         if len(descr) > 512:
             error = 'Event description over 512 characters.'
-            logger.error(error)
             raise commands.CheckFailure(error)
 
         # TODO: make sure this actually calls confirm_maybe() only once

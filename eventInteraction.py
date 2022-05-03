@@ -202,4 +202,4 @@ async def dm_to_user(user, entry=None, new_status=None, last_status=None) -> Non
     # send a small text message to ACK change
     elif new_status is not None:
         await user.send(f'Your status has been changed from '
-                             f'**{last_status}** to **{new_status}** for {globals.eventInfo}')
+                        f'**{last_status}** to **{new_status}** for {globals.eventInfo}')
