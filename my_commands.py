@@ -31,7 +31,7 @@ class Event(commands.Cog):
         # no admin role
         # if ctx.author not in globals.adminRole.members:
         #     raise commands.MissingRole(globals.adminRole.name)
-        if globals.adminRole not in ctx.author.roles:
+        if globals.adminRole not in [r.name for r in ctx.author.roles]:
             raise commands.MissingRole(globals.adminRole)
 
         # not in active event channel errors
@@ -59,7 +59,7 @@ class Event(commands.Cog):
                            f'Requires role \'{globals.adminRole}\'.\n'
                            '\u200b\n'
                            'If <title> or <description> are not one word, they must be enclosed in \"\"\n'
-                           f'Example: {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"',
+                           f'Example:   {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"',
                       usage='<yy/mm/dd> <hh> <\"title\"> <\"description\">')
     @commands.max_concurrency(1)
     async def create(self, ctx, datestring, hour: int, title, descr):

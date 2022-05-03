@@ -53,6 +53,7 @@ class MyHelp(commands.HelpCommand):
             await channel.send(embed=embed)
 
     async def send_cog_help(self, cog):
+        approved_channels = ', '.join([c.mention for c in globals.mainChannels])
         cog_name_dict = {
             'DM': ['DM - edit your database entry',
                    'Commands to edit or show your database entry info.\n'
@@ -60,7 +61,9 @@ class MyHelp(commands.HelpCommand):
                    ],
             'Event': [f'Event - manage events (ADMIN)',
                       'Commands to create, edit, and close events in approved server channels.\n'
-                      f'Requires role: \'{globals.adminRole}\''
+                      f'Requires role: \'{globals.adminRole}\'\n'
+                      f'\u200b\n'
+                      f'Approved channel(s): {approved_channels}'
                       ],
             'Misc': [f'Misc - general commands', ''],
             'Help': ['Help', '']
