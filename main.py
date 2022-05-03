@@ -15,7 +15,9 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
 intents = discord.Intents(messages=True, members=True, guilds=True, message_content=True)
 bot = commands.Bot(command_prefix=globals.commandPrefix,
                    intents=intents,
-                   description='Manages event attendance and user history')
+                   description='Manages event attendance and user history',
+                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False)
+                   )
 
 
 globals.bot = bot
@@ -59,6 +61,11 @@ async def on_ready():
         error = 'Failed to acquire at least one channel.'
         logging.error(error)
         sys.exit(error)
+
+    globals.bugReportChannel = bot.get_channel(globals.bugReportChannelID)
+    if globals.bugReportChannel is None:
+        error = 'Failed to acquire bug report channel'
+        logging.error(error)
 
     # populate the global event vars if bot is restarted while event is already active
     eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()

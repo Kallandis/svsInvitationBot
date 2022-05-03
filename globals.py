@@ -6,6 +6,8 @@ eventInfo = ''
 eventMessage = None
 eventChannel = None
 
+bugReportChannel = None
+bugReportChannelID = 970947508903759902
 #
 #
 #

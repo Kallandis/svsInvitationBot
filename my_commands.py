@@ -274,6 +274,30 @@ class Misc(commands.Cog):
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
 
+    @commands.command(help='Logs a bug with the bot.\n'
+                           'Limit of 4000 characters.\n',
+                      usage='<description of bug>')
+    @commands.dm_only()
+    async def bug(self, ctx, *, arg):
+        if globals.bugReportChannel is None:
+            raise commands.CheckFailure('The bot failed to acquire the bug report channel during startup.\n'
+                                        'If the bug is critical, please contact an admin.')
+
+        title = 'Bug Report'
+        descr = str(ctx.author) + ' sent the following bug report:\n'
+        descr += arg
+
+        # limit it to 4000 chars
+        if len(descr) > 4096:
+            raise commands.CheckFailure('Bug report too long, must stay below 4000 characters.')
+
+        # send bug report to svsBotTestServer/bug-reports
+        embed = discord.Embed(title=title, description=descr)
+        await globals.bugReportChannel.send(embed=embed)
+
+        # ACK the report
+        await ctx.send('Bug report has been logged. Thank you.')
+
 
 @globals.bot.event
 async def on_command_error(ctx, error):
