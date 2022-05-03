@@ -79,44 +79,49 @@ class Event(commands.Cog):
             unix_time = int(time.mktime(date_time.timetuple()))
 
             # get time until event
-            td = datetime.timedelta(seconds=unix_time - time.time())
-            td = td.total_seconds()
-            td -= (globals.confirmMaybeWarningTimeHours * 60 * 60)
+            timeUntilEvent = datetime.timedelta(seconds=unix_time - time.time())
+            timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.confirmMaybeWarningTimeHours * 60 * 60
 
+        # catch errors in parsing input into datetime object
         except ValueError:
             error = 'Date or time entered incorrectly.'
             logger.error(error)
             raise commands.CheckFailure(error)
 
+        # event must be at least 10 minutes in the future
+        if timeUntilEvent.total_seconds() < 10 * 60:
+            error = 'Event less than 10 minutes in the future.'
+            logger.error(error)
+            raise commands.CheckFailure(error)
+
+        # title is limited to 256 chars
         if len(title) > 256:
             error = 'Title over 256 characters.'
             logger.error(error)
             raise commands.CheckFailure(error)
 
+        # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
         if len(descr) > 512:
-            # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
-            error = 'Description over 512 characters.'
+            error = 'Event description over 512 characters.'
             logger.error(error)
             raise commands.CheckFailure(error)
 
         # TODO: make sure this actually calls confirm_maybe() only once
-        # confirm maybe will only be called if it is at least 2 days in the future
-        if td > 60 * 60 * 24 * 2:
-            @tasks.loop(seconds=td, count=2)
+        # "maybes" will only be reminded if it would be at least 2 days in the future
+        if timeUntilConfirmMaybe > 2 * 24 * 60 * 60:
+            @tasks.loop(seconds=timeUntilConfirmMaybe, count=2)
             async def confirm_maybe_loop():
                 # the loop immediately runs once upon start, so wait until the second loop
                 if confirm_maybe_loop.current_loop > 0:
                     await helpers.confirm_maybe()
             confirm_maybe_loop.start()
 
-        # build title and dynamic timestamp for embed
-        # title = "SvS Event"
+        # discord-formatted timestring
         eventTime = f"<t:{unix_time}>"
 
-        # and then format them up a bit
+        # some formatting for embed description
         eventInfo = title + ' @ ' + eventTime
         description = '@ ' + eventTime + '\n\n'
-        # descr += "It's an SvS Event"
         description += descr
         descr += '\n\u200b'
 
