@@ -28,12 +28,12 @@ class EventButtonsView(discord.ui.View):
             # get the last status of the user, defaults to None
             last_status = self.last_statuses.get(interaction.user.id, None)
             # handle interaction
-            success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if not success:
-            # handle_intxn returns False when user does not have a database entry
+            output = await handle_interaction(last_status, status, interaction, self.parent_message)
+        if output == 'request_entry':
+            # handle_intxn returns 'request_entry' when user does not have a database entry
             # must keep this separate to reduce time spent in 'lock'
             await helpers.request_entry(interaction.user, event_attempt=True)
-        else:
+        elif output == 'success':
             # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
             self.last_statuses[interaction.user.id] = status
 
@@ -42,10 +42,10 @@ class EventButtonsView(discord.ui.View):
         status = 'MAYBE'
         async with lock:
             last_status = self.last_statuses.get(interaction.user.id, None)
-            success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if not success:
+            output = await handle_interaction(last_status, status, interaction, self.parent_message)
+        if output == 'request_entry':
             await helpers.request_entry(interaction.user, event_attempt=True)
-        else:
+        elif output == 'success':
             self.last_statuses[interaction.user.id] = status
 
     @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
@@ -53,10 +53,10 @@ class EventButtonsView(discord.ui.View):
         status = 'NO'
         async with lock:
             last_status = self.last_statuses.get(interaction.user.id, None)
-            success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if not success:
+            output = await handle_interaction(last_status, status, interaction, self.parent_message)
+        if output == 'request_entry':
             await helpers.request_entry(interaction.user, event_attempt=True)
-        else:
+        elif output == 'success':
             self.last_statuses[interaction.user.id] = status
 
     # # buttons for finalizing and deleting event
@@ -73,16 +73,16 @@ class EventButtonsView(discord.ui.View):
     #         await helpers.delete_event(user, intent='delete')
 
 
-async def handle_interaction(last_status, status, interaction, parent_message) -> bool:
+async def handle_interaction(last_status, status, interaction, parent_message) -> str:
     if last_status == status:  # don't do anything if they are already in this category
-        return False
+        return 'ignore'
 
     user = interaction.user
     entry = await db.get_entry(user.id)
     if not entry:
         # await helpers.request_entry(user, event_attempt=True)
         # moved request_entry() to the event button to minimize time spent in 'lock'
-        return False
+        return 'request_entry'
 
     # send ephemeral message to eventChannel
     await interaction.response.send_message(f'Registered as **{status}** for {globals.eventInfo}.', ephemeral=True)
@@ -95,14 +95,14 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
 
         if status != 'NO':   # only DM them if their response is YES or MAYBE
             entry = list(entry)
-            entry[7] = status
+            entry[-2] = status
             await dm_to_user(user, entry=entry)
 
     else:
         # if this is not their first response to event, DM them with change-string instead of full embed
         await dm_to_user(user, new_status=status, last_status=last_status)
 
-    return True
+    return 'success'
 
 
 async def update_event_field(message: discord.Message, name: str, status: str, remove_status=None) -> None:

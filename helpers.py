@@ -21,7 +21,7 @@ async def confirm_maybe() -> None:
     embed = discord.Embed(title=title, description=descr)
 
     # send embed to all maybes
-    maybeEntries = await db.all_attending_of_category('status', 'MAYBE', display_name=False)
+    maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
     for entry in maybeEntries:
         user = globals.guild.get_member(entry[0])
         await user.send(embed=embed)
@@ -99,7 +99,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
-            csvFile = await build_csv(globals.csvFileName)
+            csvFile = await build_csv(globals.csvFileName, status='YES')
             description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
         else:
@@ -126,21 +126,20 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     await db.reset_status()
 
 
-async def build_csv(filename: str) -> discord.File:
+async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
     """
     parses the user database into csv subcategories
     """
 
-    # select lotto winners
-    lottoEntries = await db.all_attending_of_category('lotto', 1)
-    random.shuffle(lottoEntries)
-    lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
-    # get just the name
-    # lottoWinners = [winner[0] for winner in lottoWinners]
+    if finalize:
+        # select lotto winners
+        lottoEntries = await db.all_of_category('lotto', 1)
+        random.shuffle(lottoEntries)
+        lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
 
     # get class arrays
-    ce = await db.all_attending_of_category('class', 'CE')
-    mm = await db.all_attending_of_category('class', 'MM')
+    ce = await db.all_of_category('class', 'CE', status=status)
+    mm = await db.all_of_category('class', 'MM', status=status)
     # name, class, level, unit, march_size, traps, skins
     nameIndex = 0
     classIndex = 1
@@ -336,12 +335,13 @@ async def build_csv(filename: str) -> discord.File:
         writer.writerow([*mmColTitles, '', *mmColTitles, '', *mmColTitles])
         writer.writerows(combined_mmSingles)
 
-        # whitespace
-        writer.writerows([''] * 5)
+        if finalize:
+            # whitespace
+            writer.writerows([''] * 5)
 
-        # lotto winners
-        writer.writerow(['Lottery Winners'])
-        writer.writerows(lottoWinners)
+            # lotto winners
+            writer.writerow(['Lottery Winners'])
+            writer.writerows(lottoWinners)
 
     eventCSV = discord.File(filename)
     return eventCSV

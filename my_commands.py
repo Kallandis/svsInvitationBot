@@ -210,15 +210,9 @@ class DM(commands.Cog):
         member = ctx.author
         ID = member.id
 
-        # intentDict = {None: "edit", "?": "show"}
-        # intent = intentDict.get(intent, None)
-        if intent is None:
-            msg = "```USAGE:\n$prof to edit profession\n$prof ? to show profession```"
-            await ctx.send(msg)
-            return
         intent = intent.lower()
         if intent not in ['change', 'show']:
-            raise commands.CheckFailure(f'Argument must be either \"change\" or \"show\"')
+            raise commands.CheckFailure(f'Argument must be either \'change\' or \'show\'.')
 
         entry = await db.get_entry(ID)
         if not entry:   # check if user has been registered in DB. if not, register them
@@ -257,19 +251,6 @@ class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help='Sends the user a dump of the SQL database.\n'
-                           f'Requires role \'{globals.adminRole}\'.')
-    @commands.has_role(globals.adminRole)
-    @commands.max_concurrency(1)
-    async def download_db(self, ctx):
-        """
-        Sends dump of SQL database to user
-        Requires ADMIN role
-        """
-
-        dump = await db.dump_db('svs_userHistory_dump.sql')
-        await ctx.author.send("dump of userHistory.db database", file=dump)
-
     @commands.command(help='Logs a bug with the bot.\n'
                            'Limit of 4000 characters.\n',
                       usage='<description of bug>')
@@ -293,6 +274,35 @@ class Misc(commands.Cog):
 
         # ACK the report
         await ctx.send('Bug report has been logged. Thank you.')
+
+    @commands.command(help='Sends the user a CSV of the database.\n'
+                           'Must specify if you want just event attendees, or everyone in database.\n'
+                           f'Requires role \'{globals.adminRole}\'.\n'
+                           '\u200b\n'
+                           f'Example:   {globals.commandPrefix}get_csv all',
+                      usage='<all/attending>')
+    @commands.has_role(globals.adminRole)
+    @commands.max_concurrency(1)
+    async def get_csv(self, ctx, status_to_get):
+        if status_to_get not in ['all', 'attending']:
+            raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
+        statusDict = {'all': '*', 'attending': 'YES'}
+        status_to_get = statusDict[status_to_get]
+        csvFile = await helpers.build_csv(globals.csvFileName, status=status_to_get)
+        await ctx.author.send(csvFile)
+
+    @commands.command(help='Sends the user a dump of the SQL database.\n'
+                           f'Requires role \'{globals.adminRole}\'.')
+    @commands.has_role(globals.adminRole)
+    @commands.max_concurrency(1)
+    async def get_db_dump(self, ctx):
+        """
+        Sends dump of SQL database to user
+        Requires ADMIN role
+        """
+
+        dump = await db.dump_db('svs_userHistory_dump.sql')
+        await ctx.author.send("dump of userHistory.db database", file=dump)
 
 
 @globals.bot.event

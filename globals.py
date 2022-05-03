@@ -21,11 +21,11 @@ guildID = 964624340295499857    # svsBotTestServer
 # it is recommended but not required to ONLY add the bot to the channels in this array, to reduce overhead
 mainChannelIDs = [964654664677212220]  # svsBotTestServer/botchannel
 
-# prefix that indicates a command (e.g. $prof, $create_event [args])
-commandPrefix = '$'
-
 # name of the role that allows usage of event-related commands in the mainChannel
 adminRole = 'evan'
+
+# prefix that indicates a command (e.g. $prof, $create_event [args])
+commandPrefix = '$'
 
 # url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
 # thumbnail with the embeds

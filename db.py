@@ -73,7 +73,6 @@ def profession_dicts() -> tuple:
 
 def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     # extract values from entry
-    # clas, unit, level, mm_traps, skins, status, lottery = entry[1:]
     clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:]
 
     # format values for display
@@ -146,7 +145,7 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
 
     # DM command information
     _ = globals.commandPrefix
-    embed.set_footer(text=f"{_}prof <change / show>   |   {_}lottery")
+    embed.set_footer(text=f"{_}prof <change/show>   |   {_}lottery")
     embed.timestamp = discord.utils.utcnow()
 
     # return file, embed
@@ -209,7 +208,8 @@ async def reset_status() -> None:
             await conn.commit()
 
 
-async def all_attending_of_category(category: str, value: Union[str, int], display_name=True) -> Optional[list[tuple]]:
+async def all_of_category(category: str, value: Union[str, int], status='YES',
+                          display_name=True) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
     """
@@ -218,12 +218,12 @@ async def all_attending_of_category(category: str, value: Union[str, int], displ
     if category == "class":
         sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, ALLIANCE, MM_TRAPS, SKINS " \
               "FROM USERS WHERE STATUS = ? AND CLASS = ?"
-        values = ['YES', value]
+        values = [status, value]
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ? AND LOTTERY = ?"
-        values = ['YES', value]
+        values = [status, value]
 
     # just used for checking maybes. Could be used for repopulating embed name fields if bot restarts.
     elif category == 'status':
