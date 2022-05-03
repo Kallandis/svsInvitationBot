@@ -62,6 +62,8 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
              set last_status to something.
                     do something like: if first_entry == True, check the fields to make sure you arent in it.
 
+- CHANGE: change all instances of user.dm_channel.send() to user.send()
+
 - IMPLEMENT: setup(bot) function to add cogs to the bot and maybe other stuff too
                 should do a lot of this before bot.run()
 

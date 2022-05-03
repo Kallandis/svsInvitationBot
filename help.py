@@ -8,10 +8,6 @@ class MyHelp(commands.HelpCommand):
         return '%s%s %s' % (self.context.clean_prefix, command.qualified_name, command.signature)
 
     async def send_bot_help(self, mapping):
-        cog_name_dict = {
-            'DM': 'DM - edit your database entry',
-            'Event': f'Event - manage events (ADMIN)',
-        }
         descr = '<arg> is a mandatory argument\n' \
                 '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
                 '[arg] is an optional argument\n' \
@@ -22,12 +18,19 @@ class MyHelp(commands.HelpCommand):
             command_signatures = [self.get_command_signature(c) for c in commands]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", None)
-                cog_name = cog_name_dict.get(cog_name, cog_name)
+                # cog_name = cog_name_dict.get(cog_name, cog_name)
                 if cog_name is not None:
                     embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
+        # send help embed to the context
         channel = self.get_destination()
         await channel.send(embed=embed)
+
+        # delete the help message if it was sent in a guild
+        # if not isinstance(self.context.channel, discord.DMChannel):
+        #     await self.context.message.delete()
+        #
+        # await self.context.author.send(embed=embed)
 
     async def send_command_help(self, command):
         embed = discord.Embed(title=self.get_command_signature(command), description=command.help)
@@ -79,6 +82,7 @@ class MyHelp(commands.HelpCommand):
                 error += f'\nDid you mean {globals.commandPrefix}help {prompt}?'
 
         embed = discord.Embed(title="Error", description=error)
+
         channel = self.get_destination()
         await channel.send(embed=embed)
 
