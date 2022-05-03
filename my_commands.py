@@ -19,11 +19,20 @@ class Event(commands.Cog):
         self.bot = bot
 
     async def cog_check(self, ctx) -> bool:
-        print(f'{globals.eventChannel = }')
+        # not in guild channel
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.CheckFailure('Command cannot be used in DM.')
+
+        # not in valid event channel
         if ctx.channel.id not in globals.mainChannelIDs:
-            raise commands.CheckFailure('Command used outside of allowed channels.')
+            channelMentions = [c.mention for c in globals.mainChannels] if globals.mainChannels else 'None'
+            raise commands.CheckFailure('Command restricted to channels:\n' + ', '.join(channelMentions))
+
+        # no admin role
         if ctx.author not in globals.adminRole.members:
             raise commands.MissingRole(globals.adminRole.name)
+
+        # not in active event channel errors
         if globals.eventChannel is not None:
             # special cases for $create when there is an active event
             if ctx.command.name == 'create':
@@ -269,40 +278,58 @@ async def on_command_error(ctx, error):
         return
 
     # generic error handling
-    title = f"{ctx.clean_prefix}{ctx.command} Error"
-    errmsg = str(error) + '\n'
-    # errmsg = ''
-    # if isinstance(error, commands.CheckFailure):
-    #     errmsg += str(error) + '\n'
-    # elif isinstance(error, commands.MissingRequiredArgument):
-    #     errmsg += "Missing argument.\n"
-    # elif isinstance(error, commands.TooManyArguments):
-    #     errmsg += "Too many arguments.\n"
-    # elif isinstance(error, commands.BadArgument):
-    #     errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
-    # elif isinstance(error, commands.NoPrivateMessage):
-    #     errmsg += "Command does not work in DM.\n"
-    # elif isinstance(error, commands.PrivateMessageOnly):
-    #     errmsg += "Command only works in DM.\n"
-    # elif isinstance(error, commands.BotMissingRole):
-    #     errmsg += "Bot lacks required role for this command.\n"
-    # elif isinstance(error, commands.BotMissingPermissions):
-    #     errmsg += "Bot lacks required permissions for this command.\n"
-    # elif isinstance(error, commands.MissingRole):
-    #     errmsg += "User lacks required role for this command.\n"
-    # elif isinstance(error, commands.MissingPermissions):
-    #     errmsg += "User lacks required permissions for this command.\n"
-    # elif isinstance(error, commands.CommandNotFound):
-    #     errmsg += "Command does not exist.\n"
-    # else:
-    #     should probably do a bit more here but idk
-    #     print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
-    #     errmsg += f'Error not handled.\n'
+    title = f"{ctx.clean_prefix}{ctx.command} Error" if ctx.command else 'Error'
+    # errmsg = str(error) + '\n'
+    errmsg = ''
+    if isinstance(error, commands.CheckFailure):
+        errmsg += str(error) + '\n'
+    elif isinstance(error, commands.MissingRequiredArgument):
+        errmsg += "Missing argument.\n"
+    elif isinstance(error, commands.TooManyArguments):
+        errmsg += "Too many arguments.\n"
+    elif isinstance(error, commands.BadArgument):
+        errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
+    elif isinstance(error, commands.NoPrivateMessage):
+        errmsg += "Command does not work in DM.\n"
+    elif isinstance(error, commands.PrivateMessageOnly):
+        errmsg += "Command only works in DM.\n"
+    elif isinstance(error, commands.BotMissingRole):
+        errmsg += "Bot lacks required role to execute this command.\n"
+    elif isinstance(error, commands.BotMissingPermissions):
+        errmsg += "Bot lacks required permissions to execute this command.\n"
+    elif isinstance(error, commands.MissingRole):
+        errmsg += "User lacks required role for this command.\n"
+    elif isinstance(error, commands.MissingPermissions):
+        errmsg += "User lacks required permissions for this command.\n"
+    elif isinstance(error, commands.CommandNotFound):
+        errmsg += "Command does not exist.\n"
+    else:
+        # should probably do a bit more here but idk
+        print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
+        errmsg += f'Unknown.\n'
 
-    if ctx.command.usage is not None:
-        errmsg += f'\u200b\nUsage: {globals.commandPrefix}{ctx.command} {ctx.command.usage}'
-    # await ctx.send(f'```{errmsg}```')
+    userInput = '\"' + ctx.message.content + '\"'
+    if len(userInput) > 100:
+        userInput = userInput[:100] + '\" ...'
+    if not isinstance(ctx.channel, discord.DMChannel):
+        userInput += f'\n\u200b\nin channel: {ctx.channel.mention}'
 
-    embed = discord.Embed(title=title, description=errmsg)
+    # embed = discord.Embed(title=title, description=errmsg)
+    embed = discord.Embed(title=title)
+    embed.add_field(name='Reason', value=errmsg, inline=False)
+    embed.add_field(name='You typed', value=userInput, inline=False)
+
+    if ctx.command is not None and ctx.command.usage is not None:
+        usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}'
+        embed.add_field(name='Usage', value=usage, inline=False)
+
     embed.set_footer(text=f"$help {ctx.command} for more info. $help for list of commands.")
-    await ctx.send(embed=embed)
+
+    if globals.send_error_to_dm:
+        # delete the offending command if it was used in a server channel
+        if not isinstance(ctx.channel, discord.DMChannel):
+            await ctx.message.delete()
+        await ctx.author.send(embed=embed)
+
+    else:
+        await ctx.send(embed=embed)

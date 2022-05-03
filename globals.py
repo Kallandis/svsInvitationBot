@@ -40,3 +40,9 @@ numberOfLottoWinners = 40
 
 # how many hours before the scheduled event time should "Maybe's" be reminded of the event
 confirmMaybeWarningTimeHours = 24
+
+# Toggle whether help embeds should be sent to the same channel as $help calls, or to the user's DM
+send_help_to_dm = True
+
+# Toggle whether error embeds should be sent to the same channel as command calls, or to the user's DM
+send_error_to_dm = True

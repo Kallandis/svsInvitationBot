@@ -48,19 +48,8 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 ---------PRIORITY--------------
 
 
-- IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will log $bug in bugreports.log
-
-- CHANGE:   embed FIELD stuff
-            - a field can hold a maximum of 1024 characters. Average of ~10chars per user -> maximum of 100 people
-                - soln: just keep adding YES fields with overflow
-            - put fields in a quote for separation
-            - Field title should indicate the number of people in the field
-
-- IMPLEMENT: custom help command https://gist.github.com/InterStella0/b78488fb28cadf279dfd3164b9f0cf96
-             (and make it send to DM)
-
-- CHANGE:   change error messages to embeds?
-            Also I think most error messages should DM the user, not be posted in main channel.
+- IMPLEMENT:    $bug DM command for reporting issues or bugs. Bot will send a bug report to discord channel in my
+                private server? can also log it in a file if desired.
 
 - ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
          and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
@@ -73,6 +62,3 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: add a module or fxn "reload_memory.py" which resets the python cache if the bot is restarted
              Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
              do things like restart the confirm_maybe() loop
-
-- CHANGE: let $create_event specify what time the event will be at, and also the title of the event
-          Might have to consider timezones here.

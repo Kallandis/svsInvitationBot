@@ -22,15 +22,17 @@ class MyHelp(commands.HelpCommand):
                 if cog_name is not None:
                     embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
-        # send help embed to the context
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+        if globals.send_help_to_dm:
+            # delete the help message if it was sent in a guild
+            if not isinstance(self.context.channel, discord.DMChannel):
+                await self.context.message.delete()
+            # send help embed to user's DM
+            await self.context.author.send(embed=embed)
 
-        # delete the help message if it was sent in a guild
-        # if not isinstance(self.context.channel, discord.DMChannel):
-        #     await self.context.message.delete()
-        #
-        # await self.context.author.send(embed=embed)
+        else:
+            # send help embed to the context
+            channel = self.get_destination()
+            await channel.send(embed=embed)
 
     async def send_command_help(self, command):
         embed = discord.Embed(title=self.get_command_signature(command), description=command.help)
@@ -38,8 +40,17 @@ class MyHelp(commands.HelpCommand):
         if alias:
             embed.add_field(name="Aliases", value=", ".join(alias), inline=False)
 
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+        if globals.send_help_to_dm:
+            # delete the help message if it was sent in a guild
+            if not isinstance(self.context.channel, discord.DMChannel):
+                await self.context.message.delete()
+            # send help embed to user's DM
+            await self.context.author.send(embed=embed)
+
+        else:
+            # send help embed to the context
+            channel = self.get_destination()
+            await channel.send(embed=embed)
 
     async def send_cog_help(self, cog):
         cog_name_dict = {
@@ -69,8 +80,17 @@ class MyHelp(commands.HelpCommand):
         if command_signatures:
             embed.add_field(name='Commands', value='\n'.join(command_signatures))
 
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+        if globals.send_help_to_dm:
+            # delete the help message if it was sent in a guild
+            if not isinstance(self.context.channel, discord.DMChannel):
+                await self.context.message.delete()
+            # send help embed to user's DM
+            await self.context.author.send(embed=embed)
+
+        else:
+            # send help embed to the context
+            channel = self.get_destination()
+            await channel.send(embed=embed)
 
     async def send_error_message(self, error):
         if error.startswith('No command'):
@@ -83,8 +103,17 @@ class MyHelp(commands.HelpCommand):
 
         embed = discord.Embed(title="Error", description=error)
 
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+        if globals.send_help_to_dm:
+            # delete the help message if it was sent in a guild
+            if not isinstance(self.context.channel, discord.DMChannel):
+                await self.context.message.delete()
+            # send help embed to user's DM
+            await self.context.author.send(embed=embed)
+
+        else:
+            # send help embed to the context
+            channel = self.get_destination()
+            await channel.send(embed=embed)
 
 
 class Help(commands.Cog):
