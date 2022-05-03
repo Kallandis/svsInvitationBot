@@ -16,19 +16,20 @@ async def reset_db():
 
     # with sql3.connect('userHistory.db') as conn:
     async with aiosqlite.connect('userHistory.db') as conn:
-
-        await conn.execute("""CREATE TABLE USERS (
-                discord_ID INTEGER NOT NULL PRIMARY KEY,
-                class TEXT,
-                level INTEGER,
-                unit TEXT,
-                march_size TEXT,
-                mm_traps TEXT,
-                skins TEXT,
-                status TEXT,
-                lottery INTEGER
-                );
-            """)
+        async with conn.cursor() as cursor:
+            await cursor.execute("""CREATE TABLE USERS (
+                    discord_ID INTEGER NOT NULL PRIMARY KEY,
+                    class TEXT,
+                    level INTEGER,
+                    unit TEXT,
+                    march_size TEXT,
+                    mm_traps TEXT,
+                    skins TEXT,
+                    status TEXT,
+                    lottery INTEGER
+                    );
+                """)
+            await conn.commit()
 
     # Event database
     if os.path.exists("eventInfo.db"):
@@ -36,14 +37,16 @@ async def reset_db():
 
     # with sql3.connect('eventInfo.db') as conn:
     async with aiosqlite.connect('eventInfo.db') as conn:
-        await conn.execute("""CREATE TABLE EVENT (
-                title TEXT,
-                time TEXT,
-                message_ID INT,
-                channel_ID INT
-                );
-            """)
-        await conn.execute("INSERT INTO EVENT (title, time, message_ID, channel_ID) values ('placeholder', 'placeholder', 0, 0)")
+        async with conn.cursor() as cursor:
+            await cursor.execute("""CREATE TABLE EVENT (
+                    title TEXT,
+                    time TEXT,
+                    message_ID INT,
+                    channel_ID INT
+                    );
+                """)
+            await cursor.execute("INSERT INTO EVENT (title, time, message_ID, channel_ID) values ('placeholder', 'placeholder', 0, 0)")
+            await conn.commit()
 
 
 if __name__ == "__main__":

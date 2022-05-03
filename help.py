@@ -60,7 +60,7 @@ class MyHelp(commands.HelpCommand):
                    ],
             'Event': [f'Event - manage events (ADMIN)',
                       'Commands to create, edit, and close events in approved server channels.\n'
-                      f'Requires role: {globals.adminRole.name}'
+                      f'Requires role: \'{globals.adminRole}\''
                       ],
             'Misc': [f'Misc - general commands', ''],
             'Help': ['Help', '']

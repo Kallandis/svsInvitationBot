@@ -29,8 +29,10 @@ class Event(commands.Cog):
             raise commands.CheckFailure('Command restricted to channels:\n' + ', '.join(channelMentions))
 
         # no admin role
-        if ctx.author not in globals.adminRole.members:
-            raise commands.MissingRole(globals.adminRole.name)
+        # if ctx.author not in globals.adminRole.members:
+        #     raise commands.MissingRole(globals.adminRole.name)
+        if globals.adminRole not in ctx.author.roles:
+            raise commands.MissingRole(globals.adminRole)
 
         # not in active event channel errors
         if globals.eventChannel is not None:
@@ -54,7 +56,7 @@ class Event(commands.Cog):
 
     @commands.command(help='Creates event at time (PST, 24hr format).\n'
                            'Must be used in a valid server channel when there is not an active event.\n'
-                           'Requires ADMIN.\n'
+                           f'Requires role \'{globals.adminRole}\'.\n'
                            '\u200b\n'
                            'If <title> or <description> are not one word, they must be enclosed in \"\"\n'
                            f'Example: {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"',
@@ -160,7 +162,9 @@ class Event(commands.Cog):
 
         pass
 
-    @commands.command(help='Closes event sign-ups and DMs the user a formatted CSV of attendees.\nMust be used in the same channel as an active event.\nRequires ADMIN.')
+    @commands.command(help='Closes event sign-ups and DMs the user a formatted CSV of attendees.\n'
+                           'Must be used in the same channel as an active event.\n'
+                           f'Requires role \'{globals.adminRole}\'.')
     @commands.max_concurrency(1)
     async def finalize(self, ctx):
         """
@@ -171,7 +175,9 @@ class Event(commands.Cog):
 
         await helpers.delete_event(ctx.author, intent='make_csv')
 
-    @commands.command(help='Closes event sign-ups and resets database to prepare for new event.\nMust be used in the same channel as an active event.\nRequires ADMIN.')
+    @commands.command(help='Closes event sign-ups and resets database to prepare for new event.\n'
+                           'Must be used in the same channel as an active event.\n'
+                           f'Requires role \'{globals.adminRole}\'.')
     @commands.max_concurrency(1)
     async def delete(self, ctx):
         """
@@ -251,7 +257,7 @@ class Misc(commands.Cog):
         self.bot = bot
 
     @commands.command(help='Sends the user a dump of the SQL database.\n'
-                           'Requires ADMIN.')
+                           f'Requires role \'{globals.adminRole}\'.')
     @commands.has_role(globals.adminRole)
     @commands.max_concurrency(1)
     async def download_db(self, ctx):
@@ -317,7 +323,7 @@ async def on_command_error(ctx, error):
     # embed = discord.Embed(title=title, description=errmsg)
     embed = discord.Embed(title=title)
     embed.add_field(name='Reason', value=errmsg, inline=False)
-    embed.add_field(name='You typed', value=userInput, inline=False)
+    embed.add_field(name='You Typed', value=userInput, inline=False)
 
     if ctx.command is not None and ctx.command.usage is not None:
         usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}'

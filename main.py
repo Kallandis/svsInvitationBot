@@ -56,14 +56,7 @@ async def on_ready():
     for _id in globals.mainChannelIDs:
         globals.mainChannels.append(bot.get_channel(_id))
     if not all(globals.mainChannels):
-        error = 'Failed to acquire at least one channel in server.'
-        logging.error(error)
-        sys.exit(error)
-
-    # admin role
-    globals.adminRole = globals.guild.get_role(globals.adminRoleID)
-    if globals.adminRole is None:
-        error = f'Failed to acquire admin-role for bot commands with ID: {globals.adminRoleID}.'
+        error = 'Failed to acquire at least one channel.'
         logging.error(error)
         sys.exit(error)
 
