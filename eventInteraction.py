@@ -29,8 +29,12 @@ class EventButtonsView(discord.ui.View):
             last_status = self.last_statuses.get(interaction.user.id, None)
             # handle interaction
             success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if success:
-            # if field was updated, add/edit key-value pair of current status, to be used if status is changed
+        if not success:
+            # handle_intxn returns False when user does not have a database entry
+            # must keep this separate to reduce time spent in 'lock'
+            await helpers.request_entry(interaction.user, event_attempt=True)
+        else:
+            # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
             self.last_statuses[interaction.user.id] = status
 
     @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
@@ -39,7 +43,9 @@ class EventButtonsView(discord.ui.View):
         async with lock:
             last_status = self.last_statuses.get(interaction.user.id, None)
             success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if success:
+        if not success:
+            await helpers.request_entry(interaction.user, event_attempt=True)
+        else:
             self.last_statuses[interaction.user.id] = status
 
     @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
@@ -48,7 +54,9 @@ class EventButtonsView(discord.ui.View):
         async with lock:
             last_status = self.last_statuses.get(interaction.user.id, None)
             success = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if success:
+        if not success:
+            await helpers.request_entry(interaction.user, event_attempt=True)
+        else:
             self.last_statuses[interaction.user.id] = status
 
     # # buttons for finalizing and deleting event
@@ -72,7 +80,8 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     user = interaction.user
     entry = await db.get_entry(user.id)
     if not entry:
-        await helpers.request_entry(user, event_attempt=True)
+        # await helpers.request_entry(user, event_attempt=True)
+        # moved request_entry() to the event button to minimize time spent in 'lock'
         return False
 
     # send ephemeral message to eventChannel
