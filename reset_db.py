@@ -1,6 +1,7 @@
 # import sqlite3 as sql3
 import aiosqlite
 import os
+import asyncio
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,4 +49,4 @@ async def reset_db():
 if __name__ == "__main__":
     confirm_reset = input("Are you sure you want to reset the database? Type CONFIRM to confirm.\n")
     if confirm_reset.lower() == "confirm":
-        await reset_db()
+        asyncio.run(reset_db())
