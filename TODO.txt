@@ -75,12 +75,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 - if doing this, it would be best to just store it as that in the DB. Could still write the range
                   in db.info_embed() for user convenience.
 
-- IMPLEMENT: fxn for downloading CSV of all people in the database. move download_db to dump_db
-
-- ISSUE:    '$get_csv all' is not working - sends '*' to status, but I think the sql statement doesn't recognize it.
-            Need to test with asyncio_test.py
-            soln could be to recognize status = 'YES', status='NO', status='MAYBE'
-
 - CHANGE:   the profession selection menu should not delete the first prompting message. Instead, just append the
             'you chose: ' thing to the bottom of it, each time replacing with a new 'you chose: ', until the end when
             the content is wiped and the message is replaced with an info embed
@@ -93,3 +87,6 @@ CHANGELIST FROM TEST:
         - if command takes arguments, also added an 'Example' field with an example of how to use the command
     - Added ~help to the DM and event embed footers
     - Added a line to the ~help command indicating you can do ~help [command] for command-specific info
+    - ~get_csv <all/attending> is now functional
+    - renamed ~prof to ~info
+

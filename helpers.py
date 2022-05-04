@@ -100,7 +100,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
             csvFile = await build_csv(globals.csvFileName, status='YES', finalize=True)
-            description = f'CSV of all that responded "YES" to {globals.eventInfo}\n' \
+            description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
         else:
             # intent = 'delete'
@@ -301,7 +301,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
 
     # multi-unit should be separate from the rest, just write those in one column
     # single-unit should be one column for each unit type, grouped within column by class, ordered by level
-    with open(filename, 'w', newline='') as csvfile:
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         ceColTitles = ['Name', 'Class', 'Level', 'Units', 'March Size', 'Alliance', 'Skins']

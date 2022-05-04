@@ -65,7 +65,7 @@ def profession_dicts() -> tuple:
     unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
     ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
     mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
-    mmTrapsDict = {'Corrosive Mucus': 'CM', 'Supermagnetic Field': 'SF', 'Electro Missiles': 'EM'}
+    mmTrapsDict = {'Corrosive Mucus': 'CM', 'Supermagnetic Field': 'SF', 'Electro Missiles': 'EM', '': ''}
 
     return unitDict, ceLevelDict, mmLevelDict, mmTrapsDict
 
@@ -213,8 +213,16 @@ async def all_of_category(category: str, value: Union[str, int], status='YES',
     # all (ID, prof) of class
     if category == "class":
         sql = "SELECT DISCORD_ID, CLASS, LEVEL, UNIT, MARCH_SIZE, ALLIANCE, MM_TRAPS, SKINS " \
-              "FROM USERS WHERE STATUS = ? AND CLASS = ?"
-        values = [status, value]
+              "FROM USERS WHERE "
+        if status in ['YES', 'MAYBE', 'NO']:
+            sql += "STATUS = ? AND CLASS = ?"
+            values = [status, value]
+        elif status == '*':
+            sql += "CLASS = ?"
+            values = [value]
+        else:
+            logger.debug(f'STATUS: {status} not recognized.')
+            return
 
     # all ID attending event who have opted in to lotto
     elif category == "lotto":
@@ -227,7 +235,7 @@ async def all_of_category(category: str, value: Union[str, int], status='YES',
         values = [value]
 
     else:
-        logger.debug(f"CATEGORY: {category} NOT RECOGNIZED")
+        logger.debug(f"CATEGORY: {category} not recognized.")
         return
 
     async with aiosqlite.connect('userHistory.db') as conn:
@@ -236,7 +244,11 @@ async def all_of_category(category: str, value: Union[str, int], status='YES',
             entries = await cursor.fetchall()
 
     if display_name:
-        entries = [(globals.guild.get_member(entry[0]).display_name, *entry[1:]) for entry in entries]
+        entries = [
+            (
+                globals.guild.get_member(entry[0]).display_name,
+                *entry[1:]
+            ) for entry in entries]
 
     return entries    # list of user tuples
 
