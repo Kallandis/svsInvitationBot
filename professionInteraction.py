@@ -194,8 +194,8 @@ class ProfessionMenu(discord.ui.Select):
                 await db.add_entry(entry)
                 embed = db.info_embed(entry,
                                       descr='You have been added to the database.\n'
-                                            'Your event sign-up was not registered because you were not in the database.\n'
-                                            f'You may now sign up for the event.\n'
+                                            'Your event sign-up was not registered.\n'
+                                            f'Please **sign up** for the event again.\n'
                                             '\u200b\n')
 
             # else just update the user's profession

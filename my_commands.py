@@ -28,9 +28,7 @@ class Event(commands.Cog):
             channelMentions = [c.mention for c in globals.mainChannels] if globals.mainChannels else 'None'
             raise commands.CheckFailure('Command restricted to channels:\n' + ', '.join(channelMentions))
 
-        # no admin role
-        # if ctx.author not in globals.adminRole.members:
-        #     raise commands.MissingRole(globals.adminRole.name)
+        # not admin role
         if globals.adminRole not in [r.name for r in ctx.author.roles]:
             raise commands.MissingRole(globals.adminRole)
 

@@ -104,7 +104,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
                           f'[Event Message]({globals.eventMessage.jump_url})'
         else:
             # intent = 'delete'
-            eventMessageEdit = f'```This event was deleted with {globals.commandPrefix}delete_event.```'
+            eventMessageEdit = f'```This event was cancelled with {globals.commandPrefix}delete.```'
             description = f'Deleted {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
             csvFile = None
@@ -339,7 +339,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
             writer.writerows([''] * 5)
 
             # lotto winners
-            writer.writerow(['Lottery Winners'])
+            writer.writerow([f'Lottery Winners ({globals.numberOfLottoWinners})'])
             writer.writerows(lottoWinners)
 
     eventCSV = discord.File(filename)
