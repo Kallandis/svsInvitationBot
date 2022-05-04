@@ -21,7 +21,7 @@ class Event(commands.Cog):
     async def cog_check(self, ctx) -> bool:
         # not in guild channel
         if isinstance(ctx.channel, discord.DMChannel):
-            raise commands.CheckFailure('Command cannot be used in DM.')
+            raise commands.NoPrivateMessage()
 
         # not in valid event channel
         if ctx.channel.id not in globals.mainChannelIDs:
@@ -59,7 +59,11 @@ class Event(commands.Cog):
                            f'Requires role \'{globals.adminRole}\'.\n'
                            '\u200b\n'
                            'If <title> or <description> are not one word, they must be enclosed in \"\"\n'
-                           f'Example:   {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"',
+                           f'Example:   {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"\n'
+                           f'\u200b\n'
+                           f'Note: Discord embeds are limited to 6000 characters, which puts a limit on the number of '
+                           f'people that can fit in the sign-up fields. Beyond that limit, the database will still '
+                           f'track sign-ups, but they will not be reflected in the event embed.',
                       usage='<yy/mm/dd> <hh> <\"title\"> <\"description\">')
     @commands.max_concurrency(1)
     async def create(self, ctx, datestring, hour: int, title, descr):
@@ -129,6 +133,7 @@ class Event(commands.Cog):
 
         # create footer and timestamp
         cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
+        cmdList.append(f'{globals.commandPrefix}help')
         embed.set_footer(text=', '.join(cmdList))
         embed.timestamp = discord.utils.utcnow()
 
@@ -167,7 +172,7 @@ class Event(commands.Cog):
                            'Must be used in the same channel as an active event.\n'
                            f'Requires role \'{globals.adminRole}\'.')
     @commands.max_concurrency(1)
-    async def finalize(self, ctx):
+    async def close(self, ctx):
         """
         Close signups and send sorted .csv of attendees to user
         Calls fxn to build the teams for the upcoming event. Should not be re-used as it consumes tokens.
@@ -193,18 +198,16 @@ class DM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help='Change or show your profession data.\n'
-                           f'Example: {globals.commandPrefix}prof change',
+    @commands.command(help='Change or show your database entry.\n'
+                           f'Example: {globals.commandPrefix}info change\n',
                       usage='<change/show>')
     @commands.dm_only()
-    async def prof(self, ctx, intent: str) -> None:
+    async def info(self, ctx, intent: str) -> None:
         """
-        $prof (no argument) to edit profession, $prof ? to show profession
+        $info change sends the user a ProfessionMenuView object to initiate database entry population
+        $info show sends the user a db.info_embed() with their database info
 
-        If the user is not in the database, prompts user to provide a database entry
-
-        Else, sends the user either a ProfessionMenuView view object to change their profession, or an info embed made with
-        db.info_embed() to show their database information
+        If the user is not in the database, either one will send a ProfessionMenuView object to get a first entry.
         """
 
         member = ctx.author
@@ -219,7 +222,7 @@ class DM(commands.Cog):
             await helpers.request_entry(member)
 
         elif intent == "change":
-            msg = await ctx.send(content="Enter profession. Menu will disappear in 5 minutes.")
+            msg = await ctx.send(content="Enter information. Menu will disappear in 5 minutes.")
             view = ProfessionMenuView(msg, 'class')
             await msg.edit(view=view)
 
@@ -252,7 +255,8 @@ class Misc(commands.Cog):
         self.bot = bot
 
     @commands.command(help='Logs a bug with the bot.\n'
-                           'Limit of 4000 characters.\n',
+                           'Limit of 4000 characters.\n'
+                           f'Example: {globals.commandPrefix}bug Something is not working.\n',
                       usage='<description of bug>')
     @commands.dm_only()
     async def bug(self, ctx, *, arg):
@@ -279,7 +283,7 @@ class Misc(commands.Cog):
                            'Must specify if you want just event attendees, or everyone in database.\n'
                            f'Requires role \'{globals.adminRole}\'.\n'
                            '\u200b\n'
-                           f'Example:   {globals.commandPrefix}get_csv all',
+                           f'Example:   {globals.commandPrefix}get_csv all\n',
                       usage='<all/attending>')
     @commands.has_role(globals.adminRole)
     @commands.max_concurrency(1)
@@ -355,11 +359,25 @@ async def on_command_error(ctx, error):
     embed.add_field(name='Reason', value=errmsg, inline=False)
     embed.add_field(name='You Typed', value=userInput, inline=False)
 
+    # usage field
     if ctx.command is not None and ctx.command.usage is not None:
-        usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}'
+        argHints = '<arg> is a mandatory argument\n' \
+                   '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
+                   '[arg] is an optional argument\n'
+        usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}\n'
+        usage += '\u200b\n' + argHints
         embed.add_field(name='Usage', value=usage, inline=False)
 
-    embed.set_footer(text=f"$help {ctx.command} for more info. $help for list of commands.")
+        # Example field
+        if 'Example:' in ctx.command.help:
+            # if the help-text has "Example:" in it, this grabs the example if it is terminated with '\n'
+            example = ctx.command.help.split('Example:')[1].strip().split('\n')[0]
+            embed.add_field(name='Example', value=example, inline=False)
+
+    # footer text prompt for $help command, $help
+    footerText = f'{globals.commandPrefix}help {ctx.command} for more info. ' if ctx.command is not None else ''
+    footerText += f'{globals.commandPrefix}help for a list of commands.'
+    embed.set_footer(text=footerText)
 
     if globals.send_error_to_dm:
         # delete the offending command if it was used in a server channel

@@ -11,6 +11,8 @@ class MyHelp(commands.HelpCommand):
         descr = '<arg> is a mandatory argument\n' \
                 '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
                 '[arg] is an optional argument\n' \
+                '\u200b\n' \
+                f'\'{self.context.clean_prefix}help [command]\' for command-specific help\n' \
                 '\u200b'
 
         embed = discord.Embed(title="Commands List", description=descr)
@@ -128,8 +130,8 @@ class Help(commands.Cog):
             'help': f'Lists all commands or gives info on a specific command or category.\n'
                     '\u200b\n'
                     f'Examples:\n'
-                    f'{_}help   ->   Shows all commands\n'
-                    f'{_}help prof   ->   Shows specific help for command "prof"\n'
+                    f'{_}help         ->   Shows all commands\n'
+                    f'{_}help info    ->   Shows specific help for command "info"\n'
                     f'{_}help Event   ->   Shows info about command category "Event"',
             'usage': '[command]'
         }

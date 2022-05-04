@@ -36,16 +36,23 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IDEA: could make the delete/finalize event confirmation just require a react instead of typing "confirm"
         might avoid the rare bug where it just immediately fails?
 
-- IMPLEMENT: store all database entries in memory to reduce database accessing. make sure it is always synced with
-             database (do some error checking stuff, only update the memory copy if database write is successful)
-                - on_ready() should repopulate the memory copy of database (or reload_memory.py if I implement that)
-
 - IDEA:     do I have to consider memory "leaks"? examples:
                 - should I be explicitly deleting old instances of EventButtons() once the event closes?
                 - should I be explicitly deleting instances of ProfessionMenuView()?
 
+- IMPLEMENT: if the length of the event embed would become larger than 6000 chars, do not add a name to the fields
+             (can still remove)
+
+- IMPLEMENT: store all database entries in memory to reduce database accessing. make sure it is always synced with
+             database (do some error checking stuff, only update the memory copy if database write is successful)
+                - on_ready() should repopulate the memory copy of database (or reload_memory.py if I implement that)
 
 ---------PRIORITY--------------
+
+- CHANGE:   needs to work in 2 different servers (not concurrently). As long as the respective channels are in mainChannelIDs,
+            the only thing that needs to be changed are a few calls to globals.guild
+                - should be able to replace those with a reference to the guild that 'ctx' was in.
+                - may need to change globals.adminRole to a list of qualified roles
 
 - ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
          and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
@@ -73,3 +80,16 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - ISSUE:    '$get_csv all' is not working - sends '*' to status, but I think the sql statement doesn't recognize it.
             Need to test with asyncio_test.py
             soln could be to recognize status = 'YES', status='NO', status='MAYBE'
+
+- CHANGE:   the profession selection menu should not delete the first prompting message. Instead, just append the
+            'you chose: ' thing to the bottom of it, each time replacing with a new 'you chose: ', until the end when
+            the content is wiped and the message is replaced with an info embed
+
+
+CHANGELIST FROM TEST:
+    - on first database entry, info embed will remind the user that their sign-up was rejected, and that they must sign up again
+        - it could probably be made to do it automatically, but it would take a bit of work
+    - Added explanation of <arg>, <arg1/arg2>, and [arg] to error message 'Usage' field
+        - if command takes arguments, also added an 'Example' field with an example of how to use the command
+    - Added ~help to the DM and event embed footers
+    - Added a line to the ~help command indicating you can do ~help [command] for command-specific info

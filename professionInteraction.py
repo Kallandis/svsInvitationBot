@@ -2,6 +2,9 @@ import discord
 import db
 
 import logging
+
+import globals
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +32,7 @@ class ProfessionMenu(discord.ui.Select):
             options = [
                 discord.SelectOption(label='MM'),
                 discord.SelectOption(label='CE'),
-                discord.SelectOption(label='CANCEL', description='Pick this to cancel updating profession')
+                discord.SelectOption(label='CANCEL', description='Pick this to cancel updating database entry.')
             ]
             placeholder = f'Select your class'
 
@@ -119,7 +122,7 @@ class ProfessionMenu(discord.ui.Select):
         choice = ', '.join(self.values)
         if choice == 'CANCEL':
             # does this need to interact with invoking fxn update_profession()?
-            await interaction.response.edit_message(content='Cancelled updating profession', view=None)
+            await interaction.response.edit_message(content='Cancelled updating database', view=None)
             return
 
         if self.category == "class":
@@ -189,7 +192,11 @@ class ProfessionMenu(discord.ui.Select):
                 entry = [interaction.user.id, *prof_array, "NO", 1]
 
                 await db.add_entry(entry)
-                embed = db.info_embed(entry, descr='You have been added to the database.\n\u200b\n')
+                embed = db.info_embed(entry,
+                                      descr='You have been added to the database.\n'
+                                            'Your event sign-up was not registered because you were not in the database.\n'
+                                            f'You may now sign up for the event.\n'
+                                            '\u200b\n')
 
             # else just update the user's profession
             else:
@@ -198,7 +205,7 @@ class ProfessionMenu(discord.ui.Select):
                 status, lottery = old_entry[-2:]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
 
-                embed = db.info_embed(new_entry, descr='Successfully edited profession.\n\u200b\n')
+                embed = db.info_embed(new_entry, descr='Successfully edited database entry.\n\u200b\n')
                 await db.update_profession(interaction.user.id, prof_array)
 
             # send user's selection as an info-embed, remove the view
@@ -233,4 +240,4 @@ class ProfessionMenuView(discord.ui.View):
         # check that the parent message has an embed, indicating that the user successfully completed selection.
         # If not, timeout the message.
         if not parent_message.embeds:
-            await self.parent_message.edit(content='Profession menu timed out.', view=None)
+            await self.parent_message.edit(content='Selection menu timed out.', view=None)

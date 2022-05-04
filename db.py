@@ -144,7 +144,7 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
 
     # DM command information
     _ = globals.commandPrefix
-    embed.set_footer(text=f"{_}prof <change/show>   |   {_}lottery")
+    embed.set_footer(text=f"{_}info <change/show>   |   {_}lottery   |   {_}help")
     embed.timestamp = discord.utils.utcnow()
 
     # return file, embed
@@ -153,9 +153,7 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
 
 async def update_profession(discord_id: discord.Member.id, prof_array: list) -> None:
     """
-    param [str] prof: one of ~10 Profession designations ( MM1/2/3 , CE3/X/N - A/F/N , CEM )
-    formatting instructions to be given in private message
-    Should only be called if prof_array is not None
+    updates an existing database entry indexed by "discord_id" to new profession data
     """
 
     sql = "UPDATE USERS SET CLASS = ?, LEVEL = ?, UNIT = ?, MARCH_SIZE = ?, ALLIANCE = ?, " \

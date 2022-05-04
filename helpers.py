@@ -30,14 +30,14 @@ async def confirm_maybe() -> None:
 async def request_entry(user: Union[discord.Member, discord.User], event_attempt=False) -> None:
     """
     Prompt unregistered user to provide data entry for SQL database.
-    Called when user reacts to an event or uses DM command $lotto or $prof before being added to DB
+    Called when user reacts to an event or uses DM command $lotto or $info before being added to DB
     """
 
     if event_attempt:
         cont = "Your event sign-up has been cancelled because you are not in the database.\n" \
-               "After entering your profession, you may sign up for the event again.\n"
+               "After entering your information, you may sign up for the event again.\n"
     else:
-        cont = "You do not have an existing entry in the database. Please enter profession.\n"
+        cont = "You do not have an existing entry in the database. Please enter information.\n"
     cont += "Menu will disappear in 5 minutes."
 
     msg = await user.send(content=cont)
