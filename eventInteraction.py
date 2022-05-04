@@ -19,11 +19,29 @@ class EventButtonsView(discord.ui.View):
         self.parent_message = parent_message
         self.last_statuses = {}
 
-    @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        status = 'YES'
+    def check_in_field_before_restart(self, interaction):
+        # if the last status of user is None, checks to make sure the bot has not restarted and thus lost their last
+        # status. Does this by checking the raw field values to see if the user's name is in there. If so, sets the
+        # user's last status to the correct value.
+        if self.last_statuses.get(interaction.user.id, None) is None:
+            # get the embed
+            emb = self.parent_message.embeds[0]
+            fields = emb.fields
+            for i in range(len(fields)):
+                # check each field for user's name
+                if interaction.user.display_name in fields[i].value:
+                    # if name is found, iterate backwards to get the 'category' of field that it is in (yes, maybe, no)
+                    while True:
+                        # strip [124] field count to get title
+                        fieldType = fields[i].name.split()[0]
+                        if fieldType in ['YES', 'MAYBE', 'NO']:
+                            self.last_statuses[interaction.user.id] = fieldType
+                            break
+                        else:
+                            i -= 1
+                    break
 
-        # have to make this mutex to avoid r/w problem with editing event message's embed fields
+    async def process_click(self, interaction, status):
         async with lock:
             # get the last status of the user, defaults to None
             last_status = self.last_statuses.get(interaction.user.id, None)
@@ -37,27 +55,48 @@ class EventButtonsView(discord.ui.View):
             # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
             self.last_statuses[interaction.user.id] = status
 
+    @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+        status = 'YES'
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
+
+        # if self.last_statuses.get(interaction.user.id, None) is None:
+        #     emb = self.parent_message.embeds[0]
+        #     fields = emb.fields
+        #     for i in range(len(fields)):
+        #         if interaction.user.display_name in fields[i].value:
+        #             while True:
+        #                 if fields[i].name in ['YES', 'MAYBE', 'NO']:
+        #                     self.last_statuses[interaction.user.id] = fields[i].name
+        #                     break
+        #             break
+
+        # have to make this mutex to avoid r/w problem with editing event message's embed fields
+        # async with lock:
+        #     # get the last status of the user, defaults to None
+        #     last_status = self.last_statuses.get(interaction.user.id, None)
+        #     # handle interaction
+        #     output = await handle_interaction(last_status, status, interaction, self.parent_message)
+        # if output == 'request_entry':
+        #     # handle_intxn returns 'request_entry' when user does not have a database entry
+        #     # must keep this separate to reduce time spent in 'lock'
+        #     await helpers.request_entry(interaction.user, event_attempt=True)
+        # elif output == 'success':
+        #     # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
+        #     self.last_statuses[interaction.user.id] = status
+
     @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
     async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'MAYBE'
-        async with lock:
-            last_status = self.last_statuses.get(interaction.user.id, None)
-            output = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if output == 'request_entry':
-            await helpers.request_entry(interaction.user, event_attempt=True)
-        elif output == 'success':
-            self.last_statuses[interaction.user.id] = status
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
 
     @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'NO'
-        async with lock:
-            last_status = self.last_statuses.get(interaction.user.id, None)
-            output = await handle_interaction(last_status, status, interaction, self.parent_message)
-        if output == 'request_entry':
-            await helpers.request_entry(interaction.user, event_attempt=True)
-        elif output == 'success':
-            self.last_statuses[interaction.user.id] = status
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
 
     # # buttons for finalizing and deleting event
     # @discord.ui.button(label='SUBMIT', style=discord.ButtonStyle.success, custom_id='persistent_view:finalize', row=2)
@@ -110,7 +149,8 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
     # first remove/add vals, then resolve empty/new fields to avoid indexing errors
     embed = message.embeds[0]
     fields = embed.fields
-    titles = [field.name[:field.name.index('[')].strip() if '[' in field.name else field.name for field in fields]
+    # titles = [field.name[:field.name.index('[')].strip() if '[' in field.name else field.name for field in fields]
+    titles = [field.name.split()[0] for field in fields]
 
     maybeIndex = titles.index('MAYBE')
     noIndex = titles.index('NO')
@@ -137,7 +177,11 @@ async def update_event_field(message: discord.Message, name: str, status: str, r
         if add:
             statusNames += f'{name}\n'
         else:
+            # I think discord will implicitly strip the trailing '\n' of the field value, so need to remove both
+            # name and name\n in case the name is the trailing name of the field? this might only be an issue on restart
             statusNames = statusNames.replace(f'{name}\n', '')
+            # need to replace {name}\n first, or only {name} will be replaced and the \n stay
+            statusNames = statusNames.replace(f'{name}', '')
 
         statusCount = statusNames.count('\n')   # number of names is equal to number of '\n' in string
 

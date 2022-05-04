@@ -19,8 +19,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - CHANGE:   move the user-defined global variables into a different file (config.txt)
             then populate those user-defined global vars in on_ready()
 
-- IMPLEMENT: get a profile pic for the bot
-
 - CHANGE:   DEPRECATED FOR NOW (was not received well)
             - When the fields become long, the buttons will be far below the event message.
             - soln: make the buttons be above the event message
@@ -30,11 +28,13 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 await blankMsg.edit(view=view)
                 - then, when deleting event, would have to remove the view from this instead of eventMessage
 
-- CHANGE:   the CSV can probably be formatted a little more conveniently. Leave out duplicate info like class, unit
-            within certain categories? since they are always the same.
+- CHANGE:   CSV formatting changes - depends on what the organizers want
+            - remove certain redundant cols to make it more compact. F.X., when entries are grouped by unit and class,
+                don't need to include the unit and class in that entry.
 
-- IDEA: could make the delete/finalize event confirmation just require a react instead of typing "confirm"
-        might avoid the rare bug where it just immediately fails?
+            - display march size as median instead of range?
+                - if doing this, it would be best to just store it as that in the DB. Could still write the range
+                  in db.info_embed() for user convenience.
 
 - IDEA:     do I have to consider memory "leaks"? examples:
                 - should I be explicitly deleting old instances of EventButtons() once the event closes?
@@ -54,11 +54,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 - should be able to replace those with a reference to the guild that 'ctx' was in.
                 - may need to change globals.adminRole to a list of qualified roles
 
-- ISSUE: EventButtons are persistent through restart, but the field values are not; it thinks that it's my first entry
-         and sends me a first-time entry info_embed(). on restart, need to check if name is in field values and if so
-         set last_status to something.
-            do something like: if first_entry == True, check the fields to make sure you arent in it.
-
 - IMPLEMENT: add a module or fxn "reload_memory.py" which resets the python cache if the bot is restarted
              Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
              do things like restart the confirm_maybe() loop
@@ -66,14 +61,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: add some cooldowns to commands to prevent spam
                 - most of them should be pretty minor
                 - except for $bug, which should be like 5 minutes
-
-- CHANGE:   CSV formatting changes - depends on what the organizers want
-            - remove certain redundant cols to make it more compact. F.X., when entries are grouped by unit and class,
-                don't need to include the unit and class in that entry.
-
-            - display march size as median instead of range?
-                - if doing this, it would be best to just store it as that in the DB. Could still write the range
-                  in db.info_embed() for user convenience.
 
 - CHANGE:   the profession selection menu should not delete the first prompting message. Instead, just append the
             'you chose: ' thing to the bottom of it, each time replacing with a new 'you chose: ', until the end when
