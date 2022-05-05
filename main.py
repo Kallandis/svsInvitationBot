@@ -4,7 +4,9 @@ import logging
 import globals
 import sys
 import traceback
+import time
 
+import helpers
 import tokenFile
 
 logging.basicConfig(filename='bot.log', level=logging.INFO,
@@ -29,7 +31,8 @@ intents = discord.Intents(messages=True, members=True, guilds=True, message_cont
 bot = commands.Bot(command_prefix=globals.commandPrefix,
                    intents=intents,
                    description='Manages event attendance and user history',
-                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False)
+                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
+                   activity=discord.Game(name=f'{globals.commandPrefix}help')
                    )
 
 
@@ -74,22 +77,33 @@ async def on_ready():
         logging.error(error)
         sys.exit(error)
 
+    # bug report channel in my private server "svsBotTestServer"
     globals.bugReportChannel = bot.get_channel(globals.bugReportChannelID)
     if globals.bugReportChannel is None:
         error = 'Failed to acquire bug report channel'
         logging.error(error)
 
-    # populate the global event vars if bot is restarted while event is already active
+    #
+    # if bot is restarted while the event is active, repopulate everything in memory to ensure seamless restart
     eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
     if eventMessageID:
+        # event variables
         globals.eventInfo = eventTitle + ' @ ' + eventTime
-        # globals.eventMessageID = eventMessageID
         globals.eventChannel = bot.get_channel(eventChannelID)
         globals.eventMessage = await globals.eventChannel.fetch_message(eventMessageID)
 
         # re-initializes EventButtonsView instance so that buttons still work
         view = EventButtonsView(globals.eventMessage)
         await globals.eventMessage.edit(view=view)
+
+        # TODO: test this
+        # restart confirm_maybe loop
+        # extract unix time of event, convert to time until maybes should be reminded, send to fxn
+        eventTime = int(eventTime.strip('><')[1:])
+        confirmMaybeTime = eventTime - globals.confirmMaybeWarningTimeHours * 60 * 60
+        timeUntilConfirmMaybe = confirmMaybeTime - time.time()
+        maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe)
+        globals.maybe_loop = maybe_loop
 
     # add cogs
     await bot.add_cog(my_commands.DM(bot))

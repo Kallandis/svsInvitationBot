@@ -18,6 +18,12 @@ class Event(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # delete commands after they resolve properly
+    # the error handler already deletes messages if they raise an exception
+    async def cog_after_invoke(self, ctx) -> None:
+        if not ctx.command_failed:
+            await ctx.message.delete()
+
     async def cog_check(self, ctx) -> bool:
         # not in guild channel
         if isinstance(ctx.channel, discord.DMChannel):
@@ -105,14 +111,19 @@ class Event(commands.Cog):
             raise commands.CheckFailure(error)
 
         # TODO: make sure this actually calls confirm_maybe() only once
-        # "maybes" will only be reminded if it would be at least 2 days in the future
-        if timeUntilConfirmMaybe > 2 * 24 * 60 * 60:
-            @tasks.loop(seconds=timeUntilConfirmMaybe, count=2)
-            async def confirm_maybe_loop():
-                # the loop immediately runs once upon start, so wait until the second loop
-                if confirm_maybe_loop.current_loop > 0:
-                    await helpers.confirm_maybe()
-            confirm_maybe_loop.start()
+        # start the background task to remind the "MAYBE's"
+        # loop will only start if timeUntilConfirmMaybe > 2 days
+        maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe)
+        globals.maybe_loop = maybe_loop
+
+        # # "maybes" will only be reminded if it would be at least 2 days in the future
+        # if timeUntilConfirmMaybe > 2 * 24 * 60 * 60:
+        #     @tasks.loop(seconds=timeUntilConfirmMaybe, count=2)
+        #     async def confirm_maybe_loop():
+        #         # the loop immediately runs once upon start, so wait until the second loop
+        #         if confirm_maybe_loop.current_loop > 0:
+        #             await helpers.confirm_maybe()
+        #     confirm_maybe_loop.start()
 
         # discord-formatted timestring
         eventTime = f"<t:{unix_time}>"
@@ -121,7 +132,11 @@ class Event(commands.Cog):
         eventInfo = title + ' @ ' + eventTime
         description = '@ ' + eventTime + '\n\n'
         description += descr
-        descr += '\n\u200b'
+
+        firstTimeHint = '\n\nIf this is your first time interacting with the bot, you will see "This interaction ' \
+                        'failed." The bot will send you a DM with instructions.\n\u200b'
+
+        description += firstTimeHint
 
         # create embed and add fields
         embed = discord.Embed(title=title, description=description, color=discord.Color.dark_red())
@@ -252,6 +267,12 @@ class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # delete commands after they resolve properly, if they were used outside of DM
+    # the error handler already deletes messages if they raise an exception
+    async def cog_after_invoke(self, ctx) -> None:
+        if not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
+            await ctx.message.delete()
+
     @commands.command(help='Logs a bug with the bot.\n'
                            'Limit of 4000 characters.\n'
                            f'Example: {globals.commandPrefix}bug Something is not working.\n',
@@ -310,82 +331,82 @@ class Misc(commands.Cog):
         await ctx.author.send("dump of userHistory.db database", file=dump)
 
 
-# @globals.bot.event
-# async def on_command_error(ctx, error):
-#     logger.error(f'{ctx.command} ERROR: {str(error)}')
-#     print('errstring: ' + str(error))
-#
-#     # command has local error handler
-#     if hasattr(ctx.command, 'on_error'):
-#         return
-#
-#     # generic error handling
-#     title = f"{ctx.clean_prefix}{ctx.command} Error" if ctx.command else 'Error'
-#     # errmsg = str(error) + '\n'
-#     errmsg = ''
-#     if isinstance(error, commands.CheckFailure):
-#         errmsg += str(error) + '\n'
-#     elif isinstance(error, commands.MissingRequiredArgument):
-#         errmsg += "Missing argument.\n"
-#     elif isinstance(error, commands.TooManyArguments):
-#         errmsg += "Too many arguments.\n"
-#     elif isinstance(error, commands.BadArgument):
-#         errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
-#     elif isinstance(error, commands.NoPrivateMessage):
-#         errmsg += "Command does not work in DM.\n"
-#     elif isinstance(error, commands.PrivateMessageOnly):
-#         errmsg += "Command only works in DM.\n"
-#     elif isinstance(error, commands.BotMissingRole):
-#         errmsg += "Bot lacks required role to execute this command.\n"
-#     elif isinstance(error, commands.BotMissingPermissions):
-#         errmsg += "Bot lacks required permissions to execute this command.\n"
-#     elif isinstance(error, commands.MissingRole):
-#         errmsg += "User lacks required role for this command.\n"
-#     elif isinstance(error, commands.MissingPermissions):
-#         errmsg += "User lacks required permissions for this command.\n"
-#     elif isinstance(error, commands.CommandNotFound):
-#         errmsg += "Command does not exist.\n"
-#     else:
-#         # should probably do a bit more here but idk
-#         print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
-#         errmsg += f'Unknown.\nPossible bug, please report with {globals.commandPrefix}bug.'
-#
-#     userInput = '\"' + ctx.message.content + '\"'
-#     if len(userInput) > 100:
-#         userInput = userInput[:100] + '\" ...'
-#     if not isinstance(ctx.channel, discord.DMChannel):
-#         userInput += f'\n\u200b\nin channel: {ctx.channel.mention}'
-#
-#     # embed = discord.Embed(title=title, description=errmsg)
-#     embed = discord.Embed(title=title)
-#     embed.add_field(name='Reason', value=errmsg, inline=False)
-#     embed.add_field(name='You Typed', value=userInput, inline=False)
-#
-#     # usage field
-#     if ctx.command is not None and ctx.command.usage is not None:
-#         argHints = '<arg> is a mandatory argument\n' \
-#                    '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
-#                    '[arg] is an optional argument\n'
-#         usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}\n'
-#         usage += '\u200b\n' + argHints
-#         embed.add_field(name='Usage', value=usage, inline=False)
-#
-#         # Example field
-#         if 'Example:' in ctx.command.help:
-#             # if the help-text has "Example:" in it, this grabs the example if it is terminated with '\n'
-#             example = ctx.command.help.split('Example:')[1].strip().split('\n')[0]
-#             embed.add_field(name='Example', value=example, inline=False)
-#
-#     # footer text prompt for $help command, $help
-#     footerText = f'{globals.commandPrefix}help {ctx.command} for more info. ' if ctx.command is not None else ''
-#     footerText += f'{globals.commandPrefix}help for a list of commands.'
-#     embed.set_footer(text=footerText)
-#
-#     if globals.send_error_to_dm:
-#         # delete the offending command if it was used in a server channel
-#         if not isinstance(ctx.channel, discord.DMChannel):
-#             await ctx.message.delete()
-#         await ctx.author.send(embed=embed)
-#
-#     else:
-#         await ctx.send(embed=embed)
+@globals.bot.event
+async def on_command_error(ctx, error):
+    logger.error(f'{ctx.command} ERROR: {str(error)}')
+    print('errstring: ' + str(error))
+
+    # command has local error handler
+    if hasattr(ctx.command, 'on_error'):
+        return
+
+    # generic error handling
+    title = f"{ctx.clean_prefix}{ctx.command} Error" if ctx.command else 'Error'
+    # errmsg = str(error) + '\n'
+    errmsg = ''
+    if isinstance(error, commands.CheckFailure):
+        errmsg += str(error) + '\n'
+    elif isinstance(error, commands.MissingRequiredArgument):
+        errmsg += "Missing argument.\n"
+    elif isinstance(error, commands.TooManyArguments):
+        errmsg += "Too many arguments.\n"
+    elif isinstance(error, commands.BadArgument):
+        errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
+    elif isinstance(error, commands.NoPrivateMessage):
+        errmsg += "Command does not work in DM.\n"
+    elif isinstance(error, commands.PrivateMessageOnly):
+        errmsg += "Command only works in DM.\n"
+    elif isinstance(error, commands.BotMissingRole):
+        errmsg += "Bot lacks required role to execute this command.\n"
+    elif isinstance(error, commands.BotMissingPermissions):
+        errmsg += "Bot lacks required permissions to execute this command.\n"
+    elif isinstance(error, commands.MissingRole):
+        errmsg += "User lacks required role for this command.\n"
+    elif isinstance(error, commands.MissingPermissions):
+        errmsg += "User lacks required permissions for this command.\n"
+    elif isinstance(error, commands.CommandNotFound):
+        errmsg += "Command does not exist.\n"
+    else:
+        # should probably do a bit more here but idk
+        print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
+        errmsg += f'Unknown.\nPossible bug, please report with {globals.commandPrefix}bug.'
+
+    userInput = '\"' + ctx.message.content + '\"'
+    if len(userInput) > 100:
+        userInput = userInput[:100] + '\" ...'
+    if not isinstance(ctx.channel, discord.DMChannel):
+        userInput += f'\n\u200b\nin channel: {ctx.channel.mention}'
+
+    # embed = discord.Embed(title=title, description=errmsg)
+    embed = discord.Embed(title=title)
+    embed.add_field(name='Reason', value=errmsg, inline=False)
+    embed.add_field(name='You Typed', value=userInput, inline=False)
+
+    # usage field
+    if ctx.command is not None and ctx.command.usage is not None:
+        argHints = '<arg> is a mandatory argument\n' \
+                   '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
+                   '[arg] is an optional argument\n'
+        usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}\n'
+        usage += '\u200b\n' + argHints
+        embed.add_field(name='Usage', value=usage, inline=False)
+
+        # Example field
+        if 'Example:' in ctx.command.help:
+            # if the help-text has "Example:" in it, this grabs the example if it is terminated with '\n'
+            example = ctx.command.help.split('Example:')[1].strip().split('\n')[0]
+            embed.add_field(name='Example', value=example, inline=False)
+
+    # footer text prompt for $help command, $help
+    footerText = f'{globals.commandPrefix}help {ctx.command} for more info. ' if ctx.command is not None else ''
+    footerText += f'{globals.commandPrefix}help for a list of commands.'
+    embed.set_footer(text=footerText)
+
+    if globals.send_error_to_dm:
+        # delete the offending command if it was used in a server channel
+        if not isinstance(ctx.channel, discord.DMChannel):
+            await ctx.message.delete()
+        await ctx.author.send(embed=embed)
+
+    else:
+        await ctx.send(embed=embed)

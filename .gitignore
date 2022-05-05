@@ -2,7 +2,7 @@
 /shelf/
 workspace.xml
 tokenFile.py
-svs_attendees.csv
+svs_entries.csv
 userHistory.db
 eventInfo.db
 NOTES.txt

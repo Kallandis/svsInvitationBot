@@ -34,16 +34,8 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='CE'),
                 discord.SelectOption(label='CANCEL', description='Pick this to cancel updating database entry.')
             ]
-            placeholder = f'Select your class'
-
-        elif category == "unit":
-            options = [
-                discord.SelectOption(label='Army'),
-                discord.SelectOption(label='Air Force'),
-                discord.SelectOption(label='Navy')
-            ]
-            max_vals = 3
-            placeholder = f'Main unit & others w/ mostly purple, >= 8 perks'
+            # placeholder = f'Select your class'
+            placeholder = 'Class'
 
         elif category == "level":
             if self.clas == 'MM':
@@ -64,7 +56,18 @@ class ProfessionMenu(discord.ui.Select):
             else:
                 print(f"ERROR: Dropdown optional parameter 'clas': {self.clas} invalid")
                 return
-            placeholder = f'Select {self.clas} progress (Highest that applies)'
+            # placeholder = f'Select {self.clas} progress (Highest that applies)'
+            placeholder = f'{self.clas} Progress'
+
+        elif category == "unit":
+            options = [
+                discord.SelectOption(label='Army'),
+                discord.SelectOption(label='Air Force'),
+                discord.SelectOption(label='Navy')
+            ]
+            max_vals = 3
+            # placeholder = f'Main unit & others w/ mostly purple, >= 8 perks'
+            placeholder = 'Unit(s)'
 
         elif category == 'march size':
             options = [
@@ -77,7 +80,8 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='210-220'),
                 discord.SelectOption(label='> 220')
             ]
-            placeholder = 'Best base march size (no skin / buffs)'
+            # placeholder = 'Best base march size (no skin / buffs)'
+            placeholder = 'March size'
 
         elif category == 'alliance':
             options = [
@@ -86,7 +90,8 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='SURO'),
                 discord.SelectOption(label='Alt8')
             ]
-            placeholder = 'Select your alliance'
+            # placeholder = 'Select your alliance'
+            placeholder = 'Alliance'
 
         elif category == "mm_traps":
             options = [
@@ -96,16 +101,21 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Electro Missiles')
             ]
             max_vals = 3
-            placeholder = f'Select which traps you can build'
+            # placeholder = f'Select which traps you can build'
+            placeholder = 'Trap(s)'
 
         elif category == "skins":
             options = [
                 discord.SelectOption(label='None'),
                 discord.SelectOption(label='Atlantis'),
-                discord.SelectOption(label='Ark')
+                discord.SelectOption(label='Ark'),
+                discord.SelectOption(label='Popstar-30d'),
+                discord.SelectOption(label='Popstar-3d'),
+                discord.SelectOption(label='Popstar-1d')
             ]
             max_vals = 2
-            placeholder = f'Select which base skins you own'
+            # placeholder = f'Select which base skins you own'
+            placeholder = 'Skin(s)'
 
         else:
             print("ERROR: Dropdown required parameter 'category' either empty or invalid")
@@ -148,11 +158,24 @@ class ProfessionMenu(discord.ui.Select):
         else:  # should never be reached
             nextCategory = 'error'
 
+        # set the prompt that will be shown above the next select menu
+        nextCategoryPromptDict = {
+            'level': f'Select {self.clas} progress (Highest that applies)',
+            'unit': 'Select strongest unit type (regardless of equipment/perks). **Only** choose a second (or third) '
+                    'unit type if you have 4 purple equipment **AND** 8 perks on that march.',
+            'march size': 'Select base march size on your **BEST** march. Do not include Acadia buff or '
+                          'Hyperion/Poetic/Romantic.',
+            'alliance': 'Select the alliance you will be in at the time of the event.',
+            'mm_traps': 'Select which traps you can build.',
+            'skins':    'Select which base skins you currently own.'
+        }
+        nextCategoryPrompt = nextCategoryPromptDict.get(nextCategory, None)
+
         if nextCategory is not None:
             # edit the interaction message with a new ProfessionMenuView view for the next category
             # this cycles until nextCategory is None (when category is "skins")
             await interaction.response.edit_message(
-                content=f'You chose: {choice}',
+                content=nextCategoryPrompt,
                 view=ProfessionMenuView(
                     self.parent_message, nextCategory,
                     clas=self.clas, level=self.level, units=self.units, march_size=self.march_size,

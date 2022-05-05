@@ -19,6 +19,24 @@ class EventButtonsView(discord.ui.View):
         self.parent_message = parent_message
         self.last_statuses = {}
 
+    @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+        status = 'YES'
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
+
+    @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
+    async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
+        status = 'MAYBE'
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
+
+    @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
+    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+        status = 'NO'
+        self.check_in_field_before_restart(interaction)
+        await self.process_click(interaction, status)
+
     def check_in_field_before_restart(self, interaction):
         # if the last status of user is None, checks to make sure the bot has not restarted and thus lost their last
         # status. Does this by checking the raw field values to see if the user's name is in there. If so, sets the
@@ -54,62 +72,6 @@ class EventButtonsView(discord.ui.View):
         elif output == 'success':
             # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
             self.last_statuses[interaction.user.id] = status
-
-    @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        status = 'YES'
-        self.check_in_field_before_restart(interaction)
-        await self.process_click(interaction, status)
-
-        # if self.last_statuses.get(interaction.user.id, None) is None:
-        #     emb = self.parent_message.embeds[0]
-        #     fields = emb.fields
-        #     for i in range(len(fields)):
-        #         if interaction.user.display_name in fields[i].value:
-        #             while True:
-        #                 if fields[i].name in ['YES', 'MAYBE', 'NO']:
-        #                     self.last_statuses[interaction.user.id] = fields[i].name
-        #                     break
-        #             break
-
-        # have to make this mutex to avoid r/w problem with editing event message's embed fields
-        # async with lock:
-        #     # get the last status of the user, defaults to None
-        #     last_status = self.last_statuses.get(interaction.user.id, None)
-        #     # handle interaction
-        #     output = await handle_interaction(last_status, status, interaction, self.parent_message)
-        # if output == 'request_entry':
-        #     # handle_intxn returns 'request_entry' when user does not have a database entry
-        #     # must keep this separate to reduce time spent in 'lock'
-        #     await helpers.request_entry(interaction.user, event_attempt=True)
-        # elif output == 'success':
-        #     # if field was updated, add/edit key-value pair of discordID-status, to be used if status is changed
-        #     self.last_statuses[interaction.user.id] = status
-
-    @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
-    async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
-        status = 'MAYBE'
-        self.check_in_field_before_restart(interaction)
-        await self.process_click(interaction, status)
-
-    @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
-        status = 'NO'
-        self.check_in_field_before_restart(interaction)
-        await self.process_click(interaction, status)
-
-    # # buttons for finalizing and deleting event
-    # @discord.ui.button(label='SUBMIT', style=discord.ButtonStyle.success, custom_id='persistent_view:finalize', row=2)
-    # async def submit(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     user = interaction.user
-    #     if globals.adminRole in [role.name for role in user.roles]:
-    #         await helpers.delete_event(user, intent='make_csv')
-    #
-    # @discord.ui.button(label='DELETE', style=discord.ButtonStyle.danger, custom_id='persistent_view:delete', row=2)
-    # async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     user = interaction.user
-    #     if globals.adminRole in [role.name for role in user.roles]:
-    #         await helpers.delete_event(user, intent='delete')
 
 
 async def handle_interaction(last_status, status, interaction, parent_message) -> str:

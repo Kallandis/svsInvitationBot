@@ -1,4 +1,5 @@
 import discord
+from discord.ext import tasks
 import random
 import csv
 from asyncio import TimeoutError
@@ -10,21 +11,59 @@ import globals
 from professionInteraction import ProfessionMenuView
 
 
-async def confirm_maybe() -> None:
+# TODO: test this
+async def start_confirm_maybe_loop(time_until_reminder: float) -> Union[asyncio.Task, None]:
     """
-    When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
-    X = globals.confirmMaybeWarningTimeHours
+        When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
+        X = globals.confirmMaybeWarningTimeHours
     """
-    title = 'Event Reminder'
-    descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
-            f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
-    embed = discord.Embed(title=title, description=descr)
 
-    # send embed to all maybes
-    maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
-    for entry in maybeEntries:
-        user = globals.guild.get_member(entry[0])
-        await user.send(embed=embed)
+    # "maybes" will only be reminded if it would be at least 2 days in the future
+    if time_until_reminder < 2 * 24 * 60 * 60:
+        return
+
+    async def send_reminders() -> None:
+        # send a reminder embed to all users that are signed up to the event as "MAYBE"
+
+        # build embed
+        title = 'Event Reminder'
+        descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
+                f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
+        embed = discord.Embed(title=title, description=descr)
+
+        # send embed to all maybes
+        maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
+        for entry in maybeEntries:
+            user = globals.guild.get_member(entry[0])
+            await user.send(embed=embed)
+
+    # loop to schedule the reminder for the future
+    @tasks.loop(seconds=time_until_reminder, count=2)
+    async def confirm_maybe_loop():
+        # the loop immediately runs once upon start, so must loop twice, wait until second loop to send reminder
+        if confirm_maybe_loop.current_loop > 0:
+            await send_reminders()
+
+    # start the loop
+    maybe_loop = confirm_maybe_loop.start()
+    return maybe_loop
+
+
+# async def confirm_maybe() -> None:
+#     """
+#     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
+#     X = globals.confirmMaybeWarningTimeHours
+#     """
+#     title = 'Event Reminder'
+#     descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
+#             f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
+#     embed = discord.Embed(title=title, description=descr)
+#
+#     # send embed to all maybes
+#     maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
+#     for entry in maybeEntries:
+#         user = globals.guild.get_member(entry[0])
+#         await user.send(embed=embed)
 
 
 async def request_entry(user: Union[discord.Member, discord.User], event_attempt=False) -> None:
@@ -93,8 +132,8 @@ async def delete_event(user: discord.Member, intent: str) -> None:
         await prompt.edit(embed=embed)
         return
 
+    # reply was "confirm"
     else:
-        # reply was "confirm"
         title = f'{cmd} Success'
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
@@ -112,6 +151,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     # remove the EventButtons view, put some text above the event embed indicating it's closed / deleted
     await globals.eventMessage.edit(content=eventMessageEdit, view=None)
     embed = discord.Embed(title=title, description=description)
+
     # if csvFile is not None, attach it to the message edit
     kwargs = {'embed': embed, 'attachments': [csvFile]} if csvFile else {'embed': embed}
     await prompt.edit(**kwargs)
@@ -120,6 +160,10 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     globals.eventInfo = ''
     globals.eventMessage = None
     globals.eventChannel = None
+
+    # stop the maybe loop (if it is still running)
+    globals.maybe_loop.cancel()
+    globals.maybe_loop = None
 
     # reset database
     await db.update_event('placeholder', 'placeholder', 0, 0)
