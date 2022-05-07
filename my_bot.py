@@ -96,12 +96,13 @@ class Bot(commands.Bot):
 
             # TODO: test this
             # restart confirm_maybe loop
-            # extract unix time of event, convert to time until maybes should be reminded, send to fxn
+            # extract unix time of event, convert to time until event, send to fxn
             eventTime = int(eventTime.strip('><t:'))
-            confirmMaybeTime = eventTime - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
-            timeUntilConfirmMaybe = confirmMaybeTime - time.time()
+            timeUntilEvent = eventTime - time.time()
+            # confirmMaybeTime = eventTime - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
+            # timeUntilConfirmMaybe = confirmMaybeTime - time.time()
 
-            maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe, globals.eventMessage.guild)
+            maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilEvent, globals.eventMessage.guild)
             # maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe, self.eventMessage.guild)
             self.maybe_loop = maybe_loop
 
@@ -120,6 +121,9 @@ class Bot(commands.Bot):
         if self.bug_report_channel:
             print('Sending bugs to channel: ' + self.bug_report_channel.guild.name + '/' + self.bug_report_channel.name)
 
+        if globals.eventMessage:
+            print('Reacquired existing event')
+
     def reset_event_vars(self) -> None:
         globals.eventInfo = ''
         globals.eventMessage = None
@@ -129,5 +133,6 @@ class Bot(commands.Bot):
         # self.eventMessage = None
         # self.eventChannel = None
 
-        self.maybe_loop.cancel()
-        self.maybe_loop = None
+        if self.maybe_loop is not None:
+            self.maybe_loop.cancel()
+            self.maybe_loop = None

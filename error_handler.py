@@ -74,7 +74,7 @@ class CommandErrorHandler(commands.Cog):
 
         userInput = '\"' + ctx.message.content + '\"'
         if len(userInput) > 100:
-            userInput = userInput[:100] + '\" ...'
+            userInput = userInput[:100] + '...\"'
         if not isinstance(ctx.channel, discord.DMChannel):
             userInput += f'\n\u200b\nin channel: {ctx.channel.mention}'
 

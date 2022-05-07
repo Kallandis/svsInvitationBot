@@ -1,5 +1,3 @@
-https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
-
 - NOTE: if commands are called by people in another timezone, the event time will be constructed on the local machine
         and timezone info will be assumed to be that of the local machine.
 
@@ -8,15 +6,6 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 
 - CHANGE:   move the user-defined global variables into a different file (config.txt)
             then populate those user-defined global vars in on_ready()
-
-- CHANGE:   DEPRECATED FOR NOW (was not received well)
-            - When the fields become long, the buttons will be far below the event message.
-            - soln: make the buttons be above the event message
-                blankMsg = await ctx.send('')
-                eventMsg = await ctx.send(embed=eventEmbed)
-                view = EventButtons(eventMsg)
-                await blankMsg.edit(view=view)
-                - then, when deleting event, would have to remove the view from this instead of eventMessage
 
 - CHANGE:   CSV formatting changes - depends on what the organizers want
             - remove certain redundant cols to make it more compact. F.X., when entries are grouped by unit and class,
@@ -31,21 +20,9 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
                 - should I be explicitly deleting instances of ProfessionMenuView()?
 
 - IMPLEMENT: if the length of the event embed would become larger than 6000 chars, do not add a name to the fields
-             (can still remove)
-
-- IMPLEMENT: store all database entries in memory to reduce database accessing. make sure it is always synced with
-             database (do some error checking stuff, only update the memory copy if database write is successful)
-                - on_ready() should repopulate the memory copy of database (or reload_memory.py if I implement that)
+             (should still be able to remove)
 
 ---------PRIORITY--------------
-
-- IMPLEMENT: edit_event()   # I have no idea what functionality this should have
-             If allow for changing time, must restart the confirm_maybe_loop() with a new value
-
-- QUESTION: bot currently detects any message that starts with '~' as a command. if that message is not a command, it
-            will be deleted and the author will be sent an error DM saying "command not found"
-
-            if this is not desired behavior, can easily not do that.
 
 - IMPLEMENT:    kill off global event variables.
                 Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
@@ -59,7 +36,6 @@ CHANGELIST FROM LAST TEST:
     UNTESTED:
         - confirm maybe loop restarts when bot restarts
         - confirm maybe loop closes when event is closed
-
 
 
 

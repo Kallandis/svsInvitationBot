@@ -33,7 +33,6 @@ class Event(commands.Cog):
         if ctx.channel.id not in globals.MAIN_CHANNEL_ID_LIST:
             channelsInGuild = filter(lambda c: c.guild == ctx.guild, self.bot.main_channels)
             channelMentions = [c.mention for c in channelsInGuild]
-            # channelMentions = [c.mention for c in self.bot.mainChannels] if self.bot.mainChannels else None
 
             if channelMentions:
                 msg = 'Command restricted to channels:\n' + ', '.join(channelMentions)
@@ -84,94 +83,101 @@ class Event(commands.Cog):
         Requires ADMIN Role
         """
 
-        # parse YY/MM/DD from command input
-        try:
-            year, month, day = [int(x) for x in datestring.split('/')]
-            if year < 2000:
-                year += 2000
-            # convert to unix time
-            date_time = datetime.datetime(year, month, day, hour, 0)
-            unix_time = int(time.mktime(date_time.timetuple()))
+        # # parse YY/MM/DD from command input
+        # try:
+        #     year, month, day = [int(x) for x in datestring.split('/')]
+        #     if year < 2000:
+        #         year += 2000
+        #     # convert to unix time
+        #     date_time = datetime.datetime(year, month, day, hour, 0)
+        #     unix_time = int(time.mktime(date_time.timetuple()))
+        #
+        #     # get time until event
+        #     timeUntilEvent = datetime.timedelta(seconds=unix_time - time.time())
+        #     timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
+        #
+        # # catch errors in parsing input into datetime object
+        # except ValueError:
+        #     error = 'Date or time entered incorrectly.'
+        #     raise commands.CheckFailure(error)
+        #
+        # # event must be at least 10 minutes in the future
+        # if timeUntilEvent.total_seconds() < 10 * 60:
+        #     error = 'Event less than 10 minutes in the future.'
+        #     raise commands.CheckFailure(error)
+        #
+        # # title is limited to 256 chars
+        # if len(title) > 256:
+        #     error = 'Title over 256 characters.'
+        #     raise commands.CheckFailure(error)
+        #
+        # # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
+        # if len(descr) > 512:
+        #     error = 'Event description over 512 characters.'
+        #     raise commands.CheckFailure(error)
 
-            # get time until event
-            timeUntilEvent = datetime.timedelta(seconds=unix_time - time.time())
-            timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
-
-        # catch errors in parsing input into datetime object
-        except ValueError:
-            error = 'Date or time entered incorrectly.'
-            raise commands.CheckFailure(error)
-
-        # event must be at least 10 minutes in the future
-        if timeUntilEvent.total_seconds() < 10 * 60:
-            error = 'Event less than 10 minutes in the future.'
-            raise commands.CheckFailure(error)
-
-        # title is limited to 256 chars
-        if len(title) > 256:
-            error = 'Title over 256 characters.'
-            raise commands.CheckFailure(error)
-
-        # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
-        if len(descr) > 512:
-            error = 'Event description over 512 characters.'
-            raise commands.CheckFailure(error)
+        # parse event information
+        eventTimeFmt, timeUntilEvent = helpers.parse_event_input(datestring=datestring, hour=hour)
+        title = helpers.parse_event_input(title=title)
+        descr = helpers.parse_event_input(descr=descr)
+        descr = '@ ' + eventTimeFmt + '\n\n' + descr
 
         # TODO: make sure this actually calls confirm_maybe() only once
         # start the background task to remind the "MAYBE's"
         # loop will only start if timeUntilConfirmMaybe > 2 days
-        maybeLoop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe, ctx.guild)
+        maybeLoop = await helpers.start_confirm_maybe_loop(timeUntilEvent, ctx.guild)
         self.bot.maybe_loop = maybeLoop
-        # globals.maybe_loop = maybe_loop
 
-        # # "maybes" will only be reminded if it would be at least 2 days in the future
-        # if timeUntilConfirmMaybe > 2 * 24 * 60 * 60:
-        #     @tasks.loop(seconds=timeUntilConfirmMaybe, count=2)
-        #     async def confirm_maybe_loop():
-        #         # the loop immediately runs once upon start, so wait until the second loop
-        #         if confirm_maybe_loop.current_loop > 0:
-        #             await helpers.confirm_maybe()
-        #     confirm_maybe_loop.start()
-
-        # discord-formatted timestring
-        eventTime = f"<t:{unix_time}>"
-
-        # some formatting for embed description
-        eventInfo = title + ' @ ' + eventTime
-        description = '@ ' + eventTime + '\n\n'
-        description += descr
-
-        firstTimeHint = '\n\nIf this is your first time interacting with the bot, you will see "This interaction ' \
-                        'failed." The bot will send you a DM with instructions.\n\u200b'
-
-        description += firstTimeHint
-
-        # create embed and add fields
-        embed = discord.Embed(title=title, description=description, color=discord.Color.dark_red())
-        embed.add_field(name="YES  [0]", value=">>> \u200b")
-        embed.add_field(name="MAYBE  [0]", value=">>> \u200b")
-        embed.add_field(name="NO  [0]", value=">>> \u200b")
-
-        # create footer and timestamp
+        # get the cmdList to be put into footer
         cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
         cmdList.append(f'{globals.COMMAND_PREFIX}help')
-        embed.set_footer(text=', '.join(cmdList))
-        embed.timestamp = discord.utils.utcnow()
 
-        # get the file to be sent with the event embed
-        if globals.LOGO_URL:
-            embed.set_thumbnail(url=globals.LOGO_URL)
+        embed = helpers.build_event_embed(title, descr, cmdList)
 
-        # send event embed
         eventMessage = await ctx.send(embed=embed)
+        view = EventButtonsView(eventMessage)
+        await eventMessage.edit(embed=embed, view=view)
+
+        # discord-formatted timestring
+        # eventTime = f"<t:{event_unix_time}>"
+        #
+        # # some formatting for embed description
+        # eventInfo = title + ' @ ' + eventTime
+        # description = '@ ' + eventTime + '\n\n'
+        # description += descr
+        #
+        # firstTimeHint = '\n\nIf this is your first time interacting with the bot, you will see "This interaction ' \
+        #                 'failed." The bot will send you a DM with instructions.\n\u200b'
+        #
+        # description += firstTimeHint
+        #
+        # # create embed and add fields
+        # embed = discord.Embed(title=title, description=description, color=discord.Color.dark_red())
+        # embed.add_field(name="YES  [0]", value=">>> \u200b")
+        # embed.add_field(name="MAYBE  [0]", value=">>> \u200b")
+        # embed.add_field(name="NO  [0]", value=">>> \u200b")
+        #
+        # # create footer and timestamp
+        # cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
+        # cmdList.append(f'{globals.COMMAND_PREFIX}help')
+        # embed.set_footer(text=', '.join(cmdList))
+        # embed.timestamp = discord.utils.utcnow()
+        #
+        # # get the file to be sent with the event embed
+        # if globals.LOGO_URL:
+        #     embed.set_thumbnail(url=globals.LOGO_URL)
+        #
+        # # send event embed
+        # eventMessage = await ctx.send(embed=embed)
 
         # add the view to event embed. Updating of status, database, and embed fields will be handled in
         # eventInteraction.py through user interactions with the buttons.
-        view = EventButtonsView(eventMessage)
+        # view = EventButtonsView(eventMessage)
         # await eventMessage.edit(embed=embed, view=view, attachments=attachments)
-        await eventMessage.edit(embed=embed, view=view)
+        # await eventMessage.edit(embed=embed, view=view)
 
         # set globals to reduce DB accessing
+        eventInfo = title + ' @ ' + eventTimeFmt
         globals.eventInfo = eventInfo
         globals.eventMessage = eventMessage
         globals.eventChannel = ctx.channel
@@ -181,17 +187,96 @@ class Event(commands.Cog):
         # self.bot.eventChannel = ctx.channel
 
         # store event data in eventInfo.db
-        await db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
+        await db.update_event(title, eventTimeFmt, eventMessage.id, ctx.channel.id)
 
-    @commands.command(usage="TODO")
+    @commands.command(help='Edit the existing event.\n'
+                           'Must be used in the same channel as an active event.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n'
+                           '\u200b\n'
+                           'If <time>, must enter date and hour.\n'
+                           f'Example:   {globals.COMMAND_PREFIX}edit time 22/5/6 20\n'
+                           f'\u200b\n'
+                           'If <title> or <description> are not one word, they must be enclosed in \"\"\n'
+                           f'Example:   {globals.COMMAND_PREFIX}edit title "New Event Title"\n'
+                           f'\u200b\n',
+                      usage='<time/title/description> <value>'
+                      )
     @commands.max_concurrency(1)
-    async def edit(self, ctx, *, arg):
+    async def edit(self, ctx, category, *vals):
         """
         Edit the existing event
         Does not change the status of current attendees
         """
-        # https://discordpy.readthedocs.io/en/latest/ext/tasks/index.html#discord.ext.tasks.Loop.change_interval
-        pass
+
+        category = category.lower()
+        categories = ['time', 'title', 'description']
+        if category not in categories:
+            raise commands.CheckFailure(f'Category must be one of "time", "title", "description".')
+
+        if not vals:
+            raise commands.CheckFailure(f'Must enter a new value for event "{category}".')
+
+        # get the original embed values
+        old_embed = globals.eventMessage.embeds[0]
+        old_title = old_embed.title
+        old_description = old_embed.description
+
+        # get the cmdList to be put into footer
+        cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
+        cmdList.append(f'{globals.COMMAND_PREFIX}help')
+
+        if category == 'time':
+            if len(vals) != 2:
+                raise commands.CheckFailure('Category "time" requires two arguments.')
+
+            # get the new event time
+            eventTimeFmt, timeUntilEvent = helpers.parse_event_input(datestring=vals[0], hour=vals[1])
+
+            # replace the eventTimeFmt in the embed description with the new one
+            temp = old_description.split('\n\n')
+            temp[0] = '@ ' + eventTimeFmt
+            description = '\n\n'.join(temp)
+
+            # create new embed
+            embed = helpers.build_event_embed(old_title, description, cmdList, old_embed)
+
+            # change the maybe_loop to new event time
+            if self.bot.maybe_loop is not None:
+                self.bot.maybe_loop.cancel()
+            maybeLoop = await helpers.start_confirm_maybe_loop(timeUntilEvent, ctx.guild)
+            self.bot.maybe_loop = maybeLoop
+
+        elif category == 'title':
+            if len(vals) != 1:
+                raise commands.CheckFailure('Category "title" requires one argument.')
+
+            # get the new event title
+            title = helpers.parse_event_input(title=vals[0])
+            print(title)
+
+            # replace the title and create new embed
+            embed = helpers.build_event_embed(title, old_description, cmdList, old_embed)
+
+        elif category == 'description':
+            if len(vals) != 1:
+                raise commands.CheckFailure('Category "description" requires one argument.')
+
+            # get the new description
+            description = helpers.parse_event_input(descr=vals[0])
+
+            # get the old eventTimeFmt and add it to the description
+            temp = old_description.split('\n\n')
+            old_eventTimeFmt = temp[0] + '\n\n'
+            description = old_eventTimeFmt + description
+
+            # create new embed
+            embed = helpers.build_event_embed(old_title, description, cmdList, old_embed)
+
+        else:
+            return
+
+        # replace old embed with new one
+        await globals.eventMessage.edit(embed=embed)
 
     @commands.command(help='Closes event sign-ups and DMs the user a formatted CSV of attendees.\n'
                            'Must be used in the same channel as an active event.\n'

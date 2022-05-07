@@ -10,13 +10,107 @@ import db
 import globals
 from professionInteraction import ProfessionMenuView
 
+from discord.ext import commands
+import datetime
+import time
+
+
+def parse_event_input(datestring=None, hour=None, title=None, descr=None):
+    """
+    Input parser for my_commands.create(), my_commands.edit()
+    datestring, hour should be provided together
+    Other than that, only one of the args should be given at a time.
+    """
+
+    # parse and check the event time
+    if datestring is not None and hour is not None:
+        # parse YY/MM/DD from command input
+        try:
+            year, month, day = [int(x) for x in datestring.split('/')]
+            if year < 2000:
+                year += 2000
+            # convert to unix time
+            date_time = datetime.datetime(year, month, day, int(hour), 0)
+            event_unix_time = int(time.mktime(date_time.timetuple()))
+
+            # get time until event
+            timeUntilEvent = event_unix_time - time.time()
+
+        # catch errors from parsing input into datetime object
+        except ValueError:
+            error = 'Date or hour was invalid.'
+            raise commands.CheckFailure(error)
+
+        # event must be at least 10 minutes in the future
+        if timeUntilEvent < 10 * 60:
+            error = 'Event less than 10 minutes in the future.'
+            raise commands.CheckFailure(error)
+
+        # return eventTime for global variable, timeUntilEvent for maybe loop
+        eventTimeFmt = f"<t:{event_unix_time}>"
+        return eventTimeFmt, timeUntilEvent
+        # eventInfo = title + ' @ ' + eventTime
+
+    # check title
+    if title is not None:
+        # title is limited to 256 chars
+        if len(title) > 256:
+            error = 'Title over 256 characters.'
+            raise commands.CheckFailure(error)
+        return title
+
+    # check descr
+    if descr is not None:
+        # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
+        if len(descr) > 512:
+            error = 'Event description over 512 characters.'
+            raise commands.CheckFailure(error)
+        return descr
+
+    # return eventTime, timeUntilEvent, eventInfo, title, descr
+
+
+def build_event_embed(title, descr, cmd_list, old_embed=None):
+
+    # if reusing the old event's description, must avoid adding the firstTimeHint twice
+    if 'If this is your first time interacting' not in descr:
+        firstTimeHint = '\n\nIf this is your first time interacting with the bot, you will see "This interaction ' \
+                        'failed." The bot will send you a DM with instructions.\n\u200b'
+        descr += firstTimeHint
+
+    embed = discord.Embed(title=title, description=descr, color=discord.Color.dark_red())
+
+    if old_embed is None:
+        embed.add_field(name="YES  [0]", value=">>> \u200b")
+        embed.add_field(name="MAYBE  [0]", value=">>> \u200b")
+        embed.add_field(name="NO  [0]", value=">>> \u200b")
+    else:
+        # being called from edit(); add the fields from the old event message
+        fields = old_embed.fields
+        for field in fields:
+            name = field.name
+            val = field.value
+            embed.add_field(name=name, value=val)
+
+    embed.set_footer(text=', '.join(cmd_list))
+    embed.timestamp = discord.utils.utcnow()
+
+    if globals.LOGO_URL:
+        embed.set_thumbnail(url=globals.LOGO_URL)
+
+    return embed
+
 
 # TODO: test this
-async def start_confirm_maybe_loop(time_until_reminder: float, event_guild: discord.Guild) -> Union[asyncio.Task, None]:
+async def start_confirm_maybe_loop(time_until_event: float,
+                                   event_guild: discord.Guild) -> Union[asyncio.Task, None]:
     """
         When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
         X = globals.confirmMaybeWarningTimeHours
     """
+
+    # get the time until the reminder should happen
+    time_until_reminder = time_until_event - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
 
     # "maybes" will only be reminded if it would be at least 2 days in the future
     if time_until_reminder < 2 * 24 * 60 * 60:
@@ -44,9 +138,15 @@ async def start_confirm_maybe_loop(time_until_reminder: float, event_guild: disc
         if confirm_maybe_loop.current_loop > 0:
             await send_reminders()
 
+    # print(type(confirm_maybe_loop))
+    # print(dir(confirm_maybe_loop))
     # start the loop
     maybe_loop = confirm_maybe_loop.start()
+    # print(type(maybe_loop))
+    # print(dir(maybe_loop))
     return maybe_loop
+
+    # return confirm_maybe_loop
 
 
 async def request_entry(user: Union[discord.Member, discord.User], event_attempt=False) -> None:
