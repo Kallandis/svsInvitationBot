@@ -219,7 +219,9 @@ class ProfessionMenu(discord.ui.Select):
                                       descr='You have been added to the database.\n'
                                             'Your event sign-up was not registered.\n'
                                             f'Please **sign up** for the event again.\n'
-                                            '\u200b\n')
+                                            '\u200b\n',
+                                      first_entry=True
+                                      )
 
             # else just update the user's profession
             else:

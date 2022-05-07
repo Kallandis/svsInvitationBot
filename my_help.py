@@ -4,6 +4,10 @@ import globals
 
 
 class MyHelp(commands.HelpCommand):
+
+    def __init__(self, command_attrs=None):
+        super().__init__(command_attrs=command_attrs)
+
     def get_command_signature(self, command):
         return '%s%s %s' % (self.context.clean_prefix, command.qualified_name, command.signature)
 
@@ -12,7 +16,7 @@ class MyHelp(commands.HelpCommand):
                 '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
                 '[arg] is an optional argument\n' \
                 '\u200b\n' \
-                f'\'{self.context.clean_prefix}help [command]\' for command-specific help\n' \
+                f'{self.context.clean_prefix}help [command] for command-specific help\n' \
                 '\u200b'
 
         embed = discord.Embed(title="Commands List", description=descr)
@@ -24,7 +28,7 @@ class MyHelp(commands.HelpCommand):
                 if cog_name is not None:
                     embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
-        if globals.send_help_to_dm:
+        if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
             if not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
@@ -42,7 +46,7 @@ class MyHelp(commands.HelpCommand):
         if alias:
             embed.add_field(name="Aliases", value=", ".join(alias), inline=False)
 
-        if globals.send_help_to_dm:
+        if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
             if not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
@@ -55,7 +59,18 @@ class MyHelp(commands.HelpCommand):
             await channel.send(embed=embed)
 
     async def send_cog_help(self, cog):
-        approved_channels = ', '.join([c.mention for c in globals.mainChannels])
+        # get the channels that Event commands can be sent in in this guild
+
+        # can only know which channels to show if the command was invoked in a guild
+        # check if DM
+        if not isinstance(self.context.channel, discord.DMChannel):
+            channelsInGuild = filter(lambda c: c.guild == self.context.guild, globals.mainChannels)
+            channelMentions = [c.mention for c in channelsInGuild]
+            approved_channels = ', '.join(channelMentions)
+        else:
+            approved_channels = 'Use command in a server to see approved channels.'
+
+        # embed title and descriptions for each category
         cog_name_dict = {
             'DM': ['DM - edit your database entry',
                    'Commands to edit or show your database entry info.\n'
@@ -63,7 +78,7 @@ class MyHelp(commands.HelpCommand):
                    ],
             'Event': [f'Event - manage events (ADMIN)',
                       'Commands to create, edit, and close events in approved server channels.\n'
-                      f'Requires role: \'{globals.adminRole}\'\n'
+                      f'Requires role: \'{globals.ADMIN_ROLE_NAME}\'\n'
                       f'\u200b\n'
                       f'Approved channel(s): {approved_channels}'
                       ],
@@ -85,7 +100,7 @@ class MyHelp(commands.HelpCommand):
         if command_signatures:
             embed.add_field(name='Commands', value='\n'.join(command_signatures))
 
-        if globals.send_help_to_dm:
+        if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
             if not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
@@ -104,11 +119,11 @@ class MyHelp(commands.HelpCommand):
             promptDict = {'dm': 'DM', 'event': 'Event', 'misc': 'Misc'}
             prompt = promptDict.get(cmd, None)
             if prompt is not None:
-                error += f'\nDid you mean {globals.commandPrefix}help {prompt}?'
+                error += f'\nDid you mean {globals.COMMAND_PREFIX}help {prompt}?'
 
         embed = discord.Embed(title="Error", description=error)
 
-        if globals.send_help_to_dm:
+        if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
             if not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
@@ -125,7 +140,8 @@ class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        _ = globals.commandPrefix
+        # _ = globals.COMMAND_PREFIX
+        _ = bot.command_prefix
         attrs = {
             'help': f'Lists all commands or gives info on a specific command or category.\n'
                     '\u200b\n'

@@ -2,7 +2,6 @@ import globals
 import discord
 from typing import Union, Optional
 
-# import asqlite
 import aiosqlite
 
 import logging
@@ -70,7 +69,7 @@ def profession_dicts() -> tuple:
     return unitDict, ceLevelDict, mmLevelDict, mmTrapsDict
 
 
-def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
+def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discord.Embed:
     # extract values from entry
     clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:]
 
@@ -105,13 +104,17 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if globals.eventChannel:
-        # if there is an active event, put the event and the user's status in the description field of the embed
-        # eventInfo = eventTitle + ' @ ' + eventTime
-        descr += f'You are **{status}** for {globals.eventInfo}\n' \
-                 f'[Event Message]({globals.eventMessage.jump_url})'
+    if not first_entry:
+        if globals.eventChannel:
+            # if there is an active event, put the event and the user's status in the description field of the embed
+            # eventInfo = eventTitle + ' @ ' + eventTime
+            descr += f'You are **{status}** for {globals.eventInfo}\n' \
+                     f'[Event Message]({globals.eventMessage.jump_url})'
+        else:
+            descr += 'There is no event open for signups.'
     else:
-        descr += 'There is no event open for signups.'
+        # to avoid confusion, don't tell them their status (which is "NO") if they just tried to sign up
+        descr += f'[Event Message]({globals.eventMessage.jump_url})'
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
 
     # add fields to the embed for various entry parameters
@@ -139,11 +142,11 @@ def info_embed(entry: Union[list, tuple], descr='') -> discord.Embed:
         embed.add_field(**whitespace_args)
 
     # set thumbnail image
-    if globals.logoURL:
-        embed.set_thumbnail(url=globals.logoURL)
+    if globals.LOGO_URL:
+        embed.set_thumbnail(url=globals.LOGO_URL)
 
     # DM command information
-    _ = globals.commandPrefix
+    _ = globals.COMMAND_PREFIX
     # embed.set_footer(text=f"{_}info <change/show>   |   {_}lottery   |   {_}help")
     embed.set_footer(text=f"{_}info <change/show>,   {_}lottery,   {_}help")
     embed.timestamp = discord.utils.utcnow()
@@ -206,8 +209,8 @@ async def reset_status() -> None:
             await conn.commit()
 
 
-async def all_of_category(category: str, value: Union[str, int], status='YES',
-                          display_name=True) -> Optional[list[tuple]]:
+async def all_of_category(category: str, value: Union[str, int], status='YES', guilds=None,
+                          display_name=False) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
     """
@@ -244,14 +247,53 @@ async def all_of_category(category: str, value: Union[str, int], status='YES',
             await cursor.execute(sql, values)
             entries = await cursor.fetchall()
 
-    if display_name:
-        entries = [
-            (
-                globals.guild.get_member(entry[0]).display_name,
-                *entry[1:]
-            ) for entry in entries]
+    def strip_emoji(name):
+        # encode into ascii, ignoring unknown chars, then decode back into ascii
+        try:
+            byteName = name.encode('ascii', 'ignore')
+            name = byteName.decode('ascii').strip()
+            if name == '':
+                # if the user's name is entirely non-ascii characters, it will become an empty string
+                name = 'ERROR_NAME'
+        except UnicodeEncodeError:
+            # if the user's name cannot be encoded into ascii
+            name = 'ERROR_ENCODE'
 
-    return entries    # list of user tuples
+        return name
+
+    def display_name_entries(entries):
+        new_entries = []
+        for entry in entries:
+            member = None
+
+            # get the member object to get their display name
+            # loop through all guilds that the bot is in (bot.event_guilds)
+            for guild in guilds:
+                member = guild.get_member(entry[0])
+                if member is not None:
+                    break
+
+            # make a new entry with the member's display name, stripped of emojis
+            new_entry = (
+                strip_emoji(member.display_name),
+                *entry[1:]
+            )
+            # add the modified entry with display_name to display_name_entries
+            new_entries.append(new_entry)
+
+        return new_entries
+
+    if display_name and guilds:
+        return display_name_entries(entries)
+
+    else:
+        return entries
+
+        # entries = [
+        #     (
+        #         guild.get_member(entry[0]).display_name,
+        #         *entry[1:]
+        #     ) for entry in entries]
 
 
 async def dump_db(filename: str) -> discord.File:

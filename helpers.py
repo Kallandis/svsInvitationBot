@@ -12,7 +12,7 @@ from professionInteraction import ProfessionMenuView
 
 
 # TODO: test this
-async def start_confirm_maybe_loop(time_until_reminder: float) -> Union[asyncio.Task, None]:
+async def start_confirm_maybe_loop(time_until_reminder: float, event_guild: discord.Guild) -> Union[asyncio.Task, None]:
     """
         When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
         X = globals.confirmMaybeWarningTimeHours
@@ -32,9 +32,9 @@ async def start_confirm_maybe_loop(time_until_reminder: float) -> Union[asyncio.
         embed = discord.Embed(title=title, description=descr)
 
         # send embed to all maybes
-        maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
+        maybeEntries = await db.all_of_category('status', 'MAYBE')
         for entry in maybeEntries:
-            user = globals.guild.get_member(entry[0])
+            user = event_guild.get_member(entry[0])
             await user.send(embed=embed)
 
     # loop to schedule the reminder for the future
@@ -47,23 +47,6 @@ async def start_confirm_maybe_loop(time_until_reminder: float) -> Union[asyncio.
     # start the loop
     maybe_loop = confirm_maybe_loop.start()
     return maybe_loop
-
-
-# async def confirm_maybe() -> None:
-#     """
-#     When it is X hours before the event, remind "MAYBE" users that they are registered as Maybe.
-#     X = globals.confirmMaybeWarningTimeHours
-#     """
-#     title = 'Event Reminder'
-#     descr = f'You are registered as **MAYBE** for {globals.eventInfo}\n' \
-#             f'If you would like to change your status, go to [Event Message]({globals.eventMessage.jump_url})'
-#     embed = discord.Embed(title=title, description=descr)
-#
-#     # send embed to all maybes
-#     maybeEntries = await db.all_of_category('status', 'MAYBE', display_name=False)
-#     for entry in maybeEntries:
-#         user = globals.guild.get_member(entry[0])
-#         await user.send(embed=embed)
 
 
 async def request_entry(user: Union[discord.Member, discord.User], event_attempt=False) -> None:
@@ -86,7 +69,7 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
 
 
 # to be called in delete_event(), finalize_event()
-async def delete_event(user: discord.Member, intent: str) -> None:
+async def delete_event(user, bot, intent: str) -> None:
     """
     Checks for confirmation with invoking user. If yes:
     Sets eventInfo.db to default value
@@ -96,11 +79,7 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     Empties the sql_write() "buffer"
     """
 
-    if user.dm_channel is None:
-        await user.create_dm()
-    dmChannel = user.dm_channel
-
-    # prompt the user to send "confirm" in dmChannel to confirm their command
+    # prompt the user to send "confirm" in DM to confirm their command
     timeout = 60
     prompt = ''
     if intent == 'delete':
@@ -110,18 +89,18 @@ async def delete_event(user: discord.Member, intent: str) -> None:
                   f'to confirm you want to close signups and receive a CSV of attendees.\n' \
                   f'Doing this is non-reversible, as it will reset everyone\'s status to \"NO\".'
 
-    cmd = globals.commandPrefix + ('delete_event' if intent == 'delete' else 'finalize_event')
+    cmd = globals.COMMAND_PREFIX + ('delete' if intent == 'delete' else 'close')
     embed = discord.Embed(title=f'{cmd}', description=prompt)
-    prompt = await dmChannel.send(embed=embed)
+    prompt = await user.send(embed=embed)
 
     # wait for a response from the user
     try:
-        reply = await globals.bot.wait_for('message', timeout=timeout,
-                                           check=lambda m: m.channel == dmChannel and m.author == user)
+        reply = await bot.wait_for('message', timeout=timeout,
+                                   check=lambda m: m.channel == user.dm_channel and m.author == user)
     except TimeoutError:
+        # if no response, edit the prompt to indicate failure
         edit = f'No response received in {timeout} seconds, event **{intent}** cancelled'
         embed = discord.Embed(title=f'{cmd} Timeout', description=edit)
-        # await prompt.edit(content=edit)
         await prompt.edit(embed=embed)
         return
 
@@ -138,12 +117,12 @@ async def delete_event(user: discord.Member, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
-            csvFile = await build_csv(globals.csvFileName, status='YES', finalize=True)
+            csvFile = await build_csv(bot.event_guilds, status='YES', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
         else:
             # intent = 'delete'
-            eventMessageEdit = f'```This event was cancelled with {globals.commandPrefix}delete.```'
+            eventMessageEdit = f'```This event was cancelled with {globals.COMMAND_PREFIX}delete.```'
             description = f'Deleted {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
             csvFile = None
@@ -156,34 +135,37 @@ async def delete_event(user: discord.Member, intent: str) -> None:
     kwargs = {'embed': embed, 'attachments': [csvFile]} if csvFile else {'embed': embed}
     await prompt.edit(**kwargs)
 
-    # reset global vars
-    globals.eventInfo = ''
-    globals.eventMessage = None
-    globals.eventChannel = None
+    # reset event-related variables and confirm maybe loop
+    bot.reset_event_vars()
 
-    # stop the maybe loop (if it is still running)
-    globals.maybe_loop.cancel()
-    globals.maybe_loop = None
+    # globals.eventInfo = ''
+    # globals.eventMessage = None
+    # globals.eventChannel = None
 
-    # reset database
+    # # stop the maybe loop (if it is still running)
+    # globals.maybe_loop.cancel()
+    # globals.maybe_loop = None
+
+    # reset event database
     await db.update_event('placeholder', 'placeholder', 0, 0)
+    # reset everyone's status to "NO"
     await db.reset_status()
 
 
-async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
+async def build_csv(guilds: list[discord.Guild], status: str = 'YES', finalize=False) -> discord.File:
     """
     parses the user database into csv subcategories
     """
 
     if finalize:
         # select lotto winners
-        lottoEntries = await db.all_of_category('lotto', 1)
+        lottoEntries = await db.all_of_category('lotto', 1, guilds=guilds, display_name=True)
         random.shuffle(lottoEntries)
-        lottoWinners = lottoEntries[:globals.numberOfLottoWinners]
+        lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
 
     # get class arrays
-    ce = await db.all_of_category('class', 'CE', status=status)
-    mm = await db.all_of_category('class', 'MM', status=status)
+    ce = await db.all_of_category('class', 'CE', status=status, guilds=guilds, display_name=True)
+    mm = await db.all_of_category('class', 'MM', status=status, guilds=guilds, display_name=True)
     # name, class, level, unit, march_size, traps, skins
     nameIndex = 0
     classIndex = 1
@@ -345,7 +327,7 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
 
     # multi-unit should be separate from the rest, just write those in one column
     # single-unit should be one column for each unit type, grouped within column by class, ordered by level
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+    with open(globals.CSV_FILENAME, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         ceColTitles = ['Name', 'Class', 'Level', 'Units', 'March Size', 'Alliance', 'Skins']
@@ -383,10 +365,8 @@ async def build_csv(filename: str, status: str, finalize=False) -> discord.File:
             writer.writerows([''] * 5)
 
             # lotto winners
-            writer.writerow([f'Lottery Winners ({globals.numberOfLottoWinners})'])
+            writer.writerow([f'Lottery Winners ({globals.NUMBER_OF_LOTTO_WINNERS})'])
             writer.writerows(lottoWinners)
 
-    eventCSV = discord.File(filename)
+    eventCSV = discord.File(globals.CSV_FILENAME)
     return eventCSV
-
-

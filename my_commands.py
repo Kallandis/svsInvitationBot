@@ -30,13 +30,20 @@ class Event(commands.Cog):
             raise commands.NoPrivateMessage()
 
         # not in valid event channel
-        if ctx.channel.id not in globals.mainChannelIDs:
-            channelMentions = [c.mention for c in globals.mainChannels] if globals.mainChannels else 'None'
-            raise commands.CheckFailure('Command restricted to channels:\n' + ', '.join(channelMentions))
+        if ctx.channel.id not in globals.MAIN_CHANNEL_ID_LIST:
+            channelsInGuild = filter(lambda c: c.guild == ctx.guild, self.bot.main_channels)
+            channelMentions = [c.mention for c in channelsInGuild]
+            # channelMentions = [c.mention for c in self.bot.mainChannels] if self.bot.mainChannels else None
+
+            if channelMentions:
+                msg = 'Command restricted to channels:\n' + ', '.join(channelMentions)
+            else:
+                msg = 'This command is not authorized for use in this guild - likely config error.'
+            raise commands.CheckFailure(msg)
 
         # not admin role
-        if globals.adminRole not in [r.name for r in ctx.author.roles]:
-            raise commands.MissingRole(globals.adminRole)
+        if globals.ADMIN_ROLE_NAME not in [r.name for r in ctx.author.roles]:
+            raise commands.MissingRole(globals.ADMIN_ROLE_NAME)
 
         # not in active event channel errors
         if globals.eventChannel is not None:
@@ -60,10 +67,10 @@ class Event(commands.Cog):
 
     @commands.command(help='Creates event at time (PST, 24hr format).\n'
                            'Must be used in a valid server channel when there is not an active event.\n'
-                           f'Requires role \'{globals.adminRole}\'.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n'
                            '\u200b\n'
                            'If <title> or <description> are not one word, they must be enclosed in \"\"\n'
-                           f'Example:   {globals.commandPrefix}create 22/7/3 15 \"My Event\" \"This is an event\"\n'
+                           f'Example:   {globals.COMMAND_PREFIX}create 22/7/3 15 \"My Event\" \"This is an event\"\n'
                            f'\u200b\n'
                            f'Note: Discord embeds are limited to 6000 characters, which puts a limit on the number of '
                            f'people that can fit in the sign-up fields. Beyond that limit, the database will still '
@@ -88,7 +95,7 @@ class Event(commands.Cog):
 
             # get time until event
             timeUntilEvent = datetime.timedelta(seconds=unix_time - time.time())
-            timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.confirmMaybeWarningTimeHours * 60 * 60
+            timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
 
         # catch errors in parsing input into datetime object
         except ValueError:
@@ -113,8 +120,9 @@ class Event(commands.Cog):
         # TODO: make sure this actually calls confirm_maybe() only once
         # start the background task to remind the "MAYBE's"
         # loop will only start if timeUntilConfirmMaybe > 2 days
-        maybe_loop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe)
-        globals.maybe_loop = maybe_loop
+        maybeLoop = await helpers.start_confirm_maybe_loop(timeUntilConfirmMaybe, ctx.guild)
+        self.bot.maybe_loop = maybeLoop
+        # globals.maybe_loop = maybe_loop
 
         # # "maybes" will only be reminded if it would be at least 2 days in the future
         # if timeUntilConfirmMaybe > 2 * 24 * 60 * 60:
@@ -146,13 +154,13 @@ class Event(commands.Cog):
 
         # create footer and timestamp
         cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
-        cmdList.append(f'{globals.commandPrefix}help')
+        cmdList.append(f'{globals.COMMAND_PREFIX}help')
         embed.set_footer(text=', '.join(cmdList))
         embed.timestamp = discord.utils.utcnow()
 
         # get the file to be sent with the event embed
-        if globals.logoURL:
-            embed.set_thumbnail(url=globals.logoURL)
+        if globals.LOGO_URL:
+            embed.set_thumbnail(url=globals.LOGO_URL)
 
         # send event embed
         eventMessage = await ctx.send(embed=embed)
@@ -168,6 +176,10 @@ class Event(commands.Cog):
         globals.eventMessage = eventMessage
         globals.eventChannel = ctx.channel
 
+        # self.bot.eventInfo = eventInfo
+        # self.bot.eventMessage = eventMessage
+        # self.bot.eventChannel = ctx.channel
+
         # store event data in eventInfo.db
         await db.update_event(title, eventTime, eventMessage.id, ctx.channel.id)
 
@@ -178,12 +190,12 @@ class Event(commands.Cog):
         Edit the existing event
         Does not change the status of current attendees
         """
-
+        # https://discordpy.readthedocs.io/en/latest/ext/tasks/index.html#discord.ext.tasks.Loop.change_interval
         pass
 
     @commands.command(help='Closes event sign-ups and DMs the user a formatted CSV of attendees.\n'
                            'Must be used in the same channel as an active event.\n'
-                           f'Requires role \'{globals.adminRole}\'.')
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.')
     @commands.max_concurrency(1)
     async def close(self, ctx):
         """
@@ -192,19 +204,20 @@ class Event(commands.Cog):
         Requires ADMIN role
         """
 
-        await helpers.delete_event(ctx.author, intent='make_csv')
+        await helpers.delete_event(ctx.author, self.bot, intent='make_csv')
 
     @commands.command(help='Closes event sign-ups and resets database to prepare for new event.\n'
                            'Must be used in the same channel as an active event.\n'
-                           f'Requires role \'{globals.adminRole}\'.')
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.')
     @commands.max_concurrency(1)
     async def delete(self, ctx):
         """
         Resets eventInfo.db to default value
         Resets everyone's status to "NO"
+        Requires ADMIN role
         """
 
-        await helpers.delete_event(ctx.author, intent='delete')
+        await helpers.delete_event(ctx.author, self.bot, intent='delete')
 
 
 class DM(commands.Cog):
@@ -212,7 +225,7 @@ class DM(commands.Cog):
         self.bot = bot
 
     @commands.command(help='Change or show your database entry.\n'
-                           f'Example: {globals.commandPrefix}info change\n',
+                           f'Example: {globals.COMMAND_PREFIX}info change\n',
                       usage='<change/show>')
     @commands.dm_only()
     async def info(self, ctx, intent: str) -> None:
@@ -275,11 +288,11 @@ class Misc(commands.Cog):
 
     @commands.command(help='Logs a bug with the bot.\n'
                            'Limit of 4000 characters.\n'
-                           f'Example: {globals.commandPrefix}bug Something is not working.\n',
+                           f'Example: {globals.COMMAND_PREFIX}bug Something is not working.\n',
                       usage='<description of bug>')
     @commands.dm_only()
     async def bug(self, ctx, *, arg):
-        if globals.bugReportChannel is None:
+        if self.bot.bug_report_channel is None:
             raise commands.CheckFailure('The bot failed to acquire the bug report channel during startup.\n'
                                         'If the bug is critical, please contact an admin.')
 
@@ -293,25 +306,25 @@ class Misc(commands.Cog):
 
         # send bug report to svsBotTestServer/bug-reports
         embed = discord.Embed(title=title, description=descr)
-        await globals.bugReportChannel.send(embed=embed)
+        await self.bot.bug_report_channel.send(embed=embed)
 
         # ACK the report
         await ctx.send('Bug report has been logged. Thank you.')
 
     @commands.command(help='Sends the user a CSV of the database.\n'
                            'Must specify if you want just event attendees, or everyone in database.\n'
-                           f'Requires role \'{globals.adminRole}\'.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n'
                            '\u200b\n'
-                           f'Example:   {globals.commandPrefix}get_csv all\n',
+                           f'Example:   {globals.COMMAND_PREFIX}get_csv all\n',
                       usage='<all/attending>')
-    @commands.has_role(globals.adminRole)
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
     @commands.max_concurrency(1)
     async def get_csv(self, ctx, arg):
         if arg not in ['all', 'attending']:
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
         statusDict = {'all': '*', 'attending': 'YES'}
         status_to_get = statusDict[arg]
-        csvFile = await helpers.build_csv(globals.csvFileName, status=status_to_get)
+        csvFile = await helpers.build_csv(self.bot.event_guilds, status=status_to_get)
         if arg == 'all':
             msg = 'CSV of all users in the database'
         else:
@@ -319,8 +332,8 @@ class Misc(commands.Cog):
         await ctx.author.send(msg, file=csvFile)
 
     @commands.command(help='Sends the user a dump of the SQL database.\n'
-                           f'Requires role \'{globals.adminRole}\'.')
-    @commands.has_role(globals.adminRole)
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
     @commands.max_concurrency(1)
     async def get_db_dump(self, ctx):
         """
@@ -329,84 +342,3 @@ class Misc(commands.Cog):
         """
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
-
-
-@globals.bot.event
-async def on_command_error(ctx, error):
-    logger.error(f'{ctx.command} ERROR: {str(error)}')
-    print('errstring: ' + str(error))
-
-    # command has local error handler
-    if hasattr(ctx.command, 'on_error'):
-        return
-
-    # generic error handling
-    title = f"{ctx.clean_prefix}{ctx.command} Error" if ctx.command else 'Error'
-    # errmsg = str(error) + '\n'
-    errmsg = ''
-    if isinstance(error, commands.CheckFailure):
-        errmsg += str(error) + '\n'
-    elif isinstance(error, commands.MissingRequiredArgument):
-        errmsg += "Missing argument.\n"
-    elif isinstance(error, commands.TooManyArguments):
-        errmsg += "Too many arguments.\n"
-    elif isinstance(error, commands.BadArgument):
-        errmsg += f'Parameter \"{str(error).split()[-1][1:-2]}\" was invalid.\n'
-    elif isinstance(error, commands.NoPrivateMessage):
-        errmsg += "Command does not work in DM.\n"
-    elif isinstance(error, commands.PrivateMessageOnly):
-        errmsg += "Command only works in DM.\n"
-    elif isinstance(error, commands.BotMissingRole):
-        errmsg += "Bot lacks required role to execute this command.\n"
-    elif isinstance(error, commands.BotMissingPermissions):
-        errmsg += "Bot lacks required permissions to execute this command.\n"
-    elif isinstance(error, commands.MissingRole):
-        errmsg += "User lacks required role for this command.\n"
-    elif isinstance(error, commands.MissingPermissions):
-        errmsg += "User lacks required permissions for this command.\n"
-    elif isinstance(error, commands.CommandNotFound):
-        errmsg += "Command does not exist.\n"
-    else:
-        # should probably do a bit more here but idk
-        print(f'Ignoring exception in command {globals.commandPrefix}{ctx.command}.')
-        errmsg += f'Unknown.\nPossible bug, please report with {globals.commandPrefix}bug.'
-
-    userInput = '\"' + ctx.message.content + '\"'
-    if len(userInput) > 100:
-        userInput = userInput[:100] + '\" ...'
-    if not isinstance(ctx.channel, discord.DMChannel):
-        userInput += f'\n\u200b\nin channel: {ctx.channel.mention}'
-
-    # embed = discord.Embed(title=title, description=errmsg)
-    embed = discord.Embed(title=title)
-    embed.add_field(name='Reason', value=errmsg, inline=False)
-    embed.add_field(name='You Typed', value=userInput, inline=False)
-
-    # usage field
-    if ctx.command is not None and ctx.command.usage is not None:
-        argHints = '<arg> is a mandatory argument\n' \
-                   '<arg1/arg2> indicates two possible choices for a mandatory argument\n' \
-                   '[arg] is an optional argument\n'
-        usage = f'{globals.commandPrefix}{ctx.command} {ctx.command.usage}\n'
-        usage += '\u200b\n' + argHints
-        embed.add_field(name='Usage', value=usage, inline=False)
-
-        # Example field
-        if 'Example:' in ctx.command.help:
-            # if the help-text has "Example:" in it, this grabs the example if it is terminated with '\n'
-            example = ctx.command.help.split('Example:')[1].strip().split('\n')[0]
-            embed.add_field(name='Example', value=example, inline=False)
-
-    # footer text prompt for $help command, $help
-    footerText = f'{globals.commandPrefix}help {ctx.command} for more info. ' if ctx.command is not None else ''
-    footerText += f'{globals.commandPrefix}help for a list of commands.'
-    embed.set_footer(text=footerText)
-
-    if globals.send_error_to_dm:
-        # delete the offending command if it was used in a server channel
-        if not isinstance(ctx.channel, discord.DMChannel):
-            await ctx.message.delete()
-        await ctx.author.send(embed=embed)
-
-    else:
-        await ctx.send(embed=embed)

@@ -42,20 +42,14 @@ https://maah.gitbooks.io/discord-bots/content/storing-data/using-sql.html
 - IMPLEMENT: edit_event()   # I have no idea what functionality this should have
              If allow for changing time, must restart the confirm_maybe_loop() with a new value
 
-- IMPLEMENT: add a module or fxn "reload_memory.py" which resets the python cache if the bot is restarted
-             Currently doing a lot of that functionality in on_ready(), so just call stuff from there.
+- QUESTION: bot currently detects any message that starts with '~' as a command. if that message is not a command, it
+            will be deleted and the author will be sent an error DM saying "command not found"
 
-             ** do things like restart the confirm_maybe() loop
+            if this is not desired behavior, can easily not do that.
 
-- IMPLEMENT: add some cooldowns to commands to prevent spam
-                - most of them should be pretty minor
-                - except for $bug, which should be like 5 minutes
-
-- CHANGE:   needs to work in 2 different servers (not concurrently). As long as the respective channels are in mainChannelIDs,
-            the only thing that needs to be changed are a few calls to globals.guild
-                - should be able to replace those with a reference to the guild that 'ctx' was in.
-                - may need to change globals.adminRole to a list of qualified roles
-                    -> use commands.has_any_role() instead of commands.has_role()
+- IMPLEMENT:    kill off global event variables.
+                Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
+                Probably easiest to just pass the bot along the chain until it hits info_embed()?
 
 CHANGELIST FROM LAST TEST:
     - delete successful as well as unsuccessful commands in guild channels
@@ -65,6 +59,7 @@ CHANGELIST FROM LAST TEST:
     UNTESTED:
         - confirm maybe loop restarts when bot restarts
         - confirm maybe loop closes when event is closed
+
 
 
 
