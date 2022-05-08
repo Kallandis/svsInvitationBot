@@ -24,7 +24,7 @@ Privileged Intents: Needs "Server Members", "Message Content"
 ## Configuring the bot
 I don't know how to make a config file, so user-config is currently done in globals.py
 
-You must set various guild-specific parameters, such as: 
+You must set various server-specific parameters, such as: 
 
 * `MAIN_CHANNEL_ID_LIST` : list of the channels that events should be restricted to 
 * `ADMIN_ROLE_NAME` : Role name that certain privileged commands are to be restricted behind
@@ -35,6 +35,8 @@ You must set various guild-specific parameters, such as:
 * `CONFIRM_MAYBE_WARNING_HOURS` : Number of hours before the event that users who signed up as "MAYBE" should be reminded (set to 0 to never send reminder)
 * `SEND_{HELP, ERROR}_TO_DM` : Flags to determine if `help` and `error` messages should be sent to the user's DM
 * `BUG_REPORT_CHANNEL_ID` : Channel ID that bug reports logged with command `bug` are sent to (optional)
+
+The channels in `MAIN_CHANNEL_ID_LIST` can be in different servers, but all servers must have an admin-role with the *same name*.
 
 ## Running the bot
 If this is your first time running the bot, first populate `globals.py` with the necessary variables, then run `reset_db.py` to create the databases
