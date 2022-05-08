@@ -23,6 +23,7 @@ Privileged Intents: Needs "Server Members", "Message Content"
 
 ## Configuring the bot
 I don't know how to make a config file, so user-config is currently done in globals.py
+
 You must set various guild-specific parameters, such as: 
 
 * `MAIN_CHANNEL_ID_LIST` : list of the channels that events should be restricted to 
