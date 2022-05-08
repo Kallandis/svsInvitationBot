@@ -109,11 +109,16 @@ class Bot(commands.Bot):
     async def on_ready(self):
         print(f'{self.user.name} connected!')
         print(f'discord.py version = {discord.__version__}')
+        print()
 
         await self.load_variables()
 
         for guild in self.guilds:
             print('Connected to guild: ' + guild.name)
+            adminRoleInGuild = list(filter(lambda r: r.name == globals.ADMIN_ROLE_NAME, guild.roles))
+            if not adminRoleInGuild:
+                print(f'ALERT: Guild "{guild.name}" does not have a role named "{globals.ADMIN_ROLE_NAME}". Events '
+                      f'cannot be created in this guild.')
 
         for channel in self.main_channels:
             print('Listening on channel: ' + channel.guild.name + '/' + channel.name)
@@ -122,7 +127,8 @@ class Bot(commands.Bot):
             print('Sending bugs to channel: ' + self.bug_report_channel.guild.name + '/' + self.bug_report_channel.name)
 
         if globals.eventMessage:
-            print('Reacquired existing event')
+            print(f'Reacquired existing event in channel: '
+                  f'{globals.eventChannel.guild.name}/{globals.eventChannel.name}')
 
     def reset_event_vars(self) -> None:
         globals.eventInfo = ''
