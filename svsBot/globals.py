@@ -49,3 +49,6 @@ SEND_ERROR_TO_DM = True
 
 # Channel that $bug should send bug reports to
 BUG_REPORT_CHANNEL_ID = 970947508903759902     # svsBotTestServer/bug-reports (Evan's private server)
+
+# Channel that backups of the database should be sent to when "~close" is called
+DB_BACKUP_CHANNEL_ID = 972960827479031848

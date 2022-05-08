@@ -12,8 +12,6 @@ import svsBot.error_handler as error_handler
 import svsBot.globals as globals
 
 
-
-
 class Bot(commands.Bot):
     # def __init__(self, command_prefix, intents, description, allowed_mentions, activity):
     #     super().__init__(command_prefix=command_prefix, intents=intents, description=description)
@@ -76,8 +74,8 @@ class Bot(commands.Bot):
         eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
         if eventMessageID:
             import time
-            # from eventInteraction import EventButtonsView
-            # import helpers
+            from svsBot.event_interaction import EventButtonsView
+            import svsBot.helpers as helpers
 
             # event variables
             globals.eventInfo = eventTitle + ' @ ' + eventTime
@@ -90,8 +88,8 @@ class Bot(commands.Bot):
             # self.eventMessage = await self.eventChannel.fetch_message(eventMessageID)
 
             # re-initializes EventButtonsView instance so that buttons still work
-            view = event_interaction.EventButtonsView(globals.eventMessage)
-            # view = EventButtonsView(globals.eventMessage)
+            # view = event_interaction.EventButtonsView(globals.eventMessage)
+            view = EventButtonsView(globals.eventMessage)
             await globals.eventMessage.edit(view=view)
             # view = EventButtonsView(self.eventMessage)
             # await self.eventMessage.edit(view=view)

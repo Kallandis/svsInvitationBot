@@ -217,6 +217,11 @@ async def delete_event(user, bot, intent: str) -> None:
             csvFile = await build_csv(bot.event_guilds, status='YES', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
+
+            # send a backup of the database to dedicated backup channel
+            backupChannel = bot.get_channel(globals.DB_BACKUP_CHANNEL_ID)
+            dbFile = discord.File('userHistory.db')
+            await backupChannel.send(file=dbFile)
         else:
             # intent = 'delete'
             eventMessageEdit = f'```This event was cancelled with {globals.COMMAND_PREFIX}delete.```'
