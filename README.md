@@ -17,7 +17,7 @@ My personal invite link:
 
 https://discord.com/api/oauth2/authorize?client_id=964610834041045043&permissions=124928&scope=bot
 
-(see `add_bot_to_server_instructions.txt` for details)
+* see `add_bot_to_server_instructions.txt` for details
 
 Privileged Intents: Needs "Server Members", "Message Content" 
 
