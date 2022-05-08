@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-import globals
+
+from . import globals
 
 
 class MyHelp(commands.HelpCommand):

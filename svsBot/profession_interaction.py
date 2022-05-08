@@ -1,11 +1,9 @@
 import discord
-import db
 
 import logging
-
-import globals
-
 logger = logging.getLogger(__name__)
+
+from . import db
 
 
 class ProfessionMenu(discord.ui.Select):

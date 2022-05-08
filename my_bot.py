@@ -2,15 +2,16 @@ import discord
 from discord.ext import commands
 import sys
 
-import my_commands
-import my_help
-import db
-import error_handler
-
-import globals
-
 import logging
 logger = logging.getLogger(__name__)
+
+import svsBot.my_commands as my_commands
+import svsBot.my_help as my_help
+import svsBot.db as db
+import svsBot.error_handler as error_handler
+import svsBot.globals as globals
+
+
 
 
 class Bot(commands.Bot):
@@ -75,8 +76,8 @@ class Bot(commands.Bot):
         eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
         if eventMessageID:
             import time
-            from eventInteraction import EventButtonsView
-            import helpers
+            # from eventInteraction import EventButtonsView
+            # import helpers
 
             # event variables
             globals.eventInfo = eventTitle + ' @ ' + eventTime
@@ -89,7 +90,8 @@ class Bot(commands.Bot):
             # self.eventMessage = await self.eventChannel.fetch_message(eventMessageID)
 
             # re-initializes EventButtonsView instance so that buttons still work
-            view = EventButtonsView(globals.eventMessage)
+            view = event_interaction.EventButtonsView(globals.eventMessage)
+            # view = EventButtonsView(globals.eventMessage)
             await globals.eventMessage.edit(view=view)
             # view = EventButtonsView(self.eventMessage)
             # await self.eventMessage.edit(view=view)
@@ -113,7 +115,7 @@ class Bot(commands.Bot):
 
         await self.load_variables()
 
-        for guild in self.guilds:
+        for guild in self.event_guilds:
             print('Connected to guild: ' + guild.name)
             adminRoleInGuild = list(filter(lambda r: r.name == globals.ADMIN_ROLE_NAME, guild.roles))
             if not adminRoleInGuild:

@@ -1,12 +1,12 @@
 import discord  # development branch 2.0.0a to be able to use Views, Interactions
 import logging
-import globals
 import sys
 import traceback
 import asyncio
 
 import my_bot
 import tokenFile
+import svsBot.globals as globals
 
 # set up main logger that other loggers inherit from
 logging.basicConfig(filename='bot.log', level=logging.INFO,

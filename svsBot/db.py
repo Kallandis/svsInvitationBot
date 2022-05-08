@@ -1,11 +1,11 @@
-import globals
 import discord
 from typing import Union, Optional
-
 import aiosqlite
 
 import logging
 logger = logging.getLogger(__name__)
+
+from . import globals
 
 
 async def add_entry(values: Union[list, tuple]) -> None:

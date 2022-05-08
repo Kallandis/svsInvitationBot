@@ -1,18 +1,15 @@
 import discord
-from discord.ext import tasks
+from discord.ext import commands, tasks
+import datetime
+import time
 import random
 import csv
 from asyncio import TimeoutError
 from typing import Union
 import asyncio
 
-import db
-import globals
-from professionInteraction import ProfessionMenuView
-
-from discord.ext import commands
-import datetime
-import time
+from . import db, globals
+from . profession_interaction import ProfessionMenuView
 
 
 def parse_event_input(datestring=None, hour=None, title=None, descr=None):

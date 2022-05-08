@@ -6,7 +6,7 @@ import sys
 import logging
 logger = logging.getLogger(__name__)
 
-import globals
+from . import globals
 
 
 class CommandErrorHandler(commands.Cog):

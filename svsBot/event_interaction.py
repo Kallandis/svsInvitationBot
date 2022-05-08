@@ -1,13 +1,11 @@
 import discord
-import helpers
-import globals
-import db
+import asyncio
+lock = asyncio.Lock()
 
 import logging
 logger = logging.getLogger(__name__)
 
-import asyncio
-lock = asyncio.Lock()
+from . import helpers, globals, db
 
 
 class EventButtonsView(discord.ui.View):

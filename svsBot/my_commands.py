@@ -1,17 +1,12 @@
 import discord
 from discord.ext import commands, tasks
-import globals
-import db
-import time
-import datetime
-
-from eventInteraction import EventButtonsView
-from professionInteraction import ProfessionMenuView
-import helpers
 
 import logging
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.ERROR)
+
+from . import db, helpers, globals
+from . event_interaction import EventButtonsView
+from . profession_interaction import ProfessionMenuView
 
 
 class Event(commands.Cog):
@@ -171,7 +166,7 @@ class Event(commands.Cog):
         # eventMessage = await ctx.send(embed=embed)
 
         # add the view to event embed. Updating of status, database, and embed fields will be handled in
-        # eventInteraction.py through user interactions with the buttons.
+        # event_interaction.py through user interactions with the buttons.
         # view = EventButtonsView(eventMessage)
         # await eventMessage.edit(embed=embed, view=view, attachments=attachments)
         # await eventMessage.edit(embed=embed, view=view)
