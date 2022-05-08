@@ -20,14 +20,13 @@ eventChannel = None
 #
 # ---------------- BEGIN user-specific variables ----------------
 
-# ID of the guild the bot is to operate in - deprecated
+# only used to remove my private server from the bot's bot.guilds attr
 EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
-# GUILD_ID = 865787393529085993      # Dragon Babs
 
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
 # this is only on the bot's end. You must ensure that the bot has permissions and access to these channels in the server
 # it is recommended but not required to ONLY add the bot to the channels in this array, to reduce overhead
-MAIN_CHANNEL_ID_LIST = [964654664677212220, 972300998162907169]  # svsBotTestServer/botchannel
+MAIN_CHANNEL_ID_LIST = [964654664677212220]  # svsBotTestServer/botchannel
 # MAIN_CHANNEL_ID_LIST = [971054349822332948]   # Dragon Babs/bot-testing
 
 # name of the role that allows usage of event-related commands in the mainChannels
@@ -47,7 +46,7 @@ CSV_FILENAME = r'svs_entries.csv'
 
 # number of people to select as lottery winners. This should be higher than the intended number of winners, to account
 # for no-shows or other cases in which a randomly selected winner should not actually be given a prize.
-NUMBER_OF_LOTTO_WINNERS = 30
+NUMBER_OF_LOTTO_WINNERS = 40
 
 # how many hours before the scheduled event time should "Maybe's" be reminded of the event
 CONFIRM_MAYBE_WARNING_HOURS = 24

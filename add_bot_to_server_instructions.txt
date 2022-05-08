@@ -1,0 +1,13 @@
+Steps to add bot to server:
+
+1. In the file "globals.py", populate "guildID" with the server ID, "mainChannelIDs" with the ID of all channels that the bot should listen in, and "adminRole" with the name of a role that will be used to restrict certain commands to trusted users. 
+
+2. Run "reset_db.py" to reset/create the local database files.
+
+3. Click this link to add the bot to any server in which you have "Manage Server" permission. If it says the bot is private, that means I need to temporarily make it public so that other people can use this link. 
+https://discord.com/api/oauth2/authorize?client_id=964610834041045043&permissions=124928&scope=bot
+
+4. After adding the bot to the server, ensure it has access to all channels specified in step 1, and permissions to send, edit, and delete messages and embed links/files. 
+
+
+- Evan
