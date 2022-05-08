@@ -6,11 +6,9 @@ Stores users' submitted in-game information in a database and allows them to sig
 Written with discord.py
 
 ## Requirements
-Most modules can be installed with `python -m pip install -r requirements.txt`
+Requires python >= 3.8
 
-However, the bot requires discord.py version >= 2.0.0, which is still in development as of 2022/5/8
-
-Until its official release, must install from latest branch https://github.com/Rapptz/discord.py
+`python -m pip install -r requirements.txt`
 
 ## Inviting the bot to your server
 My personal invite link: 
