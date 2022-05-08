@@ -1,6 +1,3 @@
-# stores bot object and guild information
-# bot = None
-# guild = None
 mainChannels = None   # can't figure out how to access this from My_Help() without making it a global
 
 # stores event information - these are pretty hard to get rid of as they are referenced far away from the bot.
@@ -8,20 +5,13 @@ eventInfo = ''
 eventMessage = None
 eventChannel = None
 
-# confirm maybe loop (asyncio.Task), must be stored so it can be cancelled when event is closed
-# maybe_loop = None
-
-# bug reports are sent to a private channel for later review
-# bugReportChannel = None
-
+# only used to remove my private server from the bot's bot.guilds attr
+EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
 
 #
 #
 #
 # ---------------- BEGIN user-specific variables ----------------
-
-# only used to remove my private server from the bot's bot.guilds attr
-EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
 
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
 # this is only on the bot's end. You must ensure that the bot has permissions and access to these channels in the server
