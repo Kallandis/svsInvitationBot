@@ -41,4 +41,6 @@ The channels in `MAIN_CHANNEL_ID_LIST` can be in different servers, but all serv
 ## Running the bot
 If this is your first time running the bot, first populate `globals.py` with the necessary variables, then run `reset_db.py` to create the databases
 
+You will also need to create a file `tokenFile.py` and populate it with `token=MY_BOT_TOKEN`
+
 Otherwise, just run `main.py`
