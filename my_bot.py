@@ -113,7 +113,7 @@ class Bot(commands.Bot):
 
         await self.load_variables()
 
-        for guild in self.event_guilds:
+        for guild in self.guilds:
             print('Connected to guild: ' + guild.name)
             adminRoleInGuild = list(filter(lambda r: r.name == globals.ADMIN_ROLE_NAME, guild.roles))
             if not adminRoleInGuild:
