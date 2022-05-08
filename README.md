@@ -22,7 +22,7 @@ https://discord.com/api/oauth2/authorize?client_id=964610834041045043&permission
 Privileged Intents: Needs "Server Members", "Message Content" 
 
 ## Configuring the bot
-I don't know how to make a config file, so user-config is currently done in globals.py
+I don't know how to make a config file, so user-config is currently done in `globals.py`
 
 You must set various server-specific parameters, such as: 
 
