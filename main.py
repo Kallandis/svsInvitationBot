@@ -45,7 +45,6 @@ def setup_bot():
 
 async def main():
     async with bot:
-        # await bot.load_variables()
         await bot.start(tokenFile.token)
 
 if __name__ == "__main__":

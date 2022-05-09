@@ -13,6 +13,11 @@ EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
 #
 # ---------------- BEGIN user-specific variables ----------------
 
+# central guild "1508". All other guilds are subsets of this guild; this guild will be used for pulling member's
+# display_name attributes for making the CSV. Other subset guilds might not have as strictly enforced name rules, and
+# the nicknames in those servers might not be ascii-compatible
+GUILD_ID_1508 = 915761804704104489
+
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
 # this is only on the bot's end. You must ensure that the bot has permissions and access to these channels in the server
 # it is recommended but not required to ONLY add the bot to the channels in this array, to reduce overhead

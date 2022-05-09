@@ -404,7 +404,10 @@ class Misc(commands.Cog):
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
         statusDict = {'all': '*', 'attending': 'YES'}
         status_to_get = statusDict[arg]
-        csvFile = await helpers.build_csv(self.bot.event_guilds, status=status_to_get)
+        central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+        if central_guild is None:
+            raise commands.CheckFailure('Failed to acquire 1508 guild.')
+        csvFile = await helpers.build_csv([central_guild], status=status_to_get)
         if arg == 'all':
             msg = 'CSV of all users in the database'
         else:

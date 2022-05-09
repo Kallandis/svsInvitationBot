@@ -215,7 +215,10 @@ async def delete_event(user, bot, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
-            csvFile = await build_csv(bot.event_guilds, status='YES', finalize=True)
+            central_guild = bot.get_guild(globals.GUILD_ID_1508)
+            if central_guild is None:
+                raise commands.CheckFailure('Failed to acquire 1508 guild.')
+            csvFile = await build_csv([central_guild], status='YES', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
 
