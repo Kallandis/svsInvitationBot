@@ -105,7 +105,7 @@ class CommandErrorHandler(commands.Cog):
 
         if globals.SEND_ERROR_TO_DM:
             # delete the offending command if it was used in a server channel
-            if not isinstance(ctx.channel, discord.DMChannel):
+            if globals.DELETE_COMMANDS and not isinstance(ctx.channel, discord.DMChannel):
                 await ctx.message.delete()
             await ctx.author.send(embed=embed)
 

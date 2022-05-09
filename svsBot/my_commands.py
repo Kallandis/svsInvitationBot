@@ -16,7 +16,7 @@ class Event(commands.Cog):
     # delete commands after they resolve properly
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if not ctx.command_failed:
+        if globals.DELETE_COMMANDS and not ctx.command_failed:
             await ctx.message.delete()
 
     async def cog_check(self, ctx) -> bool:
@@ -363,7 +363,7 @@ class Misc(commands.Cog):
     # delete commands after they resolve properly, if they were used outside of DM
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
+        if globals.DELETE_COMMANDS and not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
             await ctx.message.delete()
 
     @commands.command(help='Logs a bug with the bot.\n'

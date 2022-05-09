@@ -47,6 +47,11 @@ SEND_HELP_TO_DM = True
 # Toggle whether error embeds should be sent to the same channel as command calls, or to the user's DM
 SEND_ERROR_TO_DM = True
 
+# Toggle whether bot should delete all commands sent in mainchannel
+# turned off because it requires 2FA on my account which I don't want
+# if it's important I'm OK with turning it on though
+DELETE_COMMANDS = False
+
 # Channel that $bug should send bug reports to
 BUG_REPORT_CHANNEL_ID = 970947508903759902     # svsBotTestServer/bug-reports (Evan's private server)
 
