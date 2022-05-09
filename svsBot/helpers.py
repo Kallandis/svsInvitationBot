@@ -154,7 +154,8 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
 
     if event_attempt:
         cont = "Your event sign-up has been cancelled because you are not in the database.\n" \
-               "After entering your information, you may sign up for the event again.\n"
+               "After entering your information, you may sign up for the event again.\n" \
+               "Click on the menu to begin.\n"
     else:
         cont = "You do not have an existing entry in the database. Please enter information.\n"
     cont += "Menu will disappear in 5 minutes."

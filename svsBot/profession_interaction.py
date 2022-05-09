@@ -111,7 +111,7 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Popstar-3d'),
                 discord.SelectOption(label='Popstar-1d')
             ]
-            max_vals = 2
+            max_vals = len(options)
             # placeholder = f'Select which base skins you own'
             placeholder = 'Skin(s)'
 

@@ -104,17 +104,18 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if not first_entry:
-        if globals.eventChannel:
+    if globals.eventChannel:
+        if not first_entry:
             # if there is an active event, put the event and the user's status in the description field of the embed
             # eventInfo = eventTitle + ' @ ' + eventTime
             descr += f'You are **{status}** for {globals.eventInfo}\n' \
                      f'[Event Message]({globals.eventMessage.jump_url})'
         else:
-            descr += 'There is no event open for signups.'
+            # if they just entered the database, don't confuse them by telling them they are "NO"
+            descr += f'[Event Message]({globals.eventMessage.jump_url})'
     else:
-        # to avoid confusion, don't tell them their status (which is "NO") if they just tried to sign up
-        descr += f'[Event Message]({globals.eventMessage.jump_url})'
+        'There is no event open for signups.'
+
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
 
     # add fields to the embed for various entry parameters
