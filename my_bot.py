@@ -34,6 +34,9 @@ class Bot(commands.Bot):
         # bug report channel that receives reports from $bug cmd
         self.bug_report_channel = None
 
+        # TODO: or maybe can test this?
+        # self.button_lock = asyncio.Lock()
+
     async def setup_hook(self) -> None:
         # add cogs
         await self.add_cog(my_commands.DM(self))

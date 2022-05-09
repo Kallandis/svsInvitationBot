@@ -17,6 +17,9 @@ class EventButtonsView(discord.ui.View):
         self.parent_message = parent_message
         self.last_statuses = {}
 
+        # # TODO: try this?
+        # self.lock = asyncio.Lock(loop=asyncio.get_running_loop())
+
     @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'YES'

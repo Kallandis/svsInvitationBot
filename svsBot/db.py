@@ -274,9 +274,10 @@ async def all_of_category(category: str, value: Union[str, int], status='YES', g
                 if member is not None:
                     break
 
+            member_name = member.display_name if member is not None else 'NOT_FOUND'
             # make a new entry with the member's display name, stripped of emojis
             new_entry = (
-                strip_emoji(member.display_name),
+                strip_emoji(member_name),
                 *entry[1:]
             )
             # add the modified entry with display_name to display_name_entries
@@ -289,12 +290,6 @@ async def all_of_category(category: str, value: Union[str, int], status='YES', g
 
     else:
         return entries
-
-        # entries = [
-        #     (
-        #         guild.get_member(entry[0]).display_name,
-        #         *entry[1:]
-        #     ) for entry in entries]
 
 
 async def dump_db(filename: str) -> discord.File:
