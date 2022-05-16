@@ -24,8 +24,6 @@
 
 ---------PRIORITY--------------
 
-- CHANGE:       make some folders, put modules in folders instead of all sitting in the main directory
-
 - IMPLEMENT:    kill off global event variables.
                 Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
                 Probably easiest to just pass the bot along the chain until it hits info_embed()?
