@@ -400,18 +400,43 @@ class Misc(commands.Cog):
     @commands.has_role(globals.ADMIN_ROLE_NAME)
     @commands.max_concurrency(1)
     async def get_csv(self, ctx, arg):
-        if arg not in ['all', 'attending']:
-            raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
-        statusDict = {'all': '*', 'attending': 'YES'}
-        status_to_get = statusDict[arg]
-        central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
-        if central_guild is None:
-            raise commands.CheckFailure('Failed to acquire 1508 guild.')
-        csvFile = await helpers.build_csv([central_guild], status=status_to_get)
-        if arg == 'all':
-            msg = 'CSV of all users in the database'
-        else:
-            msg = f'CSV of all users that responded "YES" to {globals.eventInfo}'
+        # # parse argument
+        # if arg not in ['all', 'attending']:
+        #     raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
+        # statusDict = {'all': '*', 'attending': 'YES'}
+        # status_to_get = statusDict[arg]
+        #
+        # # CSV will be filled with user display-names which are to be pulled from their name in the central 1508 server,
+        # # which everyone should be a member of.
+        # central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+        # if central_guild is None:
+        #     raise commands.CheckFailure('Failed to acquire 1508 guild.')
+        #
+        # # build CSV
+        # csvFile = await helpers.build_csv([central_guild], status=status_to_get)
+        #
+        # # send CSV
+        # if arg == 'all':
+        #     msg = 'CSV of all users in the database'
+        # else:
+        #     msg = f'CSV of all users that responded "YES" to {globals.eventInfo}'
+        msg, csvFile = await self.handle_csv_cmd(ctx, arg)
+        await ctx.author.send(msg, file=csvFile)
+
+    @commands.command(help='Sends the user a minimally sorted CSV of the database.\n'
+                           'Must specify if you want just event attendees, or everyone in database.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n'
+                           '\u200b\n'
+                           f'Example:   {globals.COMMAND_PREFIX}get_raw_csv all\n',
+                      usage='<all/attending>')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
+    @commands.max_concurrency(1)
+    async def get_raw_csv(self, ctx, arg):
+        """
+        Same as get_csv() but implicitly makes an unsorted CSV
+        Separated from get_csv() to avoid having to pass multiple arguments
+        """
+        msg, csvFile = await self.handle_csv_cmd(ctx, arg)
         await ctx.author.send(msg, file=csvFile)
 
     @commands.command(help='Sends the user a dump of the SQL database.\n'
@@ -425,3 +450,33 @@ class Misc(commands.Cog):
         """
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
+
+    async def handle_csv_cmd(self, ctx, arg):
+        """Handles argument parsing and CSV creation for get_csv, get_raw_csv"""
+
+        # parse argument
+        if arg not in ['all', 'attending']:
+            raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
+        statusDict = {'all': '*', 'attending': 'YES'}
+        status_to_get = statusDict[arg]
+
+        # CSV will be filled with user display-names which are to be pulled from their name in the central 1508 server,
+        # which everyone should be a member of.
+        central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+        if central_guild is None:
+            raise commands.CheckFailure('Failed to acquire 1508 guild.')
+
+        # check if invoked by get_csv or get_raw_csv to determine whether to sort the CSV or make raw list
+        sorting = True if ctx.command.name == 'get_csv' else False
+
+        # build CSV
+        csvFile = await helpers.build_csv([central_guild], status=status_to_get, sorting=sorting)
+
+        # send CSV
+        if arg == 'all':
+            msg = 'CSV of all users in the database'
+        else:
+            msg = f'CSV of all users that responded "YES" or "MAYBE" to {globals.eventInfo}'
+
+        return msg, csvFile
+
