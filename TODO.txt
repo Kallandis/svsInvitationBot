@@ -23,21 +23,14 @@
              (should still be able to remove)
 
 ---------PRIORITY--------------
-- CATCHUP (changes made on the pi):
-                - in helpers.delete_event(), refetch the event message by stored ID and check if it exists; if not,
-                wipe everything as if delete_event was successful. This is to deal with when they manually delete the
-                event message
-                    - NOTE: on the pi, I just check the eventMessage. This only works if the bot has been restarted
-                    after the event message was manually deleted. Above method is better
-                - Added new channel "el-registration" in globals.py: 951396183610388491
-
 - IMPLEMENT:    move several admin-specific commands to ADMIN cog?
 - IMPLEMENT:    strip commas from names in all_of_category
 - IMPLEMENT:    kill off global event variables.
                 Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
                 Probably easiest to just pass the bot along the chain until it hits info_embed()?
 
-- IMPLEMENT:    add a fxn to manually edit someone else's entry by ID
+- IMPLEMENT:    add an admin fxn to manually edit someone else's entry by ID
+- IMPLEMENT:    add an admin fxn to purge someone's entry by ID
 - IMPLEMENT:    make logger include ID/display name of people when there is an error, when possible
 
 - ISSUE:    getting a lot of RuntimeError's due to process_click(). Likely due to asyncio.Lock() trying to create its own
