@@ -11,3 +11,4 @@ NOTES.txt
 .venv/
 venv/
 ENV/
+.idea

@@ -177,6 +177,32 @@ async def delete_event(user, bot, intent: str) -> None:
     Empties the sql_write() "buffer"
     """
 
+    # ensure that the event message either exists or was properly deleted. If it was manually
+    # deleted through discord right-click menu while still active, the "message.content" call will fail
+    try:
+        # refetch event msg by stored ID
+        eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
+        eventMsg = await globals.eventChannel.fetch_message(eventMessageID)
+        eventMsgCont = eventMsg.content
+    except (discord.NotFound, AttributeError):
+        # discord.NotFound -> fetch_message() failed
+        # AttributeError -> eventMsg had no attribute "content"
+
+        # must return out of the function early to avoid referencing dead message
+        # reset globals.eventMessage, globals.eventChannel, globals.eventInfo
+
+        bot.reset_event_vars()
+
+        await db.update_event('placeholder', 'placeholder', 0, 0)
+        # reset everyone's status to "NO"
+        await db.reset_status()
+
+        resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
+               'Event variables should now be reset. Proceed as normal.'
+        await user.send(resp)
+
+        return
+
     # prompt the user to send "confirm" in DM to confirm their command
     timeout = 60
     prompt = ''
