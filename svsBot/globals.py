@@ -37,12 +37,15 @@ MAIN_CHANNEL_ID_LIST = [964654664677212220]  # svsBotTestServer/botchannel
 # adminRole = 'Admin (Yes, be scared)'
 ADMIN_ROLE_NAME = 'evan'
 
+CSV_ROLE_NAME = 'csv'
+
 # prefix that indicates a command (e.g. $info, $create_event [args])
-COMMAND_PREFIX = '~'
+# COMMAND_PREFIX = '~'
+COMMAND_PREFIX = '!'
 
 # url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
 # thumbnail with the embeds
-LOGO_URL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/logo.png'
+LOGO_URL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/logo1.png'
 
 # name of the csv file that is made by helpers.build_csv()
 CSV_FILENAME = r'svs_entries.csv'
@@ -53,6 +56,10 @@ NUMBER_OF_LOTTO_WINNERS = 40
 
 # how many hours before the scheduled event time should "Maybe's" be reminded of the event
 CONFIRM_MAYBE_WARNING_HOURS = 24
+
+# Names longer than this in the event embed will be truncated.
+# Maximum of 23
+MAX_NAME_LENGTH_IN_EMBED_FIELD = 8
 
 # Toggle whether help embeds should be sent to the same channel as $help calls, or to the user's DM
 SEND_HELP_TO_DM = True

@@ -210,7 +210,7 @@ async def reset_status() -> None:
             await conn.commit()
 
 
-async def all_of_category(category: str, value: Union[str, int], status='YES', guilds=None,
+async def all_of_category(category: str, value: Union[str, int], guild=None, status='YES',
                           display_name=False) -> Optional[list[tuple]]:
     """
     return a list of all user tuples that satisfy a condition
@@ -265,14 +265,15 @@ async def all_of_category(category: str, value: Union[str, int], status='YES', g
     def display_name_entries(entries):
         new_entries = []
         for entry in entries:
-            member = None
 
-            # get the member object to get their display name
-            # loop through all guilds that the bot is in (bot.event_guilds)
-            for guild in guilds:
-                member = guild.get_member(entry[0])
-                if member is not None:
-                    break
+            # get the member object from main 1508 guild to get their display name
+            # Also filter by CSV role "1508+"
+            member = guild.get_member(entry[0])
+            if member is None:
+                continue
+
+            if globals.CSV_ROLE_NAME not in [r.name for r in member.roles]:
+                continue
 
             member_name = member.display_name if member is not None else 'NOT_FOUND'
             # make a new entry with the member's display name, stripped of emojis
@@ -285,7 +286,9 @@ async def all_of_category(category: str, value: Union[str, int], status='YES', g
 
         return new_entries
 
-    if display_name and guilds:
+    if display_name:
+        if not guild:
+            logging.error('Failed to provide guild object for display names.')
         return display_name_entries(entries)
 
     else:

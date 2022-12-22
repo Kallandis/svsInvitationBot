@@ -166,7 +166,7 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
     await msg.edit(view=view)
 
 
-# to be called in delete_event(), finalize_event()
+# to be called in ~close, ~delete
 async def delete_event(user, bot, intent: str) -> None:
     """
     Checks for confirmation with invoking user. If yes:
@@ -244,7 +244,7 @@ async def delete_event(user, bot, intent: str) -> None:
             central_guild = bot.get_guild(globals.GUILD_ID_1508)
             if central_guild is None:
                 raise commands.CheckFailure('Failed to acquire 1508 guild.')
-            csvFile = await build_csv([central_guild], status='YES', finalize=True)
+            csvFile = await build_csv(central_guild, status='YES', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
 
@@ -284,22 +284,22 @@ async def delete_event(user, bot, intent: str) -> None:
     await db.reset_status()
 
 
-async def build_csv(guilds: list[discord.Guild], status: str = 'YES', sorting=True, finalize=False) -> discord.File:
+async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, finalize=False) -> discord.File:
     """
     parses the user database into csv subcategories
     """
 
     if finalize:
         # select lotto winners
-        lottoEntries = await db.all_of_category('lotto', 1, guilds=guilds, display_name=True)
+        lottoEntries = await db.all_of_category('lotto', 1, guild, display_name=True)
         random.shuffle(lottoEntries)
         lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
 
     # get class arrays
-    ce = await db.all_of_category('class', 'CE', status=status, guilds=guilds, display_name=True)
-    mm = await db.all_of_category('class', 'MM', status=status, guilds=guilds, display_name=True)
+    ce = await db.all_of_category('class', 'CE', guild, status=status, display_name=True)
+    mm = await db.all_of_category('class', 'MM', guild, status=status, display_name=True)
     if status == 'YES' and sorting:
-        sorted_maybe = await db.all_of_category('status', 'maybe', guilds=guilds, display_name=True)
+        sorted_maybe = await db.all_of_category('status', 'maybe', guild, display_name=True)
     else:
         sorted_maybe = []
 
@@ -309,11 +309,11 @@ async def build_csv(guilds: list[discord.Guild], status: str = 'YES', sorting=Tr
     # get arrays for unsorted CSV
     if not sorting:
         # get the yes and maybe attendees
-        unsorted_yes = await db.all_of_category('status', 'YES', guilds=guilds, display_name=True)
-        unsorted_maybe = await db.all_of_category('status', 'MAYBE', guilds=guilds, display_name=True)
+        unsorted_yes = await db.all_of_category('status', 'YES', guild, display_name=True)
+        unsorted_maybe = await db.all_of_category('status', 'MAYBE', guild, display_name=True)
         if status == '*':
             # if called with "all", also get the no's to complete the set
-            unsorted_no = await db.all_of_category('status', 'NO', guilds=guilds, display_name=True)
+            unsorted_no = await db.all_of_category('status', 'NO', guild, display_name=True)
         else:
             unsorted_no = []
 

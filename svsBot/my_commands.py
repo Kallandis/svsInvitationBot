@@ -316,6 +316,8 @@ class DM(commands.Cog):
         If the user is not in the database, either one will send a ProfessionMenuView object to get a first entry.
         """
 
+        await db.all_of_category(category='status', value='NO')
+
         member = ctx.author
         ID = member.id
 
@@ -463,6 +465,7 @@ class Misc(commands.Cog):
         # CSV will be filled with user display-names which are to be pulled from their name in the central 1508 server,
         # which everyone should be a member of.
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+
         if central_guild is None:
             raise commands.CheckFailure('Failed to acquire 1508 guild.')
 
@@ -470,7 +473,7 @@ class Misc(commands.Cog):
         sorting = True if ctx.command.name == 'get_csv' else False
 
         # build CSV
-        csvFile = await helpers.build_csv([central_guild], status=status_to_get, sorting=sorting)
+        csvFile = await helpers.build_csv(central_guild, status=status_to_get, sorting=sorting)
 
         # send CSV
         if arg == 'all':
