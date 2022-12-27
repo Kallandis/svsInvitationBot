@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+workspace.xml
+tokenFile.py
+*.csv
+*.db
+*.log
+*.sql
+NOTES.txt
+
+.venv/
+venv/
+ENV/
