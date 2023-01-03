@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 
 import logging
-logger = logging.getLogger(__name__)
 
 from . import db, helpers, globals
 from . event_interaction import EventButtonsView
@@ -16,8 +15,10 @@ class Event(commands.Cog):
     # delete commands after they resolve properly
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if globals.DELETE_COMMANDS and not ctx.command_failed:
+        if globals.DELETE_MESSAGES and not ctx.command_failed:
             await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
 
     async def cog_check(self, ctx) -> bool:
         # not in guild channel
@@ -304,6 +305,12 @@ class DM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_after_invoke(self, ctx) -> None:
+        if globals.DELETE_MESSAGES and not ctx.command_failed:
+            await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
+
     @commands.command(help='Change or show your database entry.\n'
                            f'Example: {globals.COMMAND_PREFIX}info change\n',
                       usage='<change/show>')
@@ -363,8 +370,10 @@ class Misc(commands.Cog):
     # delete commands after they resolve properly, if they were used outside of DM
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if globals.DELETE_COMMANDS and not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
+        if globals.DELETE_MESSAGES and not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
             await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
 
     @commands.command(help='Logs a bug with the bot.\n'
                            'Limit of 4000 characters.\n'
@@ -404,10 +413,11 @@ class Misc(commands.Cog):
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
         statusDict = {'all': '*', 'attending': 'YES'}
         status_to_get = statusDict[arg]
+
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
         if central_guild is None:
             raise commands.CheckFailure('Failed to acquire 1508 guild.')
-        csvFile = await helpers.build_csv([central_guild], status=status_to_get)
+        csvFile = await helpers.build_csv(central_guild, status=status_to_get)
         if arg == 'all':
             msg = 'CSV of all users in the database'
         else:

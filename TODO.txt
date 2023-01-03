@@ -22,22 +22,31 @@
 - IMPLEMENT: if the length of the event embed would become larger than 6000 chars, do not add a name to the fields
              (should still be able to remove)
 
+- IMPLEMENT: make 'userHistory.db' be an option in globals.py, and provide an absolute filepath to reference it
+                that way, I don't have to cd to ~/python_projects/svs_bot when starting the bot
+
+- IMPLEMENT: make all of the class selection stuff a config/separate file (json?)
+
+- IMPLEMENT: make the globals.py config check if OS is RPI or WINDOWS, and change stuff accordingly
+
 ---------PRIORITY--------------
 
 - IMPLEMENT:    kill off global event variables.
                 Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
                 Probably easiest to just pass the bot along the chain until it hits info_embed()?
 
-- ISSUE:    getting a lot of RuntimeError's due to process_click(). Likely due to asyncio.Lock() trying to create its own
-            event loop. Needs to be made in the same stack as the original function call? in which case, it needs to
-            be either a global or a parameter of the bot object. Test with global for convenience.
+CHANGELIST FROM LAST TEST:
+    - delete successful as well as unsuccessful commands in guild channels
+    - add some text to the event embed telling people to check their DM if it's their first response
+    - bot has activity text "Playing ~help" to show the command prefix and the help command
+    - Put longer prompts in the message above the ""~info change" select menus
+    UNTESTED:
+        - confirm maybe loop restarts when bot restarts
+        - confirm maybe loop closes when event is closed
 
-            - can try to do something like asyncio.Lock(loop=asyncio.get_running_event_loop())
 
-            - Or alternatively, trying to copy from https://stackoverflow.com/questions/53724665/using-queues-results-in-asyncio-exception-got-future-future-pending-attached?rq=1
 
-                async def main():
-                    button_lock = asyncio.Lock()
-                    bot.button_lock = button_lock
-                    async with bot:
-                        await bot.start(tokenFile.token)
+UNTESTED CHANGES:
+    - confirm maybe loop
+    - confirm maybe loop restarts on bot startup if event is active
+    - confirm maybe loop should cancel when event is closed

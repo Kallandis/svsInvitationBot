@@ -154,8 +154,7 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
 
     if event_attempt:
         cont = "Your event sign-up has been cancelled because you are not in the database.\n" \
-               "After entering your information, you may sign up for the event again.\n" \
-               "Click on the menu to begin.\n"
+               "After entering your information, you may sign up for the event again.\n"
     else:
         cont = "You do not have an existing entry in the database. Please enter information.\n"
     cont += "Menu will disappear in 5 minutes."
@@ -176,6 +175,29 @@ async def delete_event(user, bot, intent: str) -> None:
     If intent = 'make_csv', builds a CSV of attending users and DMs it to invoking user
     Empties the sql_write() "buffer"
     """
+
+    try:
+        eventMsgCont = globals.eventMessage.content
+    except AttributeError: 
+        # this should only happen if the event message is manually deleted. In that case, need to escape
+        # out of this function early, or all of the below code will error. Reset event vars.
+        # globals.eventMessage = None
+        # globals.eventChannel = None
+        # globals.eventInfo = ''
+
+        bot.reset_event_vars()
+        
+        await db.update_event('placeholder', 'placeholder', 0, 0)
+        # reset everyone's status to "NO"
+        await db.reset_status()
+        
+        
+        resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
+               'Event variables should now be reset.'
+        await user.send(resp)
+        
+        return
+
 
     # prompt the user to send "confirm" in DM to confirm their command
     timeout = 60
@@ -215,10 +237,11 @@ async def delete_event(user, bot, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
+
             central_guild = bot.get_guild(globals.GUILD_ID_1508)
             if central_guild is None:
                 raise commands.CheckFailure('Failed to acquire 1508 guild.')
-            csvFile = await build_csv([central_guild], status='YES', finalize=True)
+            csvFile = await build_csv(central_guild, status='YES', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
 
@@ -258,20 +281,20 @@ async def delete_event(user, bot, intent: str) -> None:
     await db.reset_status()
 
 
-async def build_csv(guilds: list[discord.Guild], status: str = 'YES', finalize=False) -> discord.File:
+async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -> discord.File:
     """
     parses the user database into csv subcategories
     """
 
     if finalize:
         # select lotto winners
-        lottoEntries = await db.all_of_category('lotto', 1, guilds=guilds, display_name=True)
+        lottoEntries = await db.all_of_category('lotto', 1, guild=guild, display_name=True)
         random.shuffle(lottoEntries)
         lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
 
     # get class arrays
-    ce = await db.all_of_category('class', 'CE', status=status, guilds=guilds, display_name=True)
-    mm = await db.all_of_category('class', 'MM', status=status, guilds=guilds, display_name=True)
+    ce = await db.all_of_category('class', 'CE', guild=guild, status=status, display_name=True)
+    mm = await db.all_of_category('class', 'MM', guild=guild, status=status, display_name=True)
     # name, class, level, unit, march_size, traps, skins
     nameIndex = 0
     classIndex = 1
@@ -294,7 +317,7 @@ async def build_csv(guilds: list[discord.Guild], status: str = 'YES', finalize=F
             msize = int(msize.split('-')[0]) + 5
         return msize
 
-    allyDict = {'3NO': 0, 'drgn': 1, 'SURO': 2, 'Alt8': 3}
+    allyDict = {'508S': 0, '508N': 1, '508W': 2, '508E': 3}
 
     def sort_alliance(entry):
         alliance = entry[allianceIndex]
