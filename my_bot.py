@@ -3,7 +3,6 @@ from discord.ext import commands
 import sys
 
 import logging
-logger = logging.getLogger(__name__)
 
 import svsBot.my_commands as my_commands
 import svsBot.my_help as my_help
@@ -33,9 +32,6 @@ class Bot(commands.Bot):
 
         # bug report channel that receives reports from $bug cmd
         self.bug_report_channel = None
-
-        # TODO: or maybe can test this?
-        # self.button_lock = asyncio.Lock()
 
     async def setup_hook(self) -> None:
         # add cogs
@@ -110,27 +106,30 @@ class Bot(commands.Bot):
             self.maybe_loop = maybe_loop
 
     async def on_ready(self):
-        print(f'{self.user.name} connected!')
-        print(f'discord.py version = {discord.__version__}')
-        print()
+        logging.info(f'{self.user.name} connected!')
+        logging.info(f'discord.py version = {discord.__version__}' + '\n')
 
         await self.load_variables()
 
         for guild in self.guilds:
-            print('Connected to guild: ' + guild.name)
+            logging.info('Connected to guild: ' + guild.name)
             adminRoleInGuild = list(filter(lambda r: r.name == globals.ADMIN_ROLE_NAME, guild.roles))
+            csvRoleInGuild   = list(filter(lambda r: r.name == globals.CSV_ROLE_NAME, guild.roles))
             if not adminRoleInGuild:
-                print(f'ALERT: Guild "{guild.name}" does not have a role named "{globals.ADMIN_ROLE_NAME}". Events '
+                logging.info(f'ALERT: Guild "{guild.name}" does not have a role named "{globals.ADMIN_ROLE_NAME}". Events '
                       f'cannot be created in this guild.')
+            if not csvRoleInGuild:
+                logging.info(f'ALERT: Guild "{guild.name}" does not have a role named "{globals.CSV_ROLE_NAME}". CSV creation and display names will not work in this guild.')
+            
 
         for channel in self.main_channels:
-            print('Listening on channel: ' + channel.guild.name + '/' + channel.name)
+            logging.info('Listening on channel: ' + channel.guild.name + '/' + channel.name)
 
         if self.bug_report_channel:
-            print('Sending bugs to channel: ' + self.bug_report_channel.guild.name + '/' + self.bug_report_channel.name)
+            logging.info('Sending bugs to channel: ' + self.bug_report_channel.guild.name + '/' + self.bug_report_channel.name)
 
         if globals.eventMessage:
-            print(f'Reacquired existing event in channel: '
+            logging.info(f'Reacquired existing event in channel: '
                   f'{globals.eventChannel.guild.name}/{globals.eventChannel.name}')
 
     def reset_event_vars(self) -> None:

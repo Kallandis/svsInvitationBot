@@ -1,11 +1,6 @@
-# import sqlite3 as sql3
 import aiosqlite
 import os
 import asyncio
-
-import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 async def reset_db():
@@ -14,7 +9,6 @@ async def reset_db():
     if os.path.exists("userHistory.db"):
         os.remove("userHistory.db")
 
-    # with sql3.connect('userHistory.db') as conn:
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute("""CREATE TABLE USERS (
@@ -36,7 +30,6 @@ async def reset_db():
     if os.path.exists("eventInfo.db"):
         os.remove("eventInfo.db")
 
-    # with sql3.connect('eventInfo.db') as conn:
     async with aiosqlite.connect('eventInfo.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute("""CREATE TABLE EVENT (

@@ -9,7 +9,6 @@ from . import helpers, globals, db
 
 fieldPrefix = '>>> \u200b'  # quote block and whitespace char
 
-
 class EventButtonsView(discord.ui.View):
     __slots__ = ('parent_message', 'last_statuses')
 
@@ -40,24 +39,27 @@ class EventButtonsView(discord.ui.View):
         # if the last status of user is None, checks to make sure the bot has not restarted and thus lost their last
         # status. Does this by checking the raw field values to see if the user's name is in there. If so, sets the
         # user's last status to the correct value.
-        if self.last_statuses.get(interaction.user.id, None) is None:
-            # get the embed
-            emb = self.parent_message.embeds[0]
-            fields = emb.fields
-            for i in range(len(fields)):
-                # check each field for user's truncated name
-                name = interaction.user.display_name[:globals.MAX_NAME_LENGTH_IN_EMBED_FIELD]
-                if name in fields[i].value:
-                    # if name is found, iterate backwards to get the 'category' of field that it is in (yes, maybe, no)
-                    while True:
-                        # strip [124] field count to get title
-                        fieldType = fields[i].name.split()[0]
-                        if fieldType in ['YES', 'MAYBE', 'NO']:
-                            self.last_statuses[interaction.user.id] = fieldType
-                            break
-                        else:
-                            i -= 1
-                    break
+        if self.last_statuses.get(interaction.user.id, None) is not None:
+            return
+
+        # get the embed
+        emb = self.parent_message.embeds[0]
+        fields = emb.fields
+        for i in range(len(fields)):
+            # check each field for user's truncated name
+            name = interaction.user.display_name[:globals.MAX_NAME_LENGTH_IN_EMBED_FIELD]
+            fieldVal = fields[i].value
+            if name in get_names_list_from_field_value(fieldVal):
+                # if name is found, iterate backwards to get the 'category' of field that it is in (yes, maybe, no)
+                while True:
+                    # strip [124] field count to get title
+                    fieldType = fields[i].name.split()[0]
+                    if fieldType in ['YES', 'MAYBE', 'NO']:
+                        self.last_statuses[interaction.user.id] = fieldType
+                        break
+                    else:
+                        i -= 1
+                break
 
     async def process_click(self, interaction, status):
         async with lock:
@@ -173,6 +175,8 @@ def edit_field_values(embed, name, status, operation: str):
     else:
         names.append(name)
 
+    numberOfNames = len(names)
+
     # Build the field-value strings
     # Each field must start with fieldPrefix. Maximum field length is 1024 chars
     fieldVals = []
@@ -198,7 +202,6 @@ def edit_field_values(embed, name, status, operation: str):
     # edit the fields
     for ind in range(*status_range):
         fieldVal = fieldVals.pop(0)
-        numberOfNames = fieldVal.count('\n')
         title = (status + f'  [{numberOfNames}]') if ind == status_range[0] else '\u200b'
         embed.set_field_at(ind, name=title, value=fieldVal)
 
@@ -207,3 +210,4 @@ def edit_field_values(embed, name, status, operation: str):
         if len(fieldVals) > 1:
             logging.error('More than 1 fieldVal remaining at end.')
         embed.insert_field_at(status_range[1], name='\u200b', value=fieldVals.pop())
+

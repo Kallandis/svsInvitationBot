@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 
 import logging
-logger = logging.getLogger(__name__)
 
 from . import db, helpers, globals
 from . event_interaction import EventButtonsView
@@ -16,8 +15,10 @@ class Event(commands.Cog):
     # delete commands after they resolve properly
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if globals.DELETE_COMMANDS and not ctx.command_failed:
+        if globals.DELETE_MESSAGES and not ctx.command_failed:
             await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
 
     async def cog_check(self, ctx) -> bool:
         # not in guild channel
@@ -304,6 +305,12 @@ class DM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_after_invoke(self, ctx) -> None:
+        if globals.DELETE_MESSAGES and not ctx.command_failed:
+            await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
+
     @commands.command(help='Change or show your database entry.\n'
                            f'Example: {globals.COMMAND_PREFIX}info change\n',
                       usage='<change/show>')
@@ -315,8 +322,6 @@ class DM(commands.Cog):
 
         If the user is not in the database, either one will send a ProfessionMenuView object to get a first entry.
         """
-
-        await db.all_of_category(category='status', value='NO')
 
         member = ctx.author
         ID = member.id
@@ -365,8 +370,10 @@ class Misc(commands.Cog):
     # delete commands after they resolve properly, if they were used outside of DM
     # the error handler already deletes messages if they raise an exception
     async def cog_after_invoke(self, ctx) -> None:
-        if globals.DELETE_COMMANDS and not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
+        if globals.DELETE_MESSAGES and not ctx.command_failed and not isinstance(ctx.channel, discord.DMChannel):
             await ctx.message.delete()
+
+        logging.info(f'USER: {ctx.author.display_name}   COMMAND: {ctx.message.content[:100]}')
 
     @commands.command(help='Logs a bug with the bot.\n'
                            'Limit of 4000 characters.\n'
@@ -462,8 +469,6 @@ class Misc(commands.Cog):
         statusDict = {'all': '*', 'attending': 'YES'}
         status_to_get = statusDict[arg]
 
-        # CSV will be filled with user display-names which are to be pulled from their name in the central 1508 server,
-        # which everyone should be a member of.
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
 
         if central_guild is None:

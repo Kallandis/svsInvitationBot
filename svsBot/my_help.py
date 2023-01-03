@@ -31,7 +31,7 @@ class MyHelp(commands.HelpCommand):
 
         if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
-            if globals.DELETE_COMMANDS and not isinstance(self.context.channel, discord.DMChannel):
+            if globals.DELETE_MESSAGES and not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
             # send help embed to user's DM
             await self.context.author.send(embed=embed)
@@ -49,7 +49,7 @@ class MyHelp(commands.HelpCommand):
 
         if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
-            if globals.DELETE_COMMANDS and not isinstance(self.context.channel, discord.DMChannel):
+            if globals.DELETE_MESSAGES and not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
             # send help embed to user's DM
             await self.context.author.send(embed=embed)
@@ -103,7 +103,7 @@ class MyHelp(commands.HelpCommand):
 
         if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
-            if globals.DELETE_COMMANDS and not isinstance(self.context.channel, discord.DMChannel):
+            if globals.DELETE_MESSAGES and not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
             # send help embed to user's DM
             await self.context.author.send(embed=embed)
@@ -126,7 +126,7 @@ class MyHelp(commands.HelpCommand):
 
         if globals.SEND_HELP_TO_DM:
             # delete the help message if it was sent in a guild
-            if globals.DELETE_COMMANDS and not isinstance(self.context.channel, discord.DMChannel):
+            if globals.DELETE_MESSAGES and not isinstance(self.context.channel, discord.DMChannel):
                 await self.context.message.delete()
             # send help embed to user's DM
             await self.context.author.send(embed=embed)
