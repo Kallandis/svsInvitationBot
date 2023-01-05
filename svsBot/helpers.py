@@ -177,27 +177,19 @@ async def delete_event(user, bot, intent: str) -> None:
     """
 
     try:
-        eventMsgCont = globals.eventMessage.content
+        _ = globals.eventMessage.content
     except AttributeError:
         # this should only happen if the event message is manually deleted. In that case, need to escape
-        # out of this function early, or all of the below code will error. Reset event vars.
-        # globals.eventMessage = None
-        # globals.eventChannel = None
-        # globals.eventInfo = ''
+        # out of the function early, or all of the below code will error. Reset event vars.
 
         bot.reset_event_vars()
-
         await db.update_event('placeholder', 'placeholder', 0, 0)
         # reset everyone's status to "NO"
         await db.reset_status()
-
-
         resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
                'Event variables should now be reset.'
         await user.send(resp)
-
         return
-
 
     # prompt the user to send "confirm" in DM to confirm their command
     timeout = 60
@@ -283,7 +275,18 @@ async def delete_event(user, bot, intent: str) -> None:
 
 async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, finalize=False) -> discord.File:
     """
-    parses the user database into csv subcategories
+    Parses the user database into CSV subcategories.
+    Outputs a formatted, sorted CSV, with unsorted rows at the bottom.
+
+    ARGS:
+        guild:      the guild to pull display-names from
+        status:     * to get all users in db (that have globals.CSV_ROLE_NAME)
+                    YES to get all users who have indicated YES or MAYBE    (yeah, it's confusing)
+        finalize:   Indicate that the event has been closed.
+                    TRUE --> Triggers lottery, ignores MAYBE-statuses
+
+    NOTE:
+        get_csv <all/attending> makes a call with finalize=False
     """
 
     if finalize:
@@ -306,11 +309,15 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
     # get arrays for unsorted CSV
     if not sorting:
         # get the yes and maybe attendees
-        unsorted_yes = await db.all_of_category('status', 'YES', guild, display_name=True)
-        unsorted_maybe = await db.all_of_category('status', 'MAYBE', guild, display_name=True)
+        # unsorted_yes = await db.all_of_category('status', 'YES', guild, display_name=True)
+        unsorted_yes =  await db.all_of_category('class', 'CE', guild=guild, status='YES', display_name=True)
+        unsorted_yes += await db.all_of_category('class', 'MM', guild=guild, status='YES', display_name=True)
+        unsorted_maybe =  await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+        unsorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
         if status == '*':
             # if called with "all", also get the no's to complete the set
-            unsorted_no = await db.all_of_category('status', 'NO', guild, display_name=True)
+            unsorted_no = await db.all_of_category('class', 'CE', guild=guild, status='NO', display_name=True)
+            unsorted_no += await db.all_of_category('class', 'MM', guild=guild, status='NO', display_name=True)
         else:
             unsorted_no = []
 
@@ -381,7 +388,7 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
 
     #
     # finally, sort the maybes by class then level
-    if status == 'YES':
+    if sorted_maybe:
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelIndex], reverse=True)
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classIndex])
 
@@ -397,6 +404,8 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
         else:
             # if "all" -> status = "*", then combine all entries into one big column
             unsorted_all = [*unsorted_yes, *unsorted_maybe, *unsorted_no]
+            for x in unsorted_all:
+                print(x)
             unsorted_all = sorted(unsorted_all, key=lambda x: x[classIndex])
 
     #

@@ -132,6 +132,10 @@ class Bot(commands.Bot):
             logging.info(f'Reacquired existing event in channel: '
                   f'{globals.eventChannel.guild.name}/{globals.eventChannel.name}')
 
+        m = f'Setup complete, {self.user.name} online.'
+        print(m)
+        logging.info(m)
+
     def reset_event_vars(self) -> None:
         globals.eventInfo = ''
         globals.eventMessage = None

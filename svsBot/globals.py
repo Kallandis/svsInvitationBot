@@ -20,24 +20,26 @@ GUILD_ID_1508 = 915761804704104489
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
 # this is only on the bot's end. You must ensure that the bot has permissions and access to these channels in the server
 # it is recommended but not required to ONLY add the bot to the channels in this array, to reduce overhead
-# MAIN_CHANNEL_ID_LIST = [964654664677212220]  # svsBotTestServer/botchannel
-MAIN_CHANNEL_ID_LIST = [
-        937275649536692294,
-        951396183610388491
-        ]
+MAIN_CHANNEL_ID_LIST = [964654664677212220]  # svsBotTestServer/botchannel
+# MAIN_CHANNEL_ID_LIST = [
+#         937275649536692294,
+#         951396183610388491
+#         ]
     # 1508/svs-registration
     # 1508/el-registration
 
 # name of the role that allows usage of event-related commands in the mainChannels
 # if the bot is to work in multiple servers, all servers must have a role with this name
-# ADMIN_ROLE_NAME = 'evan'
-ADMIN_ROLE_NAME = 'SVS Planner'
+ADMIN_ROLE_NAME = 'evan'
+# ADMIN_ROLE_NAME = 'SVS Planner'
 
 # Only add people to CSV if they have this role
 CSV_ROLE_NAME = '1508+'
 
 # prefix that indicates a command (e.g. $info, $create_event [args])
-COMMAND_PREFIX = '~'
+# COMMAND_PREFIX = '~'
+COMMAND_PREFIX = '!'
+
 
 # url to the logo to use for embeds. Must be a literal-string (r'URL'). 
 # Set this to '', "", or None to not send a thumbnail with the embeds
