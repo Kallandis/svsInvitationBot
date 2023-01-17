@@ -1,6 +1,8 @@
 import discord  # development branch 2.0.0a to be able to use Views, Interactions
 import logging
 import sys
+import os
+import datetime
 import traceback
 import asyncio
 
@@ -8,23 +10,37 @@ import my_bot
 import tokenFile
 import svsBot.globals as globals
 
-# set up main logger that other loggers inherit from
-logging.basicConfig(filename='bot.log', level=logging.INFO,
-                    format='%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',
-                    datefmt='%Y/%m/%d %H:%M:%S (UTC%z)')
-
-
-# handler for logging uncaught exceptions
-def handler(type, value, tb):
-    for line in traceback.TracebackException(type, value, tb).format(chain=True):
-        logging.exception(line)
-    logging.exception(value)
-
-    sys.__excepthook__(type, value, tb)     # calls default excepthook
-
-
-# send exceptions to handler
-sys.excepthook = handler
+def setup_logs():
+    # logs directory
+    logsdir = '/svsbotlogs'
+    homedir = os.path.expanduser('~')
+    if not os.path.exists(homedir + logsdir):
+        os.mkdir(homedir + logsdir)
+    
+    # make a new logfile every time bot restarts
+    timestr = str(datetime.datetime.now())
+    timestr = timestr[2:]
+    timestr = timestr.replace(' ', '_')
+    timestr = timestr.replace('-', '')
+    timestr = timestr.replace(':', '')
+    logfile = timestr.split('.')[0]
+    logfile = 'log_' + logfile
+    logfile = homedir + logsdir + '/' + logfile
+    
+    logging.basicConfig(filename=logfile, level=logging.INFO,
+                        format='%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',
+                        datefmt='%Y/%m/%d %H:%M:%S (UTC%z)')
+    
+    # handler for logging uncaught exceptions
+    def handler(type, value, tb):
+        for line in traceback.TracebackException(type, value, tb).format(chain=True):
+            logging.exception(line)
+        logging.exception(value)
+    
+        sys.__excepthook__(type, value, tb)     # calls default excepthook
+    
+    # send exceptions to handler
+    sys.excepthook = handler
 
 
 def setup_bot():
@@ -48,6 +64,7 @@ async def main():
         await bot.start(tokenFile.token)
 
 if __name__ == "__main__":
+    setup_logs()
     bot = setup_bot()
     asyncio.run(main())
-    # bot.run(tokenFile.token)
+

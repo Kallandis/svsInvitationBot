@@ -154,8 +154,7 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
 
     if event_attempt:
         cont = "Your event sign-up has been cancelled because you are not in the database.\n" \
-               "After entering your information, you may sign up for the event again.\n" \
-               "Click on the menu to begin.\n"
+               "After entering your information, you may sign up for the event again.\n"
     else:
         cont = "You do not have an existing entry in the database. Please enter information.\n"
     cont += "Menu will disappear in 5 minutes."
@@ -166,7 +165,7 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
     await msg.edit(view=view)
 
 
-# to be called in ~close, ~delete
+# to be called in delete_event(), finalize_event()
 async def delete_event(user, bot, intent: str) -> None:
     """
     Checks for confirmation with invoking user. If yes:
@@ -177,30 +176,19 @@ async def delete_event(user, bot, intent: str) -> None:
     Empties the sql_write() "buffer"
     """
 
-    # ensure that the event message either exists or was properly deleted. If it was manually
-    # deleted through discord right-click menu while still active, the "message.content" call will fail
     try:
-        # refetch event msg by stored ID
-        eventTitle, eventTime, eventMessageID, eventChannelID = await db.get_event()
-        eventMsg = await globals.eventChannel.fetch_message(eventMessageID)
-        eventMsgCont = eventMsg.content
-    except (discord.NotFound, AttributeError):
-        # discord.NotFound -> fetch_message() failed
-        # AttributeError -> eventMsg had no attribute "content"
-
-        # must return out of the function early to avoid referencing dead message
-        # reset globals.eventMessage, globals.eventChannel, globals.eventInfo
+        _ = globals.eventMessage.content
+    except AttributeError:
+        # this should only happen if the event message is manually deleted. In that case, need to escape
+        # out of the function early, or all of the below code will error. Reset event vars.
 
         bot.reset_event_vars()
-
         await db.update_event('placeholder', 'placeholder', 0, 0)
         # reset everyone's status to "NO"
         await db.reset_status()
-
         resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
-               'Event variables should now be reset. Proceed as normal.'
+               'Event variables should now be reset.'
         await user.send(resp)
-
         return
 
     # prompt the user to send "confirm" in DM to confirm their command
@@ -241,6 +229,7 @@ async def delete_event(user, bot, intent: str) -> None:
         if intent == 'make_csv':
             eventMessageEdit = '```Sign-ups for this event are closed.```'
             # get the CSV file object
+
             central_guild = bot.get_guild(globals.GUILD_ID_1508)
             if central_guild is None:
                 raise commands.CheckFailure('Failed to acquire 1508 guild.')
@@ -286,18 +275,29 @@ async def delete_event(user, bot, intent: str) -> None:
 
 async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, finalize=False) -> discord.File:
     """
-    parses the user database into csv subcategories
+    Parses the user database into CSV subcategories.
+    Outputs a formatted, sorted CSV, with unsorted rows at the bottom.
+
+    ARGS:
+        guild:      the guild to pull display-names from
+        status:     * to get all users in db (that have globals.CSV_ROLE_NAME)
+                    YES to get all users who have indicated YES or MAYBE    (yeah, it's confusing)
+        finalize:   Indicate that the event has been closed.
+                    TRUE --> Triggers lottery, ignores MAYBE-statuses
+
+    NOTE:
+        get_csv <all/attending> makes a call with finalize=False
     """
 
     if finalize:
         # select lotto winners
-        lottoEntries = await db.all_of_category('lotto', 1, guild, display_name=True)
+        lottoEntries = await db.all_of_category('lotto', 1, guild=guild, display_name=True)
         random.shuffle(lottoEntries)
         lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
 
     # get class arrays
-    ce = await db.all_of_category('class', 'CE', guild, status=status, display_name=True)
-    mm = await db.all_of_category('class', 'MM', guild, status=status, display_name=True)
+    ce = await db.all_of_category('class', 'CE', guild=guild, status=status, display_name=True)
+    mm = await db.all_of_category('class', 'MM', guild=guild, status=status, display_name=True)
     if status == 'YES' and sorting:
         sorted_maybe = await db.all_of_category('status', 'maybe', guild, display_name=True)
     else:
@@ -309,11 +309,15 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
     # get arrays for unsorted CSV
     if not sorting:
         # get the yes and maybe attendees
-        unsorted_yes = await db.all_of_category('status', 'YES', guild, display_name=True)
-        unsorted_maybe = await db.all_of_category('status', 'MAYBE', guild, display_name=True)
+        # unsorted_yes = await db.all_of_category('status', 'YES', guild, display_name=True)
+        unsorted_yes =  await db.all_of_category('class', 'CE', guild=guild, status='YES', display_name=True)
+        unsorted_yes += await db.all_of_category('class', 'MM', guild=guild, status='YES', display_name=True)
+        unsorted_maybe =  await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+        unsorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
         if status == '*':
             # if called with "all", also get the no's to complete the set
-            unsorted_no = await db.all_of_category('status', 'NO', guild, display_name=True)
+            unsorted_no = await db.all_of_category('class', 'CE', guild=guild, status='NO', display_name=True)
+            unsorted_no += await db.all_of_category('class', 'MM', guild=guild, status='NO', display_name=True)
         else:
             unsorted_no = []
 
@@ -339,7 +343,7 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
             msize = int(msize.split('-')[0]) + 5
         return msize
 
-    allianceDict = {'3NO': 0, 'drgn': 1, 'SURO': 2, 'Alt8': 3}
+    allianceDict = {'508S': 0, '508N': 1, '508W': 2, '508E': 3}
 
     def sort_alliance(entry):
         alliance = entry[allianceIndex]
@@ -384,7 +388,7 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
 
     #
     # finally, sort the maybes by class then level
-    if status == 'YES':
+    if sorted_maybe:
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelIndex], reverse=True)
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classIndex])
 
@@ -400,6 +404,8 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', sorting=True, fin
         else:
             # if "all" -> status = "*", then combine all entries into one big column
             unsorted_all = [*unsorted_yes, *unsorted_maybe, *unsorted_no]
+            for x in unsorted_all:
+                print(x)
             unsorted_all = sorted(unsorted_all, key=lambda x: x[classIndex])
 
     #

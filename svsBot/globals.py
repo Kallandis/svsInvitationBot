@@ -13,9 +13,8 @@ EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
 #
 # ---------------- BEGIN user-specific variables ----------------
 
-# central guild "1508". All other guilds are subsets of this guild; this guild will be used for pulling member's
-# display_name attributes for making the CSV. Other subset guilds might not have as strictly enforced name rules, and
-# the nicknames in those servers might not be ascii-compatible
+# central guild "1508". All other guilds are subsets of this guild; it will be used for pulling member's
+# display_name attribute for making the CSV. 
 GUILD_ID_1508 = 915761804704104489
 
 # IDs of all guild channels that the bot is allowed to create events and listen for commands in
@@ -24,27 +23,26 @@ GUILD_ID_1508 = 915761804704104489
 MAIN_CHANNEL_ID_LIST = [964654664677212220]  # svsBotTestServer/botchannel
 # MAIN_CHANNEL_ID_LIST = [
 #         937275649536692294,
-#         973016285363445870,
 #         951396183610388491
 #         ]
-# # 1508/svs-registration
-# # dragon babs/woo-signup
-# # 1508/el-registration
-
+    # 1508/svs-registration
+    # 1508/el-registration
 
 # name of the role that allows usage of event-related commands in the mainChannels
 # if the bot is to work in multiple servers, all servers must have a role with this name
-# adminRole = 'Admin (Yes, be scared)'
 ADMIN_ROLE_NAME = 'evan'
+# ADMIN_ROLE_NAME = 'SVS Planner'
 
-CSV_ROLE_NAME = 'csv'
+# Only add people to CSV if they have this role
+CSV_ROLE_NAME = '1508+'
 
 # prefix that indicates a command (e.g. $info, $create_event [args])
 # COMMAND_PREFIX = '~'
 COMMAND_PREFIX = '!'
 
-# url to the logo to use for embeds. Must be a literal-string (r'URL'). Set this to '', "", or None to not send a
-# thumbnail with the embeds
+
+# url to the logo to use for embeds. Must be a literal-string (r'URL'). 
+# Set this to '', "", or None to not send a thumbnail with the embeds
 LOGO_URL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/logo1.png'
 
 # name of the csv file that is made by helpers.build_csv()
@@ -55,7 +53,7 @@ CSV_FILENAME = r'svs_entries.csv'
 NUMBER_OF_LOTTO_WINNERS = 40
 
 # how many hours before the scheduled event time should "Maybe's" be reminded of the event
-CONFIRM_MAYBE_WARNING_HOURS = 24
+CONFIRM_MAYBE_WARNING_HOURS = 40
 
 # Names longer than this in the event embed will be truncated.
 # Maximum of 23
@@ -67,13 +65,13 @@ SEND_HELP_TO_DM = True
 # Toggle whether error embeds should be sent to the same channel as command calls, or to the user's DM
 SEND_ERROR_TO_DM = True
 
-# Toggle whether bot should delete all commands sent in mainchannel
-# turned off because it requires 2FA on my account which I don't want
-# if it's important I'm OK with turning it on though
-DELETE_COMMANDS = False
+# Toggle whether bot should delete all commands sent in mainchannels
+# Turned off because it requires 2FA on bot owner's account, which I don't want
+# but if it's a big deal I'm ok with turning 2FA on
+DELETE_MESSAGES = False
 
 # Channel that $bug should send bug reports to
-BUG_REPORT_CHANNEL_ID = 970947508903759902     # svsBotTestServer/bug-reports (Evan's private server)
+BUG_REPORT_CHANNEL_ID = 970947508903759902  # svsBotTestServer/bug-reports (Evan's private server)
 
 # Channel that backups of the database should be sent to when "~close" is called
-DB_BACKUP_CHANNEL_ID = 972960827479031848
+DB_BACKUP_CHANNEL_ID = 972960827479031848   # svsBotTestServer/db-backups

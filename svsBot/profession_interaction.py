@@ -1,7 +1,6 @@
 import discord
 
 import logging
-logger = logging.getLogger(__name__)
 
 from . import db
 
@@ -83,10 +82,10 @@ class ProfessionMenu(discord.ui.Select):
 
         elif category == 'alliance':
             options = [
-                discord.SelectOption(label='3NO'),
-                discord.SelectOption(label='drgn'),
-                discord.SelectOption(label='SURO'),
-                discord.SelectOption(label='Alt8')
+                discord.SelectOption(label='508S'),
+                discord.SelectOption(label='508N'),
+                discord.SelectOption(label='508W'),
+                discord.SelectOption(label='508E')
             ]
             # placeholder = 'Select your alliance'
             placeholder = 'Alliance'
@@ -105,11 +104,15 @@ class ProfessionMenu(discord.ui.Select):
         elif category == "skins":
             options = [
                 discord.SelectOption(label='None'),
-                discord.SelectOption(label='Atlantis'),
-                discord.SelectOption(label='Ark'),
+                #discord.SelectOption(label='Atlantis'),
+                #discord.SelectOption(label='Ark'),
+                #discord.SelectOption(label='Popstar-30d'),
+                #discord.SelectOption(label='Popstar-3d'),
+                #discord.SelectOption(label='Popstar-1d')
+
                 discord.SelectOption(label='Popstar-30d'),
-                discord.SelectOption(label='Popstar-3d'),
-                discord.SelectOption(label='Popstar-1d')
+                discord.SelectOption(label='Void Matrix'),
+
             ]
             max_vals = len(options)
             # placeholder = f'Select which base skins you own'

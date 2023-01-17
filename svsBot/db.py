@@ -3,7 +3,6 @@ from typing import Union, Optional
 import aiosqlite
 
 import logging
-logger = logging.getLogger(__name__)
 
 from . import globals
 
@@ -104,17 +103,20 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
     lottery_args = {'name': 'Lottery', 'value': lottery}
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
-    if globals.eventChannel:
-        if not first_entry:
+    if not first_entry:
+        if globals.eventChannel:
             # if there is an active event, put the event and the user's status in the description field of the embed
             # eventInfo = eventTitle + ' @ ' + eventTime
             descr += f'You are **{status}** for {globals.eventInfo}\n' \
                      f'[Event Message]({globals.eventMessage.jump_url})'
         else:
-            # if they just entered the database, don't confuse them by telling them they are "NO"
-            descr += f'[Event Message]({globals.eventMessage.jump_url})'
+            descr += 'There is no event open for signups.'
     else:
-        'There is no event open for signups.'
+        # to avoid confusion, don't tell them their status (which is "NO") if they just tried to sign up
+        if globals.eventChannel:
+            descr += f'[Event Message]({globals.eventMessage.jump_url})'
+        else:
+            descr += 'There is no event open for signups.'
 
     embed = discord.Embed(title='Database Info', description=descr, color=discord.Color.dark_red())
 
@@ -187,7 +189,7 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
     """
     # shouldn't need to check on event status as they can only update if there is an active event. But do it anyways
     if globals.eventMessage is None:
-        logger.debug('update_status called when globals.eventMessage was \'None\'')
+        logging.error('update_status called when globals.eventMessage was \'None\'')
         return
 
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
@@ -226,7 +228,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
             sql += "CLASS = ?"
             values = [value]
         else:
-            logger.debug(f'STATUS: {status} not recognized.')
+            logging.info(f'ERROR: status "{status}" not recognized.')
             return
 
     # all ID attending event who have opted in to lotto
@@ -240,7 +242,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         values = [value]
 
     else:
-        logger.debug(f"CATEGORY: {category} not recognized.")
+        logging.info(f'ERROR: category "{category}" not recognized.')
         return
 
     async with aiosqlite.connect('userHistory.db') as conn:
@@ -266,13 +268,14 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         new_entries = []
         for entry in entries:
 
-            # get the member object from main 1508 guild to get their display name
-            # Also filter by CSV role "1508+"
+            # Get the member object from main 1508 guild to get their display name
+            # Filter by globals.CSV_ROLE_NAME
             member = guild.get_member(entry[0])
             if member is None:
                 continue
 
             if globals.CSV_ROLE_NAME not in [r.name for r in member.roles]:
+                # only add names to the list if they have the designated role
                 continue
 
             member_name = member.display_name if member is not None else 'NOT_FOUND'

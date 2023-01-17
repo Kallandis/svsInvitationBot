@@ -4,8 +4,6 @@ import traceback
 import sys
 
 import logging
-logger = logging.getLogger(__name__)
-
 from . import globals
 
 
@@ -24,8 +22,7 @@ class CommandErrorHandler(commands.Cog):
             errstring = f'{ctx.command} ERROR: {str(error)}'
         else:
             errstring = f'Command not found: {ctx.message.content}'
-        logger.error(errstring)
-        print(errstring)
+        logging.info(errstring)
 
         # command has local error handler
         if hasattr(ctx.command, 'on_error'):
@@ -105,7 +102,7 @@ class CommandErrorHandler(commands.Cog):
 
         if globals.SEND_ERROR_TO_DM:
             # delete the offending command if it was used in a server channel
-            if globals.DELETE_COMMANDS and not isinstance(ctx.channel, discord.DMChannel):
+            if globals.DELETE_MESSAGES and not isinstance(ctx.channel, discord.DMChannel):
                 await ctx.message.delete()
             await ctx.author.send(embed=embed)
 
