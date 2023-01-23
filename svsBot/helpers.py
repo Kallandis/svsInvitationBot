@@ -188,8 +188,8 @@ async def delete_event(user, bot, intent: str) -> None:
 
         bot.reset_event_vars()
         await db.update_event('placeholder', 'placeholder', 0, 0)
-        # reset everyone's status to "NO"
-        await db.reset_status()
+        # reset everyone's event data (status, interaction flag)
+        await db.reset_user_event_data()
         resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
                'Event variables should now be reset.'
         await user.send(resp)
@@ -238,8 +238,11 @@ async def delete_event(user, bot, intent: str) -> None:
             if central_guild is None:
                 raise commands.CheckFailure('Failed to acquire 1508 guild.')
             csvFile = await build_csv(central_guild, status='ATTENDING', finalize=True)
-            description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
-                          f'[Event Message]({globals.eventMessage.jump_url})'
+            ymn_csvFile = await build_ymn_csv(central_guild)
+            description = f'Successfully closed event: {globals.eventInfo}\n' \
+                        f'CSV of all users that responded "YES" or "MAYBE": {globals.CSV_FILENAME}\n' \
+                        f'CSV of all users that interacted with the event: {globals.YMN_CSV_FILENAME}\n' \
+                        f'[Event Message]({globals.eventMessage.jump_url})'
 
             # send a backup of the database to dedicated backup channel
             backupChannel = bot.get_channel(globals.DB_BACKUP_CHANNEL_ID)
@@ -250,14 +253,14 @@ async def delete_event(user, bot, intent: str) -> None:
             eventMessageEdit = f'```This event was cancelled with {globals.COMMAND_PREFIX}delete.```'
             description = f'Deleted {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
-            csvFile = None
+            csvFile = ymn_csvFile = None
 
     # remove the EventButtons view, put some text above the event embed indicating it's closed / deleted
     await globals.eventMessage.edit(content=eventMessageEdit, view=None)
     embed = discord.Embed(title=title, description=description)
 
     # if csvFile is not None, attach it to the message edit
-    kwargs = {'embed': embed, 'attachments': [csvFile]} if csvFile else {'embed': embed}
+    kwargs = {'embed': embed, 'attachments': [csvFile, ymn_csvFile]} if (csvFile and ymn_csvFile) else {'embed': embed}
     await prompt.edit(**kwargs)
 
     # reset event-related variables and confirm maybe loop
@@ -265,8 +268,10 @@ async def delete_event(user, bot, intent: str) -> None:
 
     # reset event database
     await db.update_event('placeholder', 'placeholder', 0, 0)
-    # reset everyone's status to "NO"
-    await db.reset_status()
+    # reset everyone's event data (status, interaction flag)
+    await db.reset_user_event_data()
+    # reset everyone's "interacted_with_event" flag to "0"
+
 
 
 def parse_entry(entry_: tuple, cls: str) -> tuple:
@@ -357,7 +362,6 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
 
     # finally, sort the maybes by class then level
     if sorted_maybe:
-        print(sorted_maybe)
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelInd], reverse=True)
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classInd])
 
@@ -583,3 +587,55 @@ async def build_csv(guild: discord.Guild, status: str = 'ALL', finalize=False) -
 
     eventCSV = discord.File(globals.CSV_FILENAME)
     return eventCSV
+
+
+async def build_ymn_csv(guild: discord.Guild) -> discord.File:
+    """
+    Creates a CSV containing users that have interacted with the CSV.
+
+    Only data field is Y/M/N status.
+    Separated by alliance, sorted alphabetically.
+    """
+
+    interactions = await db.all_of_category('interacted_with_event', 1, guild, display_name=True)
+    nameInd, statusInd, allianceInd = range(3)
+    alliances = ['508N', '508W', '508S', '508E']
+    colTitles = ['Name', 'Status']
+    allianceLists = []
+    maxLength = 0
+    for alliance in alliances:
+        # sort by alliance
+        all_of_alliance = filter(lambda x: x[allianceInd] == alliance, interactions)
+        # remove the alliance
+        all_of_alliance = [entry[:allianceInd] for entry in all_of_alliance]
+        # sort alphabetically
+        all_of_alliance = sorted(all_of_alliance, key=lambda x: x[nameInd])
+        allianceLists.append(all_of_alliance)
+        if len(all_of_alliance) > maxLength:
+            maxLength = len(all_of_alliance)
+
+    # match lengths of the arrays
+    for i in range(len(allianceLists)):
+        diff = maxLength - len(allianceLists[i])
+        if diff > 0:
+            allianceLists[i].extend([('', '')] * diff)
+
+    # combine each array in parallel
+    combinedEntries = []
+    tSpacer = ('',)
+    for a, b, c, d in zip(*allianceLists):
+        entry = a + tSpacer + b + tSpacer + c + tSpacer + d
+        combinedEntries.append(entry)
+
+    with open(globals.YMN_CSV_FILENAME, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+        lSpacer = ['']
+        allianceTitles = lSpacer * 12
+        allianceTitles[0::3] = alliances
+        writer.writerow(allianceTitles)
+        writer.writerow(colTitles + lSpacer + colTitles + lSpacer + colTitles + lSpacer + colTitles)
+        writer.writerows(combinedEntries)
+
+    ymnCSV = discord.File(globals.YMN_CSV_FILENAME)
+    return ymnCSV

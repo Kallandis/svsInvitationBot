@@ -210,10 +210,10 @@ class ProfessionMenu(discord.ui.Select):
 
             prof_array = [self.clas, levelNum, ''.join(unitChars), self.march_size, self.alliance, self.mm_traps, skins]
 
-            # if first-time user does not have an entry in DB, add one (happens when called through dm.request_entry())
+            # if first-time user does not have an entry in DB, add one
             if self.first_entry:
                 # set status to "NO", lottery to 1 (default vals)
-                entry = [interaction.user.id, *prof_array, "NO", 1]
+                entry = [interaction.user.id, *prof_array, "NO", 1, 0]
 
                 await db.add_entry(entry)
                 embed = db.info_embed(entry,
@@ -228,7 +228,7 @@ class ProfessionMenu(discord.ui.Select):
             else:
                 # still need to get old DB entry to send to db.info_embed()
                 old_entry = await db.get_entry(interaction.user.id)
-                status, lottery = old_entry[-2:]
+                status, lottery = old_entry[db.STATUS_IND], old_entry[db.LOTTERY_IND]
                 new_entry = [interaction.user.id, *prof_array, status, lottery]
 
                 embed = db.info_embed(new_entry, descr='Successfully edited database entry.\n\u200b\n')

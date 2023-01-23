@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import platform
 import traceback
 import sys
 
@@ -67,9 +68,10 @@ class CommandErrorHandler(commands.Cog):
         else:
             print(f'Ignoring exception in command {ctx.clean_prefix}{ctx.command}.')
             errmsg += f'Unknown.\nPossible bug, please report with {ctx.clean_prefix}bug.'
-            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+            if platform.system() == 'Windows':
+                traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             # idk if this works
-            traceback.print_exception(type(error), error, error.__traceback__, file=globals.logfile)
+            # traceback.print_exception(type(error), error, error.__traceback__, file=globals.logfile)
 
         userInput = '\"' + ctx.message.content + '\"'
         if len(userInput) > 100:

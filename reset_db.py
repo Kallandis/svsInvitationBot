@@ -21,7 +21,8 @@ async def reset_db():
                     mm_traps TEXT,
                     skins TEXT,
                     status TEXT,
-                    lottery INTEGER
+                    lottery INTEGER,
+                    interacted_with_event INTEGER
                     );
                 """)
             await conn.commit()
