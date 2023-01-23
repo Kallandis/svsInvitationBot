@@ -46,8 +46,11 @@ COMMAND_PREFIX = '!'
 # Set this to '', "", or None to not send a thumbnail with the embeds
 LOGO_URL = r'https://raw.githubusercontent.com/evanm1455/svsInvitationBot/master/logo1.png'
 
-# name of the csv file that is made by helpers.build_csv()
+# name of the csv file containing attendee information
 CSV_FILENAME = r'svs_entries.csv'
+
+# name of the csv file containing users that interacted with event
+YMN_CSV_FILENAME = r'ymn.csv'
 
 # number of people to select as lottery winners. This should be higher than the intended number of winners, to account
 # for no-shows or other cases in which a randomly selected winner should not actually be given a prize.

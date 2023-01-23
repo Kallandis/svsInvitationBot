@@ -6,6 +6,9 @@ import logging
 
 from . import globals
 
+# I wish python supported enums...
+ID_IND, CLASS_IND, LEVEL_IND, UNIT_IND, MARCH_IND, ALLIANCE_IND, MMTRAPS_IND, SKINS_IND, STATUS_IND, LOTTERY_IND, INTERACTED_IND = range(11)
+
 
 async def add_entry(values: Union[list, tuple]) -> None:
     """
@@ -70,7 +73,7 @@ def profession_dicts() -> tuple:
 
 def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discord.Embed:
     # extract values from entry
-    clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:]
+    clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:10]
 
     # format values for display
     unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
@@ -201,10 +204,20 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
             await conn.commit()
 
 
+async def update_interacted_with_event(discord_id: discord.Member.id, intxn: int) -> None:
+    sql = "UPDATE USERS SET INTERACTED_WITH_EVENT = ? WHERE DISCORD_ID = ?"
+    values = [intxn, discord_id]
+
+    async with aiosqlite.connect('userHistory.db') as conn:
+        async with conn.cursor() as cursor:
+            await cursor.execute(sql, values)
+            await conn.commit()
+
+
 # this one can just run immediately rather than go into write-loop
-async def reset_status() -> None:
-    sql = "UPDATE USERS SET STATUS = ?"
-    val = ["NO"]
+async def reset_user_event_data() -> None:
+    sql = "UPDATE USERS SET STATUS = ?, INTERACTED_WITH_EVENT = ?"
+    val = ["NO", 0]
 
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
@@ -241,6 +254,10 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         sql = "SELECT DISCORD_ID FROM USERS WHERE STATUS = ?"
         values = [value]
 
+    elif category == 'interacted_with_event':
+        sql = "SELECT DISCORD_ID, STATUS, ALLIANCE FROM USERS WHERE INTERACTED_WITH_EVENT = ?"
+        values = [value]
+
     else:
         logging.info(f'ERROR: category "{category}" not recognized.')
         return
@@ -250,49 +267,14 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
             await cursor.execute(sql, values)
             entries = await cursor.fetchall()
 
-    def strip_emoji(name):
-        # encode into ascii, ignoring unknown chars, then decode back into ascii
-        try:
-            byteName = name.encode('ascii', 'ignore')
-            name = byteName.decode('ascii').strip()
-            if name == '':
-                # if the user's name is entirely non-ascii characters, it will become an empty string
-                name = 'ERROR_NAME'
-        except UnicodeEncodeError:
-            # if the user's name cannot be encoded into ascii
-            name = 'ERROR_ENCODE'
-
-        return name
-
-    def display_name_entries(entries):
-        new_entries = []
-        for entry in entries:
-
-            # Get the member object from main 1508 guild to get their display name
-            # Filter by globals.CSV_ROLE_NAME
-            member = guild.get_member(entry[0])
-            if member is None:
-                continue
-
-            if globals.CSV_ROLE_NAME not in [r.name for r in member.roles]:
-                # only add names to the list if they have the designated role
-                continue
-
-            member_name = member.display_name if member is not None else 'NOT_FOUND'
-            # make a new entry with the member's display name, stripped of emojis
-            new_entry = (
-                strip_emoji(member_name),
-                *entry[1:]
-            )
-            # add the modified entry with display_name to display_name_entries
-            new_entries.append(new_entry)
-
-        return new_entries
-
     if display_name:
         if not guild:
             logging.error('Failed to provide guild object for display names.')
-        return display_name_entries(entries)
+        display_name_entries = []
+        for entry in entries:
+            new_entry = (await get_display_name_from_id(guild, entry[0]), *entry[1:])
+            display_name_entries.append(new_entry)
+        return display_name_entries
 
     else:
         return entries
@@ -306,3 +288,32 @@ async def dump_db(filename: str) -> discord.File:
                 file.write(line + '\n')
 
     return discord.File(filename)
+
+
+async def get_display_name_from_id(guild: discord.Guild, discord_id: discord.User.id) -> Union[None, str]:
+    """
+    Get a member's display name from a guild, stripping emojis and non-ascii chars
+    """
+    # Get the member object from main 1508 guild to get their display name
+    member = guild.get_member(discord_id)
+    if member is None:
+        logging.error(f'Discord ID {discord_id} is not a member of guild {guild}.')
+        return None
+
+    name = member.display_name if member is not None else 'NOT_FOUND'
+    # encode into ascii, ignoring unknown chars, then decode back into ascii
+    try:
+        byteName = name.encode('ascii', 'ignore')
+        name = byteName.decode('ascii').strip()
+        if name == '':
+            # if the user's name is entirely non-ascii characters, it will become an empty string
+            # name = 'ERROR_NAME'
+            logging.error(f"Discord ID {discord_id}'s name has no ascii characters.")
+            return None
+    except UnicodeEncodeError:
+        # if the user's name cannot be encoded into ascii
+        # name = 'ERROR_ENCODE'
+        logging.error(f"Discord ID {discord_id}'s name cannot be translated to ascii.")
+        return None
+
+    return name

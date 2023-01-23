@@ -20,27 +20,31 @@ class EventButtonsView(discord.ui.View):
     @discord.ui.button(label='YES', style=discord.ButtonStyle.success, custom_id='persistent_view:yes')
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'YES'
-        self.check_in_field_before_restart(interaction)
+        if interaction.user.id not in self.last_statuses:
+            await db.update_interacted_with_event(interaction.user.id, 1)
+            self.check_in_field_before_restart(interaction)
         await self.process_click(interaction, status)
 
     @discord.ui.button(label='MAYBE', style=discord.ButtonStyle.secondary, custom_id='persistent_view:maybe')
     async def maybe(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'MAYBE'
-        self.check_in_field_before_restart(interaction)
+        if interaction.user.id not in self.last_statuses:
+            await db.update_interacted_with_event(interaction.user.id, 1)
+            self.check_in_field_before_restart(interaction)
         await self.process_click(interaction, status)
 
     @discord.ui.button(label='NO', style=discord.ButtonStyle.danger, custom_id='persistent_view:no')
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         status = 'NO'
-        self.check_in_field_before_restart(interaction)
+        if interaction.user.id not in self.last_statuses:
+            await db.update_interacted_with_event(interaction.user.id, 1)
+            self.check_in_field_before_restart(interaction)
         await self.process_click(interaction, status)
 
     def check_in_field_before_restart(self, interaction):
         # if the last status of user is None, checks to make sure the bot has not restarted and thus lost their last
         # status. Does this by checking the raw field values to see if the user's name is in there. If so, sets the
         # user's last status to the correct value.
-        if self.last_statuses.get(interaction.user.id, None) is not None:
-            return
 
         # get the embed
         emb = self.parent_message.embeds[0]
@@ -97,7 +101,7 @@ async def handle_interaction(last_status, status, interaction, parent_message) -
     if last_status is None:  # this is their first response to event
         if status != 'NO':  # only DM them if their response is YES or MAYBE
             entry = list(entry)
-            entry[-2] = status
+            entry[db.STATUS_IND] = status
             embed = db.info_embed(entry)
             await user.send(embed=embed)
     else:

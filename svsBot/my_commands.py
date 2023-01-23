@@ -281,7 +281,7 @@ class DM(commands.Cog):
         if not entry:
             await helpers.request_entry(member)
         else:
-            lotto = 1 - entry[-1]
+            lotto = 1 - entry[db.LOTTERY_IND]
             lotto_in_out = 'in to' if lotto else 'out of'
             msg = f'You have opted ' + lotto_in_out + ' the lottery\n'
             await db.update_lotto(ID, lotto)
@@ -363,6 +363,26 @@ class Misc(commands.Cog):
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
 
+    @commands.command(help='Sends the user a CSV of all users that interacted with the event.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
+    @commands.max_concurrency(1)
+    async def get_ymn(self, ctx):
+        """
+        Send the user a CSV of everyone who has interacted with the event
+        """
+        if not globals.eventMessage:
+            return
+
+        central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+        if central_guild is None:
+            raise commands.CheckFailure('Failed to acquire 1508 guild.')
+
+        msg = 'mini-CSV of all users that interacted with the event'
+        csvFile = await helpers.build_ymn_csv(central_guild)
+        await ctx.author.send(msg, file=csvFile)
+
+
     async def handle_csv_cmd(self, ctx, arg):
         """Handles argument parsing and CSV creation for get_csv"""
 
@@ -371,7 +391,6 @@ class Misc(commands.Cog):
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
 
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
-
         if central_guild is None:
             raise commands.CheckFailure('Failed to acquire 1508 guild.')
 
@@ -385,10 +404,3 @@ class Misc(commands.Cog):
             msg = f'CSV of all users that responded "YES" or "MAYBE" to {globals.eventInfo}'
 
         return msg, csvFile
-
-    @commands.command(help='Sends the user a CSV of all users that interacted with the event.\n'
-                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n')
-    @commands.has_role(globals.ADMIN_ROLE_NAME)
-    @commands.max_concurrency(1)
-    async def get_ymn(self, ctx):
-        pass
