@@ -79,39 +79,6 @@ class Event(commands.Cog):
         Requires ADMIN Role
         """
 
-        # # parse YY/MM/DD from command input
-        # try:
-        #     year, month, day = [int(x) for x in datestring.split('/')]
-        #     if year < 2000:
-        #         year += 2000
-        #     # convert to unix time
-        #     date_time = datetime.datetime(year, month, day, hour, 0)
-        #     unix_time = int(time.mktime(date_time.timetuple()))
-        #
-        #     # get time until event
-        #     timeUntilEvent = datetime.timedelta(seconds=unix_time - time.time())
-        #     timeUntilConfirmMaybe = timeUntilEvent.total_seconds() - globals.CONFIRM_MAYBE_WARNING_HOURS * 60 * 60
-        #
-        # # catch errors in parsing input into datetime object
-        # except ValueError:
-        #     error = 'Date or time entered incorrectly.'
-        #     raise commands.CheckFailure(error)
-        #
-        # # event must be at least 10 minutes in the future
-        # if timeUntilEvent.total_seconds() < 10 * 60:
-        #     error = 'Event less than 10 minutes in the future.'
-        #     raise commands.CheckFailure(error)
-        #
-        # # title is limited to 256 chars
-        # if len(title) > 256:
-        #     error = 'Title over 256 characters.'
-        #     raise commands.CheckFailure(error)
-        #
-        # # not a technical limitation, but embed can only hold 6000 characters, so can't let this be too long
-        # if len(descr) > 512:
-        #     error = 'Event description over 512 characters.'
-        #     raise commands.CheckFailure(error)
-
         # parse event information
         eventTimeFmt, timeUntilEvent = helpers.parse_event_input(datestring=datestring, hour=hour)
         title = helpers.parse_event_input(title=title)
@@ -134,53 +101,11 @@ class Event(commands.Cog):
         view = EventButtonsView(eventMessage)
         await eventMessage.edit(embed=embed, view=view)
 
-        # discord-formatted timestring
-        # eventTime = f"<t:{event_unix_time}>"
-        #
-        # # some formatting for embed description
-        # eventInfo = title + ' @ ' + eventTime
-        # description = '@ ' + eventTime + '\n\n'
-        # description += descr
-        #
-        # firstTimeHint = '\n\nIf this is your first time interacting with the bot, you will see "This interaction ' \
-        #                 'failed." The bot will send you a DM with instructions.\n\u200b'
-        #
-        # description += firstTimeHint
-        #
-        # # create embed and add fields
-        # embed = discord.Embed(title=title, description=description, color=discord.Color.dark_red())
-        # embed.add_field(name="YES  [0]", value=">>> \u200b")
-        # embed.add_field(name="MAYBE  [0]", value=">>> \u200b")
-        # embed.add_field(name="NO  [0]", value=">>> \u200b")
-        #
-        # # create footer and timestamp
-        # cmdList = [ctx.clean_prefix + cmd.name for cmd in self.get_commands()]
-        # cmdList.append(f'{globals.COMMAND_PREFIX}help')
-        # embed.set_footer(text=', '.join(cmdList))
-        # embed.timestamp = discord.utils.utcnow()
-        #
-        # # get the file to be sent with the event embed
-        # if globals.LOGO_URL:
-        #     embed.set_thumbnail(url=globals.LOGO_URL)
-        #
-        # # send event embed
-        # eventMessage = await ctx.send(embed=embed)
-
-        # add the view to event embed. Updating of status, database, and embed fields will be handled in
-        # event_interaction.py through user interactions with the buttons.
-        # view = EventButtonsView(eventMessage)
-        # await eventMessage.edit(embed=embed, view=view, attachments=attachments)
-        # await eventMessage.edit(embed=embed, view=view)
-
         # set globals to reduce DB accessing
         eventInfo = title + ' @ ' + eventTimeFmt
         globals.eventInfo = eventInfo
         globals.eventMessage = eventMessage
         globals.eventChannel = ctx.channel
-
-        # self.bot.eventInfo = eventInfo
-        # self.bot.eventMessage = eventMessage
-        # self.bot.eventChannel = ctx.channel
 
         # store event data in eventInfo.db
         await db.update_event(title, eventTimeFmt, eventMessage.id, ctx.channel.id)
@@ -411,17 +336,19 @@ class Misc(commands.Cog):
     async def get_csv(self, ctx, arg):
         if arg not in ['all', 'attending']:
             raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
-        statusDict = {'all': '*', 'attending': 'YES'}
-        status_to_get = statusDict[arg]
 
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+
         if central_guild is None:
             raise commands.CheckFailure('Failed to acquire 1508 guild.')
-        csvFile = await helpers.build_csv(central_guild, status=status_to_get)
+
+        csvFile = await helpers.build_csv(central_guild, status=arg.upper())
+
         if arg == 'all':
             msg = 'CSV of all users in the database'
         else:
-            msg = f'CSV of all users that responded "YES" to {globals.eventInfo}'
+            msg = f'CSV of all users that responded "YES" or "MAYBE" to {globals.eventInfo}'
+
         await ctx.author.send(msg, file=csvFile)
 
     @commands.command(help='Sends the user a dump of the SQL database.\n'
@@ -435,3 +362,33 @@ class Misc(commands.Cog):
         """
         dump = await db.dump_db('svs_userHistory_dump.sql')
         await ctx.author.send("dump of userHistory.db database", file=dump)
+
+    async def handle_csv_cmd(self, ctx, arg):
+        """Handles argument parsing and CSV creation for get_csv"""
+
+        # parse argument
+        if arg not in ['all', 'attending']:
+            raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
+
+        central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
+
+        if central_guild is None:
+            raise commands.CheckFailure('Failed to acquire 1508 guild.')
+
+        # build CSV
+        csvFile = await helpers.build_csv(central_guild, status=arg.upper())
+
+        # send CSV
+        if arg == 'all':
+            msg = 'CSV of all users in the database'
+        else:
+            msg = f'CSV of all users that responded "YES" or "MAYBE" to {globals.eventInfo}'
+
+        return msg, csvFile
+
+    @commands.command(help='Sends the user a CSV of all users that interacted with the event.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
+    @commands.max_concurrency(1)
+    async def get_ymn(self, ctx):
+        pass

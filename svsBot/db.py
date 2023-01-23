@@ -110,7 +110,7 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
             descr += f'You are **{status}** for {globals.eventInfo}\n' \
                      f'[Event Message]({globals.eventMessage.jump_url})'
         else:
-            'There is no event open for signups.'
+            descr += 'There is no event open for signups.'
     else:
         # to avoid confusion, don't tell them their status (which is "NO") if they just tried to sign up
         if globals.eventChannel:
@@ -224,11 +224,11 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         if status in ['YES', 'MAYBE', 'NO']:
             sql += "STATUS = ? AND CLASS = ?"
             values = [status, value]
-        elif status == '*':
+        elif status == 'ALL':
             sql += "CLASS = ?"
             values = [value]
         else:
-            logger.debug(f'STATUS: {status} not recognized.')
+            logging.info(f'ERROR: status "{status}" not recognized.')
             return
 
     # all ID attending event who have opted in to lotto
@@ -242,7 +242,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         values = [value]
 
     else:
-        logger.debug(f"CATEGORY: {category} not recognized.")
+        logging.info(f'ERROR: category "{category}" not recognized.')
         return
 
     async with aiosqlite.connect('userHistory.db') as conn:
@@ -269,12 +269,13 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         for entry in entries:
 
             # Get the member object from main 1508 guild to get their display name
-			# Filter by globals.CSV_ROLE_NAME
+            # Filter by globals.CSV_ROLE_NAME
             member = guild.get_member(entry[0])
             if member is None:
                 continue
 
             if globals.CSV_ROLE_NAME not in [r.name for r in member.roles]:
+                # only add names to the list if they have the designated role
                 continue
 
             member_name = member.display_name if member is not None else 'NOT_FOUND'

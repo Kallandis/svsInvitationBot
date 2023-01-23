@@ -11,6 +11,8 @@ import asyncio
 from . import db, globals
 from . profession_interaction import ProfessionMenuView
 
+nameInd, classInd, levelInd, unitInd, marchInd, allianceInd, trapsInd, skinsInd = range(8)
+
 
 def parse_event_input(datestring=None, hour=None, title=None, descr=None):
     """
@@ -165,39 +167,33 @@ async def request_entry(user: Union[discord.Member, discord.User], event_attempt
     await msg.edit(view=view)
 
 
-# to be called in delete_event(), finalize_event()
 async def delete_event(user, bot, intent: str) -> None:
     """
-    Checks for confirmation with invoking user. If yes:
-    Sets eventInfo.db to default value
-    Sets everyone's status to "NO"
-    Removes interaction buttons from event message
-    If intent = 'make_csv', builds a CSV of attending users and DMs it to invoking user
-    Empties the sql_write() "buffer"
+    Ends the active event and handles cleanup.
+    Called by "close" and "delete" commands.
+
+    STEPS:
+    Check for confirmation with invoking user. If yes:
+    Set eventInfo.db to default value
+    Set everyone's status to "NO"
+    Remove interaction buttons from event message
+    If intent = 'make_csv', build a CSV of attending users and DM it to invoking user
     """
 
     try:
-        eventMsgCont = globals.eventMessage.content
-    except AttributeError: 
-        # this should only happen if the event message is manually deleted. In that case, need to escape
-        # out of this function early, or all of the below code will error. Reset event vars.
-        # globals.eventMessage = None
-        # globals.eventChannel = None
-        # globals.eventInfo = ''
+        _ = globals.eventMessage.content
+    except AttributeError:
+        # this should only happen if the event message was manually deleted. In that case, need to escape
+        # out of the function early, or all of the below code will error. Reset event vars.
 
         bot.reset_event_vars()
-        
         await db.update_event('placeholder', 'placeholder', 0, 0)
         # reset everyone's status to "NO"
         await db.reset_status()
-        
-        
         resp = 'Event Message not found. This indicates the event message was manually deleted. ' \
                'Event variables should now be reset.'
         await user.send(resp)
-        
         return
-
 
     # prompt the user to send "confirm" in DM to confirm their command
     timeout = 60
@@ -241,7 +237,7 @@ async def delete_event(user, bot, intent: str) -> None:
             central_guild = bot.get_guild(globals.GUILD_ID_1508)
             if central_guild is None:
                 raise commands.CheckFailure('Failed to acquire 1508 guild.')
-            csvFile = await build_csv(central_guild, status='YES', finalize=True)
+            csvFile = await build_csv(central_guild, status='ATTENDING', finalize=True)
             description = f'CSV of all users that responded "YES" to {globals.eventInfo}\n' \
                           f'[Event Message]({globals.eventMessage.jump_url})'
 
@@ -267,47 +263,56 @@ async def delete_event(user, bot, intent: str) -> None:
     # reset event-related variables and confirm maybe loop
     bot.reset_event_vars()
 
-    # globals.eventInfo = ''
-    # globals.eventMessage = None
-    # globals.eventChannel = None
-
-    # # stop the maybe loop (if it is still running)
-    # globals.maybe_loop.cancel()
-    # globals.maybe_loop = None
-
     # reset event database
     await db.update_event('placeholder', 'placeholder', 0, 0)
     # reset everyone's status to "NO"
     await db.reset_status()
 
 
-async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -> discord.File:
+def parse_entry(entry_: tuple, cls: str) -> tuple:
     """
-    parses the user database into csv subcategories
+    Convert data to human-readable text for CSV display
+        Convert level to text, replace commas with spaces, convert traps to acronym, remove traps from CE
     """
+    _, ceLevelDict, mmLevelDict, mmTrapsDict = db.profession_dicts()
+    if cls == 'CE':
+        newEntry = (
+            *entry_[:levelInd],
+            ceLevelDict[entry_[levelInd]],
+            entry_[unitInd],
+            entry_[marchInd],
+            entry_[allianceInd],
+            entry_[skinsInd].replace(', ', ' ')
+        )
+    else:
+        # for MM, put the traps entry at the end to align with CE entries in same col
+        newEntry = (
+            *entry_[:levelInd],
+            mmLevelDict[entry_[levelInd]],
+            entry_[unitInd],
+            entry_[marchInd],
+            entry_[allianceInd],
+            entry_[skinsInd].replace(', ', ' '),
+            ' '.join(map(mmTrapsDict.get, entry_[trapsInd].split(', '))),
+        )
+    return tuple(newEntry)
 
-    if finalize:
-        # select lotto winners
-        lottoEntries = await db.all_of_category('lotto', 1, guild=guild, display_name=True)
-        random.shuffle(lottoEntries)
-        lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
 
-    # get class arrays
+async def get_sorted_entries(guild: discord.Guild, status: str):
+    """
+    Get entries from database and sort them
+    """
     ce = await db.all_of_category('class', 'CE', guild=guild, status=status, display_name=True)
     mm = await db.all_of_category('class', 'MM', guild=guild, status=status, display_name=True)
-    # name, class, level, unit, march_size, traps, skins
-    nameIndex = 0
-    classIndex = 1
-    levelIndex = 2
-    unitIndex = 3
-    marchIndex = 4
-    allianceIndex = 5
-    trapsIndex = 6
-    skinsIndex = 7
 
-    # to be used as a key for sorting by march size
+    if status == 'YES':
+        sorted_maybe = await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+        sorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
+    else:
+        sorted_maybe = []
+
     def sort_march(entry):
-        msize = entry[marchIndex]
+        msize = entry[marchInd]
         # msize takes the forms {< 160, 160-170, ... , 210-220, > 220}
         if '<' in msize or '>' in msize:
             # strip the < or >
@@ -317,101 +322,72 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
             msize = int(msize.split('-')[0]) + 5
         return msize
 
-    allyDict = {'508S': 0, '508N': 1, '508W': 2, '508E': 3}
-
     def sort_alliance(entry):
-        alliance = entry[allianceIndex]
-        return allyDict[alliance]
+        allianceDict = {'508S': 0, '508N': 1, '508W': 2, '508E': 3}
+        alliance = entry[allianceInd]
+        return allianceDict[alliance]
 
     # entries with more than one unit type
     multiUnitArrays = [
-        filter(lambda x: len(x[unitIndex]) > 1, ce),
-        filter(lambda x: len(x[unitIndex]) > 1, mm)
+        filter(lambda x: len(x[unitInd]) > 1, ce),
+        filter(lambda x: len(x[unitInd]) > 1, mm)
+    ]
+
+    # split the single-unit entries of each class into 3 arrays, one for each unit type
+    unitArrays = [
+        filter(lambda x: x[unitInd] == 'A', ce),
+        filter(lambda x: x[unitInd] == 'N', ce),
+        filter(lambda x: x[unitInd] == 'F', ce),
+        filter(lambda x: x[unitInd] == 'A', mm),
+        filter(lambda x: x[unitInd] == 'N', mm),
+        filter(lambda x: x[unitInd] == 'F', mm)
     ]
 
     # sort each array in multiUnitArrays by number of units, then by level, then by march size, then by alliance
-    # must first sort by alliance
+    # must sort in reverse order
     multiUnitArrays = [sorted(subArray, key=sort_alliance) for subArray in multiUnitArrays]
-    # then march size
     multiUnitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in multiUnitArrays]
-    # then level
-    multiUnitArrays = [sorted(subArray, key=lambda x: x[levelIndex], reverse=True) for subArray in multiUnitArrays]
-    # then final sort by number of units
-    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitIndex]), reverse=True) for subArray in multiUnitArrays]
-
-    #
-    # split the single-unit entries of each class into 3 arrays, one for each unit type
-    unitArrays = [
-        filter(lambda x: x[unitIndex] == 'A', ce),
-        filter(lambda x: x[unitIndex] == 'N', ce),
-        filter(lambda x: x[unitIndex] == 'F', ce),
-        filter(lambda x: x[unitIndex] == 'A', mm),
-        filter(lambda x: x[unitIndex] == 'N', mm),
-        filter(lambda x: x[unitIndex] == 'F', mm)
-    ]
+    multiUnitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in multiUnitArrays]
+    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitInd]), reverse=True) for subArray in multiUnitArrays]
 
     # sort the unit arrays by level, then by march size, then by alliance
-
-    # must first sort by alliance
     unitArrays = [sorted(subArray, key=sort_alliance) for subArray in unitArrays]
-    # then march size
     unitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in unitArrays]
-    # then level
-    unitArrays = [sorted(subArray, key=lambda x: x[levelIndex], reverse=True) for subArray in unitArrays]
+    unitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in unitArrays]
 
-    #
-    # convert data into human-readable text
-    # convert level to text, replace commas with spaces, convert traps to acronym, remove traps from CE
-
-    # get conversion dicts
-    _, ceLevelDict, mmLevelDict, mmTrapsDict = db.profession_dicts()
+    # finally, sort the maybes by class then level
+    if sorted_maybe:
+        print(sorted_maybe)
+        sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelInd], reverse=True)
+        sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classInd])
 
     # fxn to convert the big arrays
     def convert_array(array: list):
-
-        def parse_entry(entry_: tuple, cls: str):
-            # remove the traps entry from CE
-            if cls == 'CE':
-                newEntry = (
-                    *entry_[:levelIndex],
-                    ceLevelDict[entry_[levelIndex]],
-                    entry_[unitIndex],
-                    entry_[marchIndex],
-                    entry_[allianceIndex],
-                    entry_[skinsIndex].replace(', ', ' ')
-                )
-            else:
-                # for MM, put the traps entry at the end so it does not conflict with CE entries in same col
-                newEntry = (
-                    *entry_[:levelIndex],
-                    mmLevelDict[entry_[levelIndex]],
-                    entry_[unitIndex],
-                    entry_[marchIndex],
-                    entry_[allianceIndex],
-                    entry_[skinsIndex].replace(', ', ' '),
-                    ' '.join(map(mmTrapsDict.get, entry_[trapsIndex].split(', '))),
-                )
-            return newEntry
-
         for i in range(len(array)):
             if len(array[i]) == 0:
                 # skip sub-array if there are no entries of this type
                 # e.g. nobody signed up as 'A', no multi-unit entries of class 'mm', etc
                 continue
-            class_ = array[i][0][classIndex]
+            class_ = array[i][0][classInd]
             for j in range(len(array[i])):
                 entry = array[i][j]
                 entry = parse_entry(entry, class_)
                 array[i][j] = entry
-
         return array
 
-    # convert/parse the arrays
     multiUnitArrays = convert_array(multiUnitArrays)
     unitArrays = convert_array(unitArrays)
 
-    #
-    # begin formatting arrays so that things can be displayed properly, side-by-side, etc
+    if sorted_maybe:    # this should only happen if there are maybe entries and status was "ATTENDING"
+        sorted_maybe = [parse_entry(entry_, entry_[classInd]) for entry_ in sorted_maybe]
+
+    return multiUnitArrays, unitArrays, sorted_maybe
+
+
+def format_sorted_entries(multiUnitArrays, unitArrays):
+    """
+    Formatting sorted entries for CSV alignment, side-by-side display
+    """
 
     # make same-length parallel columns of CE and MM multi-unit entries (make them have same number of rows, so they
     # can be displayed side-by-side in CSV)
@@ -428,10 +404,7 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
         combinedEntry = multiUnitArrays[0][i] + ('', '',) + multiUnitArrays[1][i]
         combinedMultiArray.append(combinedEntry)
 
-    #
     # make same-length parallel columns of A, N, F, grouped by class, sorted by level
-
-    # split in to class groupings
     ceSingles = unitArrays[0:3]
     mmSingles = unitArrays[3:]
 
@@ -454,6 +427,83 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
         combinedEntry = mmSingles[0][i] + ('',) + mmSingles[1][i] + ('',) + mmSingles[2][i]
         combined_mmSingles.append(combinedEntry)
 
+    return combinedMultiArray, combined_ceSingles, combined_mmSingles
+
+
+async def get_unsorted_entries(guild: discord.Guild, status:str):
+    """
+    Get the entries from database with minimal sorting
+    """
+    unsorted_no = []
+    unsorted_all = []
+
+    # get the yes and maybe attendees
+    unsorted_yes = await db.all_of_category('class', 'CE', guild=guild, status='YES', display_name=True)
+    unsorted_yes += await db.all_of_category('class', 'MM', guild=guild, status='YES', display_name=True)
+    unsorted_maybe = await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+    unsorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
+    if status == 'ALL':
+        # if called with "all", also get the no's to complete the set
+        unsorted_no = await db.all_of_category('class', 'CE', guild=guild, status='NO', display_name=True)
+        unsorted_no += await db.all_of_category('class', 'MM', guild=guild, status='NO', display_name=True)
+
+    if status == 'YES':
+        # if "attending" -> status = "YES", then just work with YES/MAYBE entries
+        unsorted_yes = sorted(unsorted_yes, key=lambda x: x[levelInd], reverse=True)
+        unsorted_yes = sorted(unsorted_yes, key=lambda x: x[classInd])
+        unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[levelInd], reverse=True)
+        unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[classInd])
+
+        unsorted_yes = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_yes]
+        unsorted_maybe = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_maybe]
+    else:
+        # combine all entries into one big column
+        unsorted_all = [*unsorted_yes, *unsorted_maybe, *unsorted_no]
+        unsorted_all = sorted(unsorted_all, key=lambda x: x[classInd], reverse=True)
+
+        unsorted_all = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_all]
+
+    return unsorted_yes, unsorted_maybe, unsorted_all
+
+
+# noinspection PyShadowingNames
+async def build_csv(guild: discord.Guild, status: str = 'ALL', finalize=False) -> discord.File:
+    """
+    Parses the user database into CSV subcategories.
+    Outputs a formatted, sorted CSV, with unsorted rows at the bottom.
+
+    ARGS:
+        guild:      the guild to pull display-names from
+        status:     ALL to get all users in db (that have globals.CSV_ROLE_NAME)
+                    ATTENDING to get all users who have indicated YES or MAYBE
+        finalize:   Indicate that the event has been closed. Only True if called through ~close
+                    Triggers lottery
+
+    get_csv attending:
+        SORTED YES
+        SORTED MAYBE
+        LOTTERY	(if ~close --> finalize=True)
+        UNSORTED YES
+        UNSORTED MAYBE
+
+    get_csv all:
+        SORTED
+        UNSORTED
+    """
+    # CSV separates YES and MAYBE entries. Get the MAYBE entries later.
+    if status == 'ATTENDING':
+        status = 'YES'
+
+    if finalize:
+        # select lotto winners
+        lottoEntries = await db.all_of_category('lotto', 1, guild=guild, display_name=True)
+        random.shuffle(lottoEntries)
+        lottoWinners = lottoEntries[:globals.NUMBER_OF_LOTTO_WINNERS]
+
+    multiUnitArrays, unitArrays, sorted_maybe = await get_sorted_entries(guild, status)
+    combinedMultiArray, combined_ceSingles, combined_mmSingles = format_sorted_entries(multiUnitArrays, unitArrays)
+    unsorted_yes, unsorted_maybe, unsorted_all = await get_unsorted_entries(guild, status)
+
     # multi-unit should be separate from the rest, just write those in one column
     # single-unit should be one column for each unit type, grouped within column by class, ordered by level
     with open(globals.CSV_FILENAME, 'w', newline='', encoding='utf-8') as csvfile:
@@ -461,6 +511,10 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
 
         ceColTitles = ['Name', 'Class', 'Level', 'Units', 'March Size', 'Alliance', 'Skins']
         mmColTitles = [*ceColTitles, 'Traps']
+
+        #
+        # First make the sorted CSV
+
         ceRowLength = 7
         mmRowLength = 8
         # write the multi-unit entries as parallel columns of CE and MM
@@ -469,7 +523,6 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
         writer.writerow([*ceColTitles, '', '', *mmColTitles])
         writer.writerows(combinedMultiArray)
 
-        # whitespace
         writer.writerows([''] * 8)
 
         # write the single-unit entries as parallel columns of A, N, F, in groupings of class, ordered by level
@@ -481,7 +534,6 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
         writer.writerow([*ceColTitles, '', '', *ceColTitles, '', '', *ceColTitles])
         writer.writerows(combined_ceSingles)
 
-        # whitespace
         writer.writerows([''] * 5)
 
         # do again for MM
@@ -489,13 +541,45 @@ async def build_csv(guild: discord.Guild, status: str = 'YES', finalize=False) -
         writer.writerow([*mmColTitles, '', *mmColTitles, '', *mmColTitles])
         writer.writerows(combined_mmSingles)
 
+
+        if sorted_maybe:
+            writer.writerows([''] * 5)
+
+            # finally write the sorted_maybe entries here
+            writer.writerow(['Maybes'])
+            writer.writerow(mmColTitles)
+            writer.writerows(sorted_maybe)
+
         if finalize:
-            # whitespace
             writer.writerows([''] * 5)
 
             # lotto winners
             writer.writerow([f'Lottery Winners ({globals.NUMBER_OF_LOTTO_WINNERS})'])
             writer.writerows(lottoWinners)
+
+        #
+        # Now put unsorted CSV at bottom
+        writer.writerows([''] * 10)
+        writer.writerow(['BEGIN UNSORTED'])
+
+        if status == 'ALL':
+            writer.writerow(['All DB entries'])
+            writer.writerow(mmColTitles)
+            writer.writerows(unsorted_all)
+
+        else:
+            # first put the YES entries
+            writer.writerow(['YES entries'])
+            writer.writerow(mmColTitles)
+            writer.writerows(unsorted_yes)
+
+            # whitespace
+            writer.writerows([''] * 5)
+
+            # then the MAYBE entries
+            writer.writerow(['MAYBE entries'])
+            writer.writerow(mmColTitles)
+            writer.writerows(unsorted_maybe)
 
     eventCSV = discord.File(globals.CSV_FILENAME)
     return eventCSV

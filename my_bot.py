@@ -23,10 +23,6 @@ class Bot(commands.Bot):
         # list of channels to listen on for event commands
         self.main_channels = []
 
-        # self.eventInfo = ''
-        # self.eventMessage = None
-        # self.eventChannel = None
-
         # background loop that sends a reminder to people signed up as "maybe"
         self.maybe_loop = None
 
@@ -80,18 +76,10 @@ class Bot(commands.Bot):
             globals.eventInfo = eventTitle + ' @ ' + eventTime
             globals.eventChannel = self.get_channel(eventChannelID)
             globals.eventMessage = await globals.eventChannel.fetch_message(eventMessageID)
-            # globals.eventMessage = await self.eventChannel.fetch_message(eventMessageID)
-
-            # self.eventInfo = eventTitle + ' @ ' + eventTime
-            # self.eventChannel = self.get_channel(eventChannelID)
-            # self.eventMessage = await self.eventChannel.fetch_message(eventMessageID)
 
             # re-initializes EventButtonsView instance so that buttons still work
-            # view = event_interaction.EventButtonsView(globals.eventMessage)
             view = EventButtonsView(globals.eventMessage)
             await globals.eventMessage.edit(view=view)
-            # view = EventButtonsView(self.eventMessage)
-            # await self.eventMessage.edit(view=view)
 
             # TODO: test this
             # restart confirm_maybe loop
@@ -132,14 +120,14 @@ class Bot(commands.Bot):
             logging.info(f'Reacquired existing event in channel: '
                   f'{globals.eventChannel.guild.name}/{globals.eventChannel.name}')
 
+        m = f'Setup complete, {self.user.name} online.'
+        print(m)
+        logging.info(m)
+
     def reset_event_vars(self) -> None:
         globals.eventInfo = ''
         globals.eventMessage = None
         globals.eventChannel = None
-
-        # self.eventInfo = ''
-        # self.eventMessage = None
-        # self.eventChannel = None
 
         if self.maybe_loop is not None:
             self.maybe_loop.cancel()
