@@ -154,7 +154,7 @@ def get_names_list_from_field_value(field_value: str) -> list[str]:
 
 def edit_field_values(embed, name, status, operation: str):
     """
-    Parses the field-value strings into lists for ease of manipulation.
+    Adds or removes a name from one of the event-embed fields.
     """
     logging.debug(f'\nSTATUS: {status}, OPERATION: {operation}')
     fields = embed.fields

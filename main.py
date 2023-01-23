@@ -26,6 +26,7 @@ def setup_logs():
     logfile = timestr.split('.')[0]
     logfile = 'log_' + logfile
     logfile = homedir + logsdir + '/' + logfile
+    globals.logfile = logfile
     
     logging.basicConfig(filename=logfile, level=logging.INFO,
                         format='%(asctime)s - [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s',

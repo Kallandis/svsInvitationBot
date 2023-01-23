@@ -8,7 +8,8 @@ eventChannel = None
 # only used to remove my private server from the bot's bot.guilds attr
 EVAN_GUILD_ID = 964624340295499857    # svsBotTestServer
 
-#
+logfile = None
+
 #
 #
 # ---------------- BEGIN user-specific variables ----------------

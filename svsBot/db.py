@@ -224,7 +224,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         if status in ['YES', 'MAYBE', 'NO']:
             sql += "STATUS = ? AND CLASS = ?"
             values = [status, value]
-        elif status == '*':
+        elif status == 'ALL':
             sql += "CLASS = ?"
             values = [value]
         else:
