@@ -20,7 +20,7 @@ class CommandErrorHandler(commands.Cog):
         """
 
         if ctx.command:
-            errstring = f'{ctx.command} ERROR: {str(error)}'
+            errstring = f'{ctx.command} ERROR: {str(error)}\nORIGINAL MESSAGE: [{ctx.author}] {ctx.message.content}[:100]'
         else:
             errstring = f'Command not found: {ctx.message.content}'
         logging.info(errstring)

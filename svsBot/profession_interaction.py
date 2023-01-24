@@ -214,6 +214,7 @@ class ProfessionMenu(discord.ui.Select):
             if self.first_entry:
                 # set status to "NO", lottery to 1 (default vals)
                 entry = [interaction.user.id, *prof_array, "NO", 1, 0]
+                print(len(entry), entry)
 
                 await db.add_entry(entry)
                 embed = db.info_embed(entry,

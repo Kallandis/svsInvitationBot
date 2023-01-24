@@ -17,8 +17,8 @@ async def add_entry(values: Union[list, tuple]) -> None:
     Lottery defaults to 1
     Profession must be provided by User via calls of ProfessionMenuView()
     """
-    sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, alliance, mm_traps, skins, status, lottery) "\
-          "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, alliance, mm_traps, skins, status, lottery, interacted_with_event) "\
+          "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     async with aiosqlite.connect('userHistory.db') as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
