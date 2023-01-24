@@ -12,9 +12,10 @@ ID_IND, CLASS_IND, LEVEL_IND, UNIT_IND, MARCH_IND, ALLIANCE_IND, MMTRAPS_IND, SK
 
 async def add_entry(values: Union[list, tuple]) -> None:
     """
-    param [list] entry: INT, STRING, INT, STRING, STRING, STRING, STRING, STRING, INT
+    param [list] entry: INT, STR, INT, STR, STR, STR, STR, STR, STR, INT, INT
     Status defaults to 0
     Lottery defaults to 1
+    interacted_with_event defaults to 0
     Profession must be provided by User via calls of ProfessionMenuView()
     """
     sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, alliance, mm_traps, skins, status, lottery, interacted_with_event) "\
