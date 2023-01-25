@@ -246,7 +246,7 @@ async def delete_event(user, bot, intent: str) -> None:
 
             # send a backup of the database to dedicated backup channel
             backupChannel = bot.get_channel(globals.DB_BACKUP_CHANNEL_ID)
-            dbFile = discord.File('userHistory.db')
+            dbFile = discord.File(globals.USER_DATABASE_NAME)
             await backupChannel.send(file=dbFile)
         else:
             # intent = 'delete'

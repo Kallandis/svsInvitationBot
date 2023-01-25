@@ -20,7 +20,7 @@ async def add_entry(values: Union[list, tuple]) -> None:
     """
     sql = "INSERT INTO USERS (discord_ID, class, level, unit, march_size, alliance, mm_traps, skins, status, lottery, interacted_with_event) "\
           "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -32,7 +32,7 @@ async def get_entry(discord_id: int) -> Optional[tuple]:
     """
     sql = "SELECT * FROM USERS WHERE DISCORD_ID = ?"
     val = [discord_id]
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, val)
             entry = await cursor.fetchone()
@@ -46,7 +46,7 @@ async def get_entry(discord_id: int) -> Optional[tuple]:
 async def update_event(title: str, time: str, message_id: discord.Message.id, channel_id: discord.TextChannel.id) -> None:
     sql = "UPDATE EVENT SET TITLE = ?, TIME = ?, MESSAGE_ID = ?, CHANNEL_ID = ?"
     values = [title, time, message_id, channel_id]
-    async with aiosqlite.connect('eventInfo.db') as conn:
+    async with aiosqlite.connect(globals.EVENT_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -54,7 +54,7 @@ async def update_event(title: str, time: str, message_id: discord.Message.id, ch
 
 async def get_event() -> tuple[str, str, int, int]:
     sql = "SELECT * FROM EVENT"
-    async with aiosqlite.connect('eventInfo.db') as conn:
+    async with aiosqlite.connect(globals.EVENT_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql)
             entry = await cursor.fetchone()
@@ -171,7 +171,7 @@ async def update_profession(discord_id: discord.Member.id, prof_array: list) -> 
           "MM_TRAPS = ?, SKINS = ? WHERE DISCORD_ID = ?"
     values = [*prof_array, discord_id]
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -181,7 +181,7 @@ async def update_lotto(discord_id: discord.Member.id, lotto: int) -> None:
     sql = "UPDATE USERS SET LOTTERY = ? WHERE DISCORD_ID = ?"
     values = [lotto, discord_id]
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -199,7 +199,7 @@ async def update_status(discord_id: discord.Member.id, status: str) -> None:
     sql = "UPDATE USERS SET STATUS = ? WHERE DISCORD_ID = ?"
     values = [status, discord_id]
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -209,7 +209,7 @@ async def update_interacted_with_event(discord_id: discord.Member.id, intxn: int
     sql = "UPDATE USERS SET INTERACTED_WITH_EVENT = ? WHERE DISCORD_ID = ?"
     values = [intxn, discord_id]
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             await conn.commit()
@@ -220,7 +220,7 @@ async def reset_user_event_data() -> None:
     sql = "UPDATE USERS SET STATUS = ?, INTERACTED_WITH_EVENT = ?"
     val = ["NO", 0]
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, val)
             await conn.commit()
@@ -263,7 +263,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
         logging.info(f'ERROR: category "{category}" not recognized.')
         return
 
-    async with aiosqlite.connect('userHistory.db') as conn:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(sql, values)
             entries = await cursor.fetchall()
@@ -283,8 +283,7 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
 
 async def dump_db(filename: str) -> discord.File:
     with open(filename, 'w') as file:
-        # with sql3.connect('userHistory.db') as conn:
-        async with aiosqlite.connect('userHistory.db') as conn:
+        async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
             async for line in conn.iterdump():
                 file.write(line + '\n')
 
@@ -308,13 +307,20 @@ async def get_display_name_from_id(guild: discord.Guild, discord_id: discord.Use
         name = byteName.decode('ascii').strip()
         if name == '':
             # if the user's name is entirely non-ascii characters, it will become an empty string
-            # name = 'ERROR_NAME'
             logging.error(f"Discord ID {discord_id}'s name has no ascii characters.")
             return None
     except UnicodeEncodeError:
         # if the user's name cannot be encoded into ascii
-        # name = 'ERROR_ENCODE'
         logging.error(f"Discord ID {discord_id}'s name cannot be translated to ascii.")
         return None
 
     return name
+
+
+async def delete_user(discord_id: int) -> None:
+    async with aiosqlite.connect(globals.USER_DATABASE_NAME) as conn:
+        async with conn.cursor() as cursor:
+            sql = "DELETE FROM USERS WHERE discord_ID = ?"
+            values = [discord_id]
+            await cursor.execute(sql, values)
+            await conn.commit()

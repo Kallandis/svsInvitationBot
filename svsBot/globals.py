@@ -14,6 +14,15 @@ logfile = None
 #
 # ---------------- BEGIN user-specific variables ----------------
 
+# name of user info database
+USER_DATABASE_NAME = 'userHistory.db'
+
+# name of event info database
+EVENT_DATABASE_NAME = 'eventInfo.db'
+
+# name of user info database dump file
+USER_DATABASE_DUMP_NAME = 'svs_userHistory_dump.sql'
+
 # central guild "1508". All other guilds are subsets of this guild; it will be used for pulling member's
 # display_name attribute for making the CSV. 
 GUILD_ID_1508 = 915761804704104489
@@ -26,8 +35,8 @@ MAIN_CHANNEL_ID_LIST = [
         937275649536692294,
         951396183610388491
         ]
-    # 1508/svs-registration
-    # 1508/el-registration
+        # 1508/svs-registration
+        # 1508/el-registration
 
 # name of the role that allows usage of event-related commands in the mainChannels
 # if the bot is to work in multiple servers, all servers must have a role with this name

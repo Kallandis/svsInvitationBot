@@ -107,7 +107,7 @@ class Event(commands.Cog):
         globals.eventMessage = eventMessage
         globals.eventChannel = ctx.channel
 
-        # store event data in eventInfo.db
+        # store event data in event info database
         await db.update_event(title, eventTimeFmt, eventMessage.id, ctx.channel.id)
 
     @commands.command(help='Edit the existing event.\n'
@@ -173,7 +173,6 @@ class Event(commands.Cog):
 
             # get the new event title
             title = helpers.parse_event_input(title=vals[0])
-            print(title)
 
             # replace the title and create new embed
             embed = helpers.build_event_embed(title, old_description, cmdList, old_embed)
@@ -218,11 +217,10 @@ class Event(commands.Cog):
     @commands.max_concurrency(1)
     async def delete(self, ctx):
         """
-        Resets eventInfo.db to default value
+        Resets event info database to default value
         Resets everyone's status to "NO"
         Requires ADMIN role
         """
-
         await helpers.delete_event(ctx.author, self.bot, intent='delete')
 
 
@@ -351,18 +349,6 @@ class Misc(commands.Cog):
 
         await ctx.author.send(msg, file=csvFile)
 
-    @commands.command(help='Sends the user a dump of the SQL database.\n'
-                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.')
-    @commands.has_role(globals.ADMIN_ROLE_NAME)
-    @commands.max_concurrency(1)
-    async def get_db_dump(self, ctx):
-        """
-        Sends dump of SQL database to user
-        Requires ADMIN role
-        """
-        dump = await db.dump_db('svs_userHistory_dump.sql')
-        await ctx.author.send("dump of userHistory.db database", file=dump)
-
     @commands.command(help='Sends the user a CSV of all users that interacted with the event.\n'
                            f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n')
     @commands.has_role(globals.ADMIN_ROLE_NAME)
@@ -382,25 +368,54 @@ class Misc(commands.Cog):
         csvFile = await helpers.build_ymn_csv(central_guild)
         await ctx.author.send(msg, file=csvFile)
 
+    @commands.command(help='Sends the user a dump of the SQL database.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
+    @commands.max_concurrency(1)
+    async def get_db_dump(self, ctx):
+        """
+        Sends dump of SQL database to user
+        Requires ADMIN role
+        """
+        dump = await db.dump_db(globals.USER_DATABASE_DUMP_NAME)
+        await ctx.author.send(f"Dump of {globals.USER_DATABASE_NAME}", file=dump)
 
-    async def handle_csv_cmd(self, ctx, arg):
-        """Handles argument parsing and CSV creation for get_csv"""
-
-        # parse argument
-        if arg not in ['all', 'attending']:
-            raise commands.CheckFailure('Argument must be either \'all\' or \'attending\'.')
+    @commands.command(help='Purge a user from the database by discord ID.\n'
+                           f'Requires role \'{globals.ADMIN_ROLE_NAME}\'.\n'
+                           f'Example:   {globals.COMMAND_PREFIX}purge 164196268631916544\n',
+                      usage='<DISCORD_ID>')
+    @commands.has_role(globals.ADMIN_ROLE_NAME)
+    @commands.max_concurrency(1)
+    async def purge(self, ctx, arg: int):
+        """
+        Purge a user from the user info database by their unique discord ID
+        """
+        if len(str(arg)) != 18:
+            raise commands.CheckFailure(f'{arg} is not a valid discord ID. All IDs should be 18 digit integers.')
 
         central_guild = self.bot.get_guild(globals.GUILD_ID_1508)
         if central_guild is None:
             raise commands.CheckFailure('Failed to acquire 1508 guild.')
 
-        # build CSV
-        csvFile = await helpers.build_csv(central_guild, status=arg.upper())
+        member_name = await db.get_display_name_from_id(central_guild, arg)
+        user_info = f'ID: {arg}'
+        if member_name:
+            user_info += f', Name: {member_name}'
 
-        # send CSV
-        if arg == 'all':
-            msg = 'CSV of all users in the database'
-        else:
-            msg = f'CSV of all users that responded "YES" or "MAYBE" to {globals.eventInfo}'
+        if not await db.get_entry(arg):
+            msg = f'ERROR: Target not in {globals.USER_DATABASE_NAME}: ```{user_info}```'
+            await ctx.author.send(msg)
+            return
 
-        return msg, csvFile
+        await db.delete_user(arg)
+
+        if await db.get_entry(arg):
+            msg = f'ERROR: Failed to purge {globals.USER_DATABASE_NAME}: ```{user_info}```\n' \
+                  f'Possible bug.'
+            logging.error(msg.replace('`', ''))
+            await ctx.author.send(msg)
+            return
+
+        msg = f'Purged from {globals.USER_DATABASE_NAME}: ```{user_info}```'
+        logging.info(msg.replace('`', ''))
+        await ctx.author.send(msg)
