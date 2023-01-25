@@ -273,7 +273,6 @@ async def delete_event(user, bot, intent: str) -> None:
     # reset everyone's "interacted_with_event" flag to "0"
 
 
-
 def parse_entry(entry_: tuple, cls: str) -> tuple:
     """
     Convert data to human-readable text for CSV display
@@ -328,7 +327,7 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
         return msize
 
     def sort_alliance(entry):
-        allianceDict = {'508S': 0, '508N': 1, '508W': 2, '508E': 3}
+        allianceDict = {'508N': 0, '508W': 1, '508S': 2, '508E': 3}
         alliance = entry[allianceInd]
         return allianceDict[alliance]
 
@@ -360,10 +359,11 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
     unitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in unitArrays]
     unitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in unitArrays]
 
-    # finally, sort the maybes by class then level
+    # finally, sort the maybes by alliance, class, level
     if sorted_maybe:
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelInd], reverse=True)
         sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classInd])
+        sorted_maybe = sorted(sorted_maybe, key=sort_alliance)
 
     # fxn to convert the big arrays
     def convert_array(array: list):

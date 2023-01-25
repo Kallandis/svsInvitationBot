@@ -40,7 +40,6 @@ MAIN_CHANNEL_ID_LIST = [
 
 # name of the role that allows usage of event-related commands in the mainChannels
 # if the bot is to work in multiple servers, all servers must have a role with this name
-#ADMIN_ROLE_NAME = 'evan'
 ADMIN_ROLE_NAME = 'SVS Planner'
 
 # Only add people to CSV if they have this role
