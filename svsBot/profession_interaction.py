@@ -7,15 +7,14 @@ from . import db
 
 class ProfessionMenu(discord.ui.Select):
 
-    # __slots__ = ('parent_message', 'category', 'clas', 'units', 'march_size', 'level', 'mm_traps', 'first_entry')
     __slots__ = ('parent_message', 'category',
-                 'clas', 'level', 'units', 'march_size', 'alliance', 'mm_traps', 'first_entry')
+                 'class_', 'level', 'units', 'march_size', 'alliance', 'mm_traps', 'first_entry')
 
     def __init__(self, parent_message, category,
-                 clas=None, level=None, units=None, march_size=None, alliance=None, mm_traps=None, first_entry=None):
+                 class_=None, level=None, units=None, march_size=None, alliance=None, mm_traps=None, first_entry=None):
         self.parent_message = parent_message
         self.category = category
-        self.clas = clas
+        self.class_ = class_
         self.level = level
         self.units = units
         self.march_size = march_size
@@ -29,13 +28,13 @@ class ProfessionMenu(discord.ui.Select):
             options = [
                 discord.SelectOption(label='MM'),
                 discord.SelectOption(label='CE'),
-                discord.SelectOption(label='CANCEL', description='Pick this to cancel updating database entry.')
+                discord.SelectOption(label='CANCEL', description='Pick this to cancel updating info.')
             ]
             # placeholder = f'Select your class'
             placeholder = 'Class'
 
         elif category == "level":
-            if self.clas == 'MM':
+            if self.class_ == 'MM':
                 options = [
                     discord.SelectOption(label='0T', description='Less than level 3 Weakening Towers'),
                     discord.SelectOption(label='3T', description='Level 3 Weakening Towers'),
@@ -43,7 +42,7 @@ class ProfessionMenu(discord.ui.Select):
                     discord.SelectOption(label='10', description='+10 march size'),
                     discord.SelectOption(label='E',  description='Encirclement')
                 ]
-            elif self.clas == 'CE':
+            elif self.class_ == 'CE':
                 options = [
                     discord.SelectOption(label='2',   description='Not three hero yet'),
                     discord.SelectOption(label='3',   description='Three hero march'),
@@ -51,10 +50,9 @@ class ProfessionMenu(discord.ui.Select):
                     discord.SelectOption(label='3XE', description='Encirclement')
                 ]
             else:
-                print(f"ERROR: Dropdown optional parameter 'clas': {self.clas} invalid")
+                logging.error(f"Dropdown optional parameter 'class_': {self.class_} invalid")
                 return
-            # placeholder = f'Select {self.clas} progress (Highest that applies)'
-            placeholder = f'{self.clas} Progress'
+            placeholder = f'{self.class_} Progress'
 
         elif category == "unit":
             options = [
@@ -63,7 +61,6 @@ class ProfessionMenu(discord.ui.Select):
                 discord.SelectOption(label='Navy')
             ]
             max_vals = 3
-            # placeholder = f'Main unit & others w/ mostly purple, >= 8 perks'
             placeholder = 'Unit(s)'
 
         elif category == 'march size':
@@ -104,22 +101,15 @@ class ProfessionMenu(discord.ui.Select):
         elif category == "skins":
             options = [
                 discord.SelectOption(label='None'),
-                #discord.SelectOption(label='Atlantis'),
-                #discord.SelectOption(label='Ark'),
-                #discord.SelectOption(label='Popstar-30d'),
-                #discord.SelectOption(label='Popstar-3d'),
-                #discord.SelectOption(label='Popstar-1d')
-
                 discord.SelectOption(label='Popstar-30d'),
                 discord.SelectOption(label='Void Matrix'),
-
             ]
             max_vals = len(options)
             # placeholder = f'Select which base skins you own'
             placeholder = 'Skin(s)'
 
         else:
-            print("ERROR: Dropdown required parameter 'category' either empty or invalid")
+            logging.error("ERROR: Dropdown required parameter 'category' either empty or invalid")
             return
 
         super().__init__(placeholder=placeholder, min_values=1, max_values=max_vals, options=options)
@@ -133,11 +123,11 @@ class ProfessionMenu(discord.ui.Select):
         choice = ', '.join(self.values)
         if choice == 'CANCEL':
             # does this need to interact with invoking fxn update_profession()?
-            await interaction.response.edit_message(content='Cancelled updating database', view=None)
+            await interaction.response.edit_message(content='Cancelled updating info', view=None)
             return
 
         if self.category == "class":
-            self.clas = choice
+            self.class_ = choice
             nextCategory = "level"
         elif self.category == "level":
             self.level = choice
@@ -150,7 +140,7 @@ class ProfessionMenu(discord.ui.Select):
             nextCategory = 'alliance'
         elif self.category == 'alliance':
             self.alliance = choice
-            nextCategory = "mm_traps" if self.clas == "MM" else "skins"
+            nextCategory = "mm_traps" if self.class_ == "MM" else "skins"
         elif self.category == "mm_traps":
             self.mm_traps = choice
             nextCategory = "skins"
@@ -161,7 +151,7 @@ class ProfessionMenu(discord.ui.Select):
 
         # set the prompt that will be shown above the next select menu
         nextCategoryPromptDict = {
-            'level': f'Select {self.clas} progress (Highest that applies)',
+            'level': f'Select {self.class_} progress (Highest that applies)',
             'unit': 'Select strongest unit type (regardless of equipment/perks). **Only** choose a second (or third) '
                     'unit type if you have 4 purple equipment **AND** 8 perks on that march.',
             'march size': 'Select base march size on your **BEST** march. Do not include Acadia buff or '
@@ -179,7 +169,7 @@ class ProfessionMenu(discord.ui.Select):
                 content=nextCategoryPrompt,
                 view=ProfessionMenuView(
                     self.parent_message, nextCategory,
-                    clas=self.clas, level=self.level, units=self.units, march_size=self.march_size,
+                    class_=self.class_, level=self.level, units=self.units, march_size=self.march_size,
                     alliance=self.alliance, mm_traps=self.mm_traps, first_entry=self.first_entry
                 )
             )
@@ -196,7 +186,7 @@ class ProfessionMenu(discord.ui.Select):
             # level
             ceLevelDict = {"2": 0, "3": 1, "3X": 2, "3XE": 3}
             mmLevelDict = {"0T": 0, "3T": 1, "5T": 2, "10": 3, "E": 4}
-            levelNum = ceLevelDict[self.level] if self.clas == 'CE' else mmLevelDict[self.level]
+            levelNum = ceLevelDict[self.level] if self.class_ == 'CE' else mmLevelDict[self.level]
 
             # mm_traps
             if self.mm_traps is None or 'None' in self.mm_traps:
@@ -208,7 +198,7 @@ class ProfessionMenu(discord.ui.Select):
                 # if user selected "None" in the MenuView, set skins to ''
                 skins = ''
 
-            prof_array = [self.clas, levelNum, ''.join(unitChars), self.march_size, self.alliance, self.mm_traps, skins]
+            prof_array = [self.class_, levelNum, ''.join(unitChars), self.march_size, self.alliance, self.mm_traps, skins]
 
             # if first-time user does not have an entry in DB, add one
             if self.first_entry:
@@ -240,12 +230,11 @@ class ProfessionMenu(discord.ui.Select):
 
 class ProfessionMenuView(discord.ui.View):
 
-    # __slots__ = ('parent_message', 'category', 'clas', 'units', 'march_size', 'level', 'mm_traps', 'first_entry')
     __slots__ = ('parent_message', 'category',
-                 'clas', 'level', 'units', 'march_size', 'alliance', 'mm_traps', 'first_entry')
+                 'class_', 'level', 'units', 'march_size', 'alliance', 'mm_traps', 'first_entry')
 
     def __init__(self, parent_message, category,
-                 clas=None, level=None, units=None, march_size=None, alliance=None, mm_traps=None, first_entry=None):
+                 class_=None, level=None, units=None, march_size=None, alliance=None, mm_traps=None, first_entry=None):
         super().__init__(timeout=300)
         self.parent_message = parent_message
         self.first_entry = first_entry
@@ -253,7 +242,7 @@ class ProfessionMenuView(discord.ui.View):
         # Adds the dropdown to our view object.
         self.add_item(ProfessionMenu(
             parent_message, category,
-            clas=clas, level=level, units=units, march_size=march_size, alliance=alliance, mm_traps=mm_traps,
+            class_=class_, level=level, units=units, march_size=march_size, alliance=alliance, mm_traps=mm_traps,
             first_entry=first_entry)
         )
 

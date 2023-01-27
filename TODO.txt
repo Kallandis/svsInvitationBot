@@ -1,49 +1,33 @@
-- NOTE: if commands are called by people in another timezone, the event time will be constructed on the local machine
-        and timezone info will be assumed to be that of the local machine.
 
-        So, all times given to the bot will be assumed to be in PST. Not sure how to deal with this other than getting
-        people to put in times as unix times. But it's not a big deal
-
-- CHANGE:   move the user-defined global variables into a different file (config.txt)
+- CHANGE:   move the user-defined global variables into a different file (config.json)
             then populate those user-defined global vars in on_ready()
-
-- CHANGE:   CSV formatting changes - depends on what the organizers want
-            - remove certain redundant cols to make it more compact. F.X., when entries are grouped by unit and class,
-                don't need to include the unit and class in that entry.
-
-            - display march size as median instead of range?
-                - if doing this, it would be best to just store it as that in the DB. Could still write the range
-                  in db.info_embed() for user convenience.
-
-- IDEA:     do I have to consider memory "leaks"? examples:
-                - should I be explicitly deleting old instances of EventButtons() once the event closes?
-                - should I be explicitly deleting instances of ProfessionMenuView()?
 
 - IMPLEMENT: if the length of the event embed would become larger than 6000 chars, do not add a name to the fields
              (should still be able to remove)
 
-- IMPLEMENT: make 'userHistory.db' be an option in globals.py, and provide an absolute filepath to reference it
-                that way, I don't have to cd to ~/python_projects/svs_bot when starting the bot
-
-- IMPLEMENT: make all of the class selection stuff a config/separate file (json?)
+- IMPLEMENT: make all choices in "profession_interaction.py" source from config file (profession_config.json)
+    - Update levels, march sizes per avobot_todo.txt
+    - helpers.py will need to reference this document for CSV sorting
+    - Rename db.profession_dicts() to db.database_to_text_dicts(), and introduce db.text_to_database_dicts() for
+        translating between db storage and human storage
 
 - IMPLEMENT: make the globals.py config check if OS is RPI or WINDOWS, and change stuff accordingly
+    - or just make a global var representing if OS is RPI or WINDOWS? then I only import "platform" once...
 
----------PRIORITY--------------
+- IMPLEMENT: db.get_default_entry(user_id, profession_info)
+    - move the logic for creating a new entry into db, instead of hard-coding it in profession_interaction.py
 
-- IMPLEMENT:    kill off global event variables.
-                Very easy to do except for db.info_embed(), which is far away from any bot instance. But it can be done.
-                Probably easiest to just pass the bot along the chain until it hits info_embed()?
+- CHECK: I added a new line "logging.error(traceback.format_exc())" to error_handler.py on the RPI
+    - Hopefully it logs the exceptions now.
+    - Got some of these:
+2023/01/25 06:57:20 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
+2023/01/25 06:57:30 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
+2023/01/25 06:57:31 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
+2023/01/25 06:57:37 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
+2023/01/25 06:57:37 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
+2023/01/25 06:57:58 (UTC-0800) - [ERROR] [base_events.default_exception_handler:1738]: Task exception was never retrieved
 
-CHANGELIST FROM LAST TEST:
-    - delete successful as well as unsuccessful commands in guild channels
-    - add some text to the event embed telling people to check their DM if it's their first response
-    - bot has activity text "Playing ~help" to show the command prefix and the help command
-    - Put longer prompts in the message above the ""~info change" select menus
-    UNTESTED:
-        - confirm maybe loop restarts when bot restarts
-        - confirm maybe loop closes when event is closed
-
+    - But there is no logging of what caused them. Hopefully this helps me diagnose.
 
 
 UNTESTED CHANGES:

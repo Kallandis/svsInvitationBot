@@ -66,8 +66,8 @@ class CommandErrorHandler(commands.Cog):
         elif isinstance(error, commands.MissingPermissions):
             errmsg += "User lacks required permissions for this command.\n"
         else:
-            print(f'Ignoring exception in command {ctx.clean_prefix}{ctx.command}.')
-            errmsg += f'Unknown.\nPossible bug, please report with {ctx.clean_prefix}bug.'
+            logging.error(f'Ignoring unknown exception in command {ctx.clean_prefix}{ctx.command}:\n{error}')
+            errmsg += f'Unknown error has occurred. Please contact admins.'
             if platform.system() == 'Windows':
                 traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             # idk if this works
@@ -104,11 +104,11 @@ class CommandErrorHandler(commands.Cog):
         footerText += f'{ctx.clean_prefix}help for a list of commands.'
         embed.set_footer(text=footerText)
 
-        if globals.SEND_ERROR_TO_DM:
-            # delete the offending command if it was used in a server channel
-            if globals.DELETE_MESSAGES and not isinstance(ctx.channel, discord.DMChannel):
-                await ctx.message.delete()
-            await ctx.author.send(embed=embed)
+        # delete the offending command if it was used in a server channel
+        if globals.DELETE_MESSAGES and not isinstance(ctx.channel, discord.DMChannel):
+            await ctx.message.delete()
 
+        if globals.SEND_ERROR_TO_DM:
+            await ctx.author.send(embed=embed)
         else:
             await ctx.send(embed=embed)

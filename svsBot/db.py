@@ -273,7 +273,10 @@ async def all_of_category(category: str, value: Union[str, int], guild=None, sta
             logging.error('Failed to provide guild object for display names.')
         display_name_entries = []
         for entry in entries:
-            new_entry = (await get_display_name_from_id(guild, entry[0]), *entry[1:])
+            name = await get_display_name_from_id(guild, entry[0], require_csv_role=True)
+            if not name:
+                continue
+            new_entry = (name, *entry[1:])
             display_name_entries.append(new_entry)
         return display_name_entries
 
@@ -290,17 +293,23 @@ async def dump_db(filename: str) -> discord.File:
     return discord.File(filename)
 
 
-async def get_display_name_from_id(guild: discord.Guild, discord_id: discord.User.id) -> Union[None, str]:
+async def get_display_name_from_id(guild: discord.Guild, discord_id: discord.User.id, require_csv_role=False) -> Union[None, str]:
     """
     Get a member's display name from a guild, stripping emojis and non-ascii chars
     """
     # Get the member object from main 1508 guild to get their display name
     member = guild.get_member(discord_id)
     if member is None:
-        logging.error(f'Discord ID {discord_id} is not a member of guild {guild}.')
+        logging.info(f'Get display name failed: discord ID {discord_id} is not a member of guild {guild}.')
         return None
 
-    name = member.display_name if member is not None else 'NOT_FOUND'
+    name = member.display_name
+
+    if require_csv_role:
+        if globals.CSV_ROLE_NAME not in [r.name for r in member.roles]:
+            logging.info(f'User "{name} does not have role {globals.CSV_ROLE_NAME}, skipping name retrieval.')
+            return None
+
     # encode into ascii, ignoring unknown chars, then decode back into ascii
     try:
         byteName = name.encode('ascii', 'ignore')
