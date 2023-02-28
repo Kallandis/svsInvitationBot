@@ -1,0 +1,127 @@
+{
+  "class": {
+    "category_title": "Class",
+    "prompt": "",
+    "options": [
+      "CE",
+      "MM"
+    ],
+    "select_multiple": false
+  },
+
+  "ce_level": {
+    "category_title": "CE Progress",
+    "prompt": "Select CE progress (Highest that applies)",
+    "options": [
+      "< ES",
+      "ES",
+      "Enc",
+      "M3",
+      "M10",
+      "WB"
+    ],
+    "descriptions": [
+      "Below Extra Skill Slot",
+      "Extra Skill Slot",
+      "Encirclement",
+      "Morale 3",
+      "Morale 10",
+      "Warbeast"
+    ],
+    "select_multiple": false
+  },
+
+  "mm_level": {
+    "category_title": "MM Progress",
+    "prompt": "Select MM progress (Highest that applies)",
+    "options": [
+      "< 10",
+      "10",
+      "Enc",
+      "M5",
+      "UC",
+      "Enh. D"
+    ],
+    "descriptions": [
+      "Below +10 march",
+      "+10 march",
+      "Encirclement",
+      "Morale 5",
+      "UC facility unlocked",
+      "Enhanced Droid"
+    ],
+    "select_multiple": false
+  },
+
+  "units": {
+    "category_title": "Unit(s)",
+    "prompt": "Select strongest unit type (regardless of equipment/perks). **Only** choose a second (or third) unit type if you have 4 purple equipment **AND** 8 perks on that march.",
+    "options": [
+      "Army",
+      "Air Force",
+      "Navy"
+    ],
+    "select_multiple": true,
+    "convert_long_to_short": {
+      "Army": "A",
+      "Air Force": "F",
+      "Navy": "N"
+    }
+  },
+
+  "march_size": {
+    "category_title": "March size",
+    "prompt": "Select base march size on your **BEST** march. Do not include Acadia buff or Hyperion/Poetic/Romantic.",
+    "options": [
+      "< 190",
+      "190-199",
+      "200-209",
+      "210-219",
+      "220-229",
+      "230-239",
+      "240-249",
+      "250+"
+    ],
+    "select_multiple": false
+  },
+
+  "alliance": {
+    "category_title": "Alliance",
+    "prompt": "Select the alliance you will be in at the time of the event.",
+    "options": [
+      "508E",
+      "508N",
+      "508W",
+      "508S"
+    ],
+    "select_multiple": false
+  },
+
+  "mm_traps": {
+    "category_title": "Trap(s)",
+    "prompt": "Select which traps you can build.",
+    "options": [
+      "None",
+      "Corrosive Mucus",
+      "Supermagnetic Field",
+      "Electro Missiles"
+    ],
+    "select_multiple": true,
+    "convert_long_to_short": {
+      "Corrosive Mucus": "CM", 
+      "Supermagnetic Field": "SF", 
+      "Electro Missiles": "EM", 
+      "": ""}
+  },
+
+  "skins": {
+    "category_title": "Skin(s)",
+    "prompt": "Select which base skins you currently own.",
+    "options": [
+      "None",
+      "Popstar-30d",
+      "Void Matrix"
+    ],
+    "select_multiple": true
+  }
+}

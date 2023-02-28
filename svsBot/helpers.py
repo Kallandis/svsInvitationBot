@@ -276,28 +276,35 @@ async def delete_event(user, bot, intent: str) -> None:
 def parse_entry(entry_: tuple, cls: str) -> tuple:
     """
     Convert data to human-readable text for CSV display
-        Convert level to text, replace commas with spaces, convert traps to acronym, remove traps from CE
+        Replace commas with spaces, acronymize units/traps
     """
-    _, ceLevelDict, mmLevelDict, mmTrapsDict = db.profession_dicts()
+    unitAbbrevDict = db.get_profession_abbreviation_dict('units')
+    units = entry_[unitInd]
+    units = [unitAbbrevDict[unit] for unit in units.split(', ')]
+    units = ''.join(units)
+    skins = entry_[skinsInd].replace(', ', ' ')
+
     if cls == 'CE':
         newEntry = (
-            *entry_[:levelInd],
-            ceLevelDict[entry_[levelInd]],
-            entry_[unitInd],
+            *entry_[:unitInd],
+            units,
             entry_[marchInd],
             entry_[allianceInd],
-            entry_[skinsInd].replace(', ', ' ')
+            skins
         )
     else:
         # for MM, put the traps entry at the end to align with CE entries in same col
+        mmTrapsAbbrevDict = db.get_profession_abbreviation_dict('mm_traps')
+        traps = entry_[trapsInd]
+        traps = [mmTrapsAbbrevDict[trap] for trap in traps.split(', ')]
+        traps = ' '.join(traps)
         newEntry = (
-            *entry_[:levelInd],
-            mmLevelDict[entry_[levelInd]],
-            entry_[unitInd],
+            *entry_[:unitInd],
+            units,
             entry_[marchInd],
             entry_[allianceInd],
-            entry_[skinsInd].replace(', ', ' '),
-            ' '.join(map(mmTrapsDict.get, entry_[trapsInd].split(', '))),
+            skins,
+            traps
         )
     return tuple(newEntry)
 
@@ -317,16 +324,16 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
 
     def sort_march(entry):
         msize = entry[marchInd]
-        # msize takes the forms {< 160, 160-170, ... , 210-220, > 220}
-        if '<' in msize or '>' in msize:
-            # strip the < or >
-            msize = int(msize.strip('>< '))
+        # msize takes the forms {< 160, 160-169, ... , 210-219, 220+}
+        if '-' not in msize:
+            # strip the special chars
+            msize = int(msize.strip('><+ '))
         else:
             # take the bottom of the range and add 5 to represent median and avoid equality with smallest edge case
             msize = int(msize.split('-')[0]) + 5
         return msize
 
-    def sort_alliance(entry):
+    def sort_alliance(entry) -> int:
         allianceDict = {'508N': 0, '508W': 1, '508S': 2, '508E': 3}
         alliance = entry[allianceInd]
         return allianceDict[alliance]
@@ -398,9 +405,9 @@ def format_sorted_entries(multiUnitArrays, unitArrays):
     diff = len(multiUnitArrays[1]) - len(multiUnitArrays[0])
     # add rows to the shorter subArray between ceMultiUnits and mmMultiUnits
     if diff > 0:
-        multiUnitArrays[0].extend([('', '', '', '', '', '')] * diff)
+        multiUnitArrays[0].extend([('', '', '', '', '', '', '')] * diff)
     elif diff < 0:
-        multiUnitArrays[1].extend([('', '', '', '', '', '', '')] * (-1 * diff))
+        multiUnitArrays[1].extend([('', '', '', '', '', '', '', '')] * (-1 * diff))
 
     combinedMultiArray = []
     for i in range(len(multiUnitArrays[0])):
@@ -522,7 +529,7 @@ async def build_csv(guild: discord.Guild, status: str = 'ALL', finalize=False) -
         ceRowLength = 7
         mmRowLength = 8
         # write the multi-unit entries as parallel columns of CE and MM
-        writer.writerow(['CE multi units', *[''] * (ceRowLength - 1), '', '', 'MM multi units', *[''] * 16,
+        writer.writerow(['CE multi units', *[''] * (ceRowLength - 1), *[''] * 2, 'MM multi units', *[''] * 16,
                          'Sorted by number of units then level then march size then alliance'])
         writer.writerow([*ceColTitles, '', '', *mmColTitles])
         writer.writerows(combinedMultiArray)

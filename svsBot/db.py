@@ -3,16 +3,19 @@ from typing import Union, Optional
 import aiosqlite
 
 import logging
+import json
 
 from . import globals
 
 # I wish python supported enums...
-ID_IND, CLASS_IND, LEVEL_IND, UNIT_IND, MARCH_IND, ALLIANCE_IND, MMTRAPS_IND, SKINS_IND, STATUS_IND, LOTTERY_IND, INTERACTED_IND = range(11)
+ID_IND, CLASS_IND, LEVEL_IND, UNITS_IND, MARCH_IND, ALLIANCE_IND, MMTRAPS_IND, SKINS_IND, STATUS_IND, LOTTERY_IND, INTERACTED_IND = range(11)
 
 
 async def add_entry(values: Union[list, tuple]) -> None:
     """
     param [list] entry: INT, STR, INT, STR, STR, STR, STR, STR, STR, INT, INT
+        # this documentation is out of date as of profession_info.json
+        # gonna create a custom datatype (class) for entries anyways, so just leave it for now
     Status defaults to 0
     Lottery defaults to 1
     interacted_with_event defaults to 0
@@ -62,27 +65,27 @@ async def get_event() -> tuple[str, str, int, int]:
     return entry
 
 
-def profession_dicts() -> tuple:
-    # return a tuple of dictionaries to be used for formatting database info into human-readable text
-    unitDict = {'A': 'Army', 'F': 'Air Force', 'N': 'Navy'}
-    ceLevelDict = {0: "2", 1: "3", 2: "3X", 3: "3XE"}
-    mmLevelDict = {0: "0T", 1: "3T", 2: "5T", 3: "10", 4: "E"}
-    mmTrapsDict = {'Corrosive Mucus': 'CM', 'Supermagnetic Field': 'SF', 'Electro Missiles': 'EM', '': ''}
-
-    return unitDict, ceLevelDict, mmLevelDict, mmTrapsDict
+def get_profession_abbreviation_dict(category: str) -> dict:
+    # return a dictionary that converts long-form profession info to shortened versions
+    with open(globals.PROFESSION_INFO_JSON, 'r') as f:
+        obj = json.load(f)
+    dat = obj[category]
+    return dat['convert_long_to_short']
 
 
 def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discord.Embed:
     # extract values from entry
-    clas, level, unit, march_size, alliance, mm_traps, skins, status, lottery = entry[1:10]
+    class_, level, units, march_size, alliance, mm_traps, skins, status, lottery = entry[1:10]
 
     # format values for display
-    unitDict, ceLevelDict, mmLevelDict, _ = profession_dicts()
-
-    units = [unitDict[char] for char in unit]
-    # need to escape the ">" quote char
-    march_size = ('\\' + march_size) if '<' in march_size or '>' in march_size else march_size
-    level = ceLevelDict[level] if clas == 'CE' else mmLevelDict[level]
+    # unitDict = get_profession_abbreviation_dict('units')
+    # unitDictInverted = {val: key for key, val in unitDict.items()}
+    # units = list(map(lambda unit: unitDictInverted[unit], units))
+    # units = [unitDict[char] for char in units]
+    units = units.split(', ')
+    # if march_size.startswith('>'):
+    #     # need to escape the ">" quote char
+    #     march_size = '\\' + march_size
     traps = mm_traps.split(', ')
     skins = skins.split(', ')
     lottery = 'YES' if lottery == 1 else 'NO'
@@ -97,7 +100,7 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
     # skinsTitle = 'Skin' if '\n' not in skins else 'Skins'
 
     # initialize arg dictionaries to be used in field creation
-    class_args = {'name': 'Class', 'value': clas}
+    class_args = {'name': 'Class', 'value': class_}
     level_args = {'name': 'Level', 'value': level}
     unit_args = {'name': unitTitle, 'value': units}
     march_args = {'name': 'March Size', 'value': march_size}
@@ -108,15 +111,15 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
     whitespace_args = {'name': '\u200b', 'value': '\u200b'}     # used to make an empty field for alignment
 
     if not first_entry:
+        # to avoid confusion, only show the user's status if this was a successful signup.
+        # first_entry status will always be "NO"
         if globals.eventChannel:
             # if there is an active event, put the event and the user's status in the description field of the embed
-            # eventInfo = eventTitle + ' @ ' + eventTime
             descr += f'You are **{status}** for {globals.eventInfo}\n' \
                      f'[Event Message]({globals.eventMessage.jump_url})'
         else:
             descr += 'There is no event open for signups.'
     else:
-        # to avoid confusion, don't tell them their status (which is "NO") if they just tried to sign up
         if globals.eventChannel:
             descr += f'[Event Message]({globals.eventMessage.jump_url})'
         else:
@@ -139,8 +142,6 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
         if argDict['value']:    # if traps or skins is not empty
             embed.add_field(**argDict)
             count += 1
-
-    # lottery
     embed.add_field(**lottery_args)
 
     # add whitespace fields to align 3rd row with 2nd row, if 3rd row has skins & lottery
@@ -158,7 +159,7 @@ def info_embed(entry: Union[list, tuple], descr='', first_entry=False) -> discor
     embed.set_footer(text=f"{_}info <change/show>,   {_}lottery,   {_}help")
     embed.timestamp = discord.utils.utcnow()
 
-    # return file, embed
+    # return embed
     return embed
 
 
@@ -189,7 +190,7 @@ async def update_lotto(discord_id: discord.Member.id, lotto: int) -> None:
 
 async def update_status(discord_id: discord.Member.id, status: str) -> None:
     """
-    Called by on_raw_reaction_add() to update status when a member reacts to the event embed
+    Called by event_interaction.handle_interaction() to update status when a member clicks event embed button
     """
     # shouldn't need to check on event status as they can only update if there is an active event. But do it anyways
     if globals.eventMessage is None:

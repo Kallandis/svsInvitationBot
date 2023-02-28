@@ -6,16 +6,15 @@
              (should still be able to remove)
 
 - IMPLEMENT: make all choices in "profession_interaction.py" source from config file (profession_config.json)
-    - Update levels, march sizes per avobot_todo.txt
-    - helpers.py will need to reference this document for CSV sorting
-    - Rename db.profession_dicts() to db.database_to_text_dicts(), and introduce db.text_to_database_dicts() for
-        translating between db storage and human storage
 
 - IMPLEMENT: make the globals.py config check if OS is RPI or WINDOWS, and change stuff accordingly
     - or just make a global var representing if OS is RPI or WINDOWS? then I only import "platform" once...
 
-- IMPLEMENT: db.get_default_entry(user_id, profession_info)
-    - move the logic for creating a new entry into db, instead of hard-coding it in profession_interaction.py
+- CHANGE:   db.info_embed should use db global values for entry indices, same for helpers.parse_entry
+
+- CHANGE:   entry should be a defined datatype with a specific format. Should pass around complete entries, not partial
+            --> see db.info_embed, profession_interaction.py first entry section. Messy! prone to breaking.
+            - Make a class for it. The constructor should populate it with default values
 
 - CHECK: I added a new line "logging.error(traceback.format_exc())" to error_handler.py on the RPI
     - Hopefully it logs the exceptions now.
@@ -34,3 +33,18 @@ UNTESTED CHANGES:
     - confirm maybe loop
     - confirm maybe loop restarts on bot startup if event is active
     - confirm maybe loop should cancel when event is closed
+
+
+NOTES from 2/26/2023:
+    - Added a lot of stuff for json support in profession_interaction.py
+    - (PRIORITY): I want to stop converting levels/units to chars/ints in the database. just keep them as strings.
+        --> Then, I can just write "long_to_short_form" dictionary in profession_info.json
+            - It will apply to units & mm_traps for CSV display (and maybe march size?)
+    - Then I can replace db.profession_dicts() with pulling from profession_info.json
+
+    - For helpers.py, I can sort things by using a sorted lambda from the json options index
+    e.g. sorted_levels = sorted(levels, lambda x: json_levels.index(x))
+
+    - I will keep db entries in long-form until writing to CSV. Makes it easier.
+
+    - Done with everything for the transition EXCEPT helpers.py sorting functions. Sort by index as written above.
