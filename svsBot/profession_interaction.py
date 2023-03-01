@@ -1,7 +1,7 @@
 import discord
 
 import logging
-import json
+from json import load
 
 from . import db
 from . import globals
@@ -232,7 +232,7 @@ class ProfessionMenu(discord.ui.Select):
 
     def parse_options_from_json(self, category):
         with open(globals.PROFESSION_INFO_JSON, 'r') as f:
-            obj = json.load(f)
+            obj = load(f)
         if category == 'level':
             category = 'ce_level' if self.class_ == 'CE' else 'mm_level'
 
@@ -257,7 +257,7 @@ class ProfessionMenu(discord.ui.Select):
 
     def get_next_category_prompt_from_json(self, next_category):
         with open(globals.PROFESSION_INFO_JSON, 'r') as f:
-            obj = json.load(f)
+            obj = load(f)
         if next_category == 'level':
             next_category = 'ce_level' if self.class_ == 'CE' else 'mm_level'
 

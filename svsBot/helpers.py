@@ -7,6 +7,7 @@ import csv
 from asyncio import TimeoutError
 from typing import Union
 import asyncio
+from json import load
 
 from . import db, globals
 from . profession_interaction import ProfessionMenuView
@@ -240,9 +241,9 @@ async def delete_event(user, bot, intent: str) -> None:
             csvFile = await build_csv(central_guild, status='ATTENDING', finalize=True)
             ymn_csvFile = await build_ymn_csv(central_guild)
             description = f'Successfully closed event: {globals.eventInfo}\n' \
-                        f'CSV of all users that responded "YES" or "MAYBE": {globals.CSV_FILENAME}\n' \
-                        f'CSV of all users that interacted with the event: {globals.YMN_CSV_FILENAME}\n' \
-                        f'[Event Message]({globals.eventMessage.jump_url})'
+                          f'CSV of all users that responded "YES" or "MAYBE": {globals.CSV_FILENAME}\n' \
+                          f'CSV of all users that interacted with the event: {globals.YMN_CSV_FILENAME}\n' \
+                          f'[Event Message]({globals.eventMessage.jump_url})'
 
             # send a backup of the database to dedicated backup channel
             backupChannel = bot.get_channel(globals.DB_BACKUP_CHANNEL_ID)
@@ -309,6 +310,34 @@ def parse_entry(entry_: tuple, cls: str) -> tuple:
     return tuple(newEntry)
 
 
+def sort_by_profession_category(entries, category: str, reverse=False) -> list:
+    # don't sort an empty list
+    if not entries:
+        return entries
+
+    with open(globals.PROFESSION_INFO_JSON, 'r') as f:
+        obj = load(f)
+
+    # This will be removed once I move entry to a class defn
+    category_to_index_map = {
+        'class':      db.CLASS_IND,
+        'level':      db.LEVEL_IND,
+        'units':      db.UNITS_IND,
+        'march_size': db.MARCH_IND,
+        'alliance':   db.ALLIANCE_IND,
+        'mm_traps':   db.MMTRAPS_IND,
+        'skins':      db.SKINS_IND
+    }
+    category_ind = category_to_index_map[category]
+    if category == 'level':
+        category = 'ce_level' if entries[0][db.CLASS_IND] == 'CE' else 'mm_level'
+    dat = obj[category]
+    options = dat['options']
+
+    entries = sorted(entries, key=lambda x: options.index(x[category_ind]), reverse=reverse)
+    return entries
+
+
 async def get_sorted_entries(guild: discord.Guild, status: str):
     """
     Get entries from database and sort them
@@ -316,61 +345,74 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
     ce = await db.all_of_category('class', 'CE', guild=guild, status=status, display_name=True)
     mm = await db.all_of_category('class', 'MM', guild=guild, status=status, display_name=True)
 
+    sorted_maybe_ce, sorted_maybe_mm, sorted_maybe = [], [], []
     if status == 'YES':
-        sorted_maybe = await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
-        sorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
-    else:
-        sorted_maybe = []
+        # sorted_maybe = await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+        # sorted_maybe += await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
+        sorted_maybe_ce = await db.all_of_category('class', 'CE', guild=guild, status='MAYBE', display_name=True)
+        sorted_maybe_mm = await db.all_of_category('class', 'MM', guild=guild, status='MAYBE', display_name=True)
 
-    def sort_march(entry):
-        msize = entry[marchInd]
-        # msize takes the forms {< 160, 160-169, ... , 210-219, 220+}
-        if '-' not in msize:
-            # strip the special chars
-            msize = int(msize.strip('><+ '))
-        else:
-            # take the bottom of the range and add 5 to represent median and avoid equality with smallest edge case
-            msize = int(msize.split('-')[0]) + 5
-        return msize
+    # def sort_march(entry):
+    #     msize = entry[marchInd]
+    #     # msize takes the forms {< 160, 160-169, ... , 210-219, 220+}
+    #     if '-' not in msize:
+    #         # strip the special chars
+    #         msize = int(msize.strip('><+ '))
+    #     else:
+    #         # take the bottom of the range and add 5 to represent median and avoid equality with smallest edge case
+    #         msize = int(msize.split('-')[0]) + 5
+    #     return msize
 
-    def sort_alliance(entry) -> int:
-        allianceDict = {'508N': 0, '508W': 1, '508S': 2, '508E': 3}
-        alliance = entry[allianceInd]
-        return allianceDict[alliance]
+    # def sort_alliance(entry) -> int:
+    #     allianceDict = {'508N': 0, '508W': 1, '508S': 2, '508E': 3}
+    #     alliance = entry[allianceInd]
+    #     return allianceDict[alliance]
 
     # entries with more than one unit type
     multiUnitArrays = [
-        filter(lambda x: len(x[unitInd]) > 1, ce),
-        filter(lambda x: len(x[unitInd]) > 1, mm)
+        filter(lambda x: len(x[unitInd].split(', ')) > 1, ce),
+        filter(lambda x: len(x[unitInd].split(', ')) > 1, mm)
     ]
 
     # split the single-unit entries of each class into 3 arrays, one for each unit type
     unitArrays = [
-        filter(lambda x: x[unitInd] == 'A', ce),
-        filter(lambda x: x[unitInd] == 'N', ce),
-        filter(lambda x: x[unitInd] == 'F', ce),
-        filter(lambda x: x[unitInd] == 'A', mm),
-        filter(lambda x: x[unitInd] == 'N', mm),
-        filter(lambda x: x[unitInd] == 'F', mm)
+        filter(lambda x: x[unitInd] == 'Army', ce),
+        filter(lambda x: x[unitInd] == 'Air Force', ce),
+        filter(lambda x: x[unitInd] == 'Navy', ce),
+        filter(lambda x: x[unitInd] == 'Army', mm),
+        filter(lambda x: x[unitInd] == 'Air Force', mm),
+        filter(lambda x: x[unitInd] == 'Navy', mm)
     ]
 
     # sort each array in multiUnitArrays by number of units, then by level, then by march size, then by alliance
     # must sort in reverse order
-    multiUnitArrays = [sorted(subArray, key=sort_alliance) for subArray in multiUnitArrays]
-    multiUnitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in multiUnitArrays]
-    multiUnitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in multiUnitArrays]
-    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitInd]), reverse=True) for subArray in multiUnitArrays]
+    # multiUnitArrays = [sorted(subArray, key=sort_alliance) for subArray in multiUnitArrays]
+    # multiUnitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in multiUnitArrays]
+    # multiUnitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in multiUnitArrays]
+    # multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitInd]), reverse=True) for subArray in multiUnitArrays]
+    multiUnitArrays = [sort_by_profession_category(subArray, 'alliance') for subArray in multiUnitArrays]
+    multiUnitArrays = [sort_by_profession_category(subArray, 'march_size', reverse=True) for subArray in multiUnitArrays]
+    multiUnitArrays = [sort_by_profession_category(subArray, 'level', reverse=True) for subArray in multiUnitArrays]
+    multiUnitArrays = [sorted(subArray, key=lambda x: len(x[unitInd].split(', ')), reverse=True) for subArray in multiUnitArrays]
 
     # sort the unit arrays by level, then by march size, then by alliance
-    unitArrays = [sorted(subArray, key=sort_alliance) for subArray in unitArrays]
-    unitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in unitArrays]
-    unitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in unitArrays]
+    # unitArrays = [sorted(subArray, key=sort_alliance) for subArray in unitArrays]
+    # unitArrays = [sorted(subArray, key=sort_march, reverse=True) for subArray in unitArrays]
+    # unitArrays = [sorted(subArray, key=lambda x: x[levelInd], reverse=True) for subArray in unitArrays]
+    unitArrays = [sort_by_profession_category(subArray, 'alliance') for subArray in unitArrays]
+    unitArrays = [sort_by_profession_category(subArray, 'march_size', reverse=True) for subArray in unitArrays]
+    unitArrays = [sort_by_profession_category(subArray, 'level', reverse=True) for subArray in unitArrays]
 
     # finally, sort the maybes by alliance, class, level
-    if sorted_maybe:
-        sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelInd], reverse=True)
-        sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classInd])
-        sorted_maybe = sorted(sorted_maybe, key=sort_alliance)
+    # if sorted_maybe:
+    #     sorted_maybe = sorted(sorted_maybe, key=lambda x: x[levelInd], reverse=True)
+    #     sorted_maybe = sorted(sorted_maybe, key=lambda x: x[classInd])
+    #     sorted_maybe = sorted(sorted_maybe, key=sort_alliance)
+    if sorted_maybe_ce + sorted_maybe_mm:
+        sorted_maybe_ce = sort_by_profession_category(sorted_maybe_ce, 'level', reverse=True)
+        sorted_maybe_mm = sort_by_profession_category(sorted_maybe_mm, 'level', reverse=True)
+        sorted_maybe = sorted_maybe_ce + sorted_maybe_mm
+        sorted_maybe = sort_by_profession_category(sorted_maybe, 'alliance')
 
     # fxn to convert the big arrays
     def convert_array(array: list):
@@ -390,7 +432,7 @@ async def get_sorted_entries(guild: discord.Guild, status: str):
     unitArrays = convert_array(unitArrays)
 
     if sorted_maybe:    # this should only happen if there are maybe entries and status was "ATTENDING"
-        sorted_maybe = [parse_entry(entry_, entry_[classInd]) for entry_ in sorted_maybe]
+        sorted_maybe = [parse_entry(entry_, entry_[db.CLASS_IND]) for entry_ in sorted_maybe]
 
     return multiUnitArrays, unitArrays, sorted_maybe
 
@@ -441,7 +483,7 @@ def format_sorted_entries(multiUnitArrays, unitArrays):
     return combinedMultiArray, combined_ceSingles, combined_mmSingles
 
 
-async def get_unsorted_entries(guild: discord.Guild, status:str):
+async def get_unsorted_entries(guild: discord.Guild, status: str):
     """
     Get the entries from database with minimal sorting
     """
@@ -460,17 +502,20 @@ async def get_unsorted_entries(guild: discord.Guild, status:str):
 
     if status == 'YES':
         # if "attending" -> status = "YES", then just work with YES/MAYBE entries
-        unsorted_yes = sorted(unsorted_yes, key=lambda x: x[levelInd], reverse=True)
-        unsorted_yes = sorted(unsorted_yes, key=lambda x: x[classInd])
-        unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[levelInd], reverse=True)
-        unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[classInd])
+        # unsorted_yes = sorted(unsorted_yes, key=lambda x: x[levelInd], reverse=True)
+        # unsorted_yes = sorted(unsorted_yes, key=lambda x: x[classInd])
+        # unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[levelInd], reverse=True)
+        # unsorted_maybe = sorted(unsorted_maybe, key=lambda x: x[classInd])
+        unsorted_yes = sort_by_profession_category(unsorted_yes, 'class')
+        unsorted_maybe = sort_by_profession_category(unsorted_maybe, 'class')
 
         unsorted_yes = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_yes]
         unsorted_maybe = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_maybe]
     else:
         # combine all entries into one big column
         unsorted_all = [*unsorted_yes, *unsorted_maybe, *unsorted_no]
-        unsorted_all = sorted(unsorted_all, key=lambda x: x[classInd], reverse=True)
+        # unsorted_all = sorted(unsorted_all, key=lambda x: x[classInd], reverse=True)
+        unsorted_all = sort_by_profession_category(unsorted_all, 'class')
 
         unsorted_all = [parse_entry(entry_, entry_[classInd]) for entry_ in unsorted_all]
 
@@ -527,7 +572,6 @@ async def build_csv(guild: discord.Guild, status: str = 'ALL', finalize=False) -
         # First make the sorted CSV
 
         ceRowLength = 7
-        mmRowLength = 8
         # write the multi-unit entries as parallel columns of CE and MM
         writer.writerow(['CE multi units', *[''] * (ceRowLength - 1), *[''] * 2, 'MM multi units', *[''] * 16,
                          'Sorted by number of units then level then march size then alliance'])

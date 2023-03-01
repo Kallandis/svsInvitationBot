@@ -3,7 +3,7 @@ from typing import Union, Optional
 import aiosqlite
 
 import logging
-import json
+from json import load
 
 from . import globals
 
@@ -68,7 +68,7 @@ async def get_event() -> tuple[str, str, int, int]:
 def get_profession_abbreviation_dict(category: str) -> dict:
     # return a dictionary that converts long-form profession info to shortened versions
     with open(globals.PROFESSION_INFO_JSON, 'r') as f:
-        obj = json.load(f)
+        obj = load(f)
     dat = obj[category]
     return dat['convert_long_to_short']
 
